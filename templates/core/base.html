@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Attendance System{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <nav>
+            {% if user.is_authenticated %}
+                <a href="{% url 'home:home' %}">Dashboard</a>
+                <form method="POST" action="{% url 'login:logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'landing:landing' %}">Welcome</a>
+                <a href="{% url 'login:login' %}">Log In</a>
+                <a href="{% url 'register:register' %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
