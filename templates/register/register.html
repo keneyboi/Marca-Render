@@ -1,10 +1,81 @@
-{% extends 'core/base.html' %}
-{% block title %}Register{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register | Marca{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/register/styles.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h2>Create an Account</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
+<main class="auth-container">
+  <div class="auth-card">
+    <h2 class="auth-title">Register</h2>
+    <p class="auth-subtitle">Ready to check attendance?</p>
+    
+    <form method="POST" class="auth-form">
+  {% csrf_token %}
+
+  <!-- Two-column grid row for First Name & Last Name -->
+    <div class="form-row">
+        <div class="form-group">
+        <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}
+            <div class="auth-error-container">
+            {% for error in form.first_name.errors %}
+                <span class="auth-error-text">{{ error }}</span>
+            {% endfor %}
+            </div>
+        {% endif %}
+        </div>
+
+        <div class="form-group">
+        <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+        {{ form.last_name }}
+        {% if form.last_name.errors %}
+            <div class="auth-error-container">
+            {% for error in form.last_name.errors %}
+                <span class="auth-error-text">{{ error }}</span>
+            {% endfor %}
+            </div>
+        {% endif %}
+        </div>
+    </div>
+
+    <!-- Loop through remaining fields (Username, Email, Passwords, etc.) -->
+    {% for field in form %}
+        {% if field.name != 'first_name' and field.name != 'last_name' %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="auth-error-container">
+                {% for error in field.errors %}
+                <span class="auth-error-text">{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+        <div class="auth-error-container non-field-errors">
+        {% for error in form.non_field_errors %}
+            <span class="auth-error-text">{{ error }}</span>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+    <button type="submit" class="auth-btn">Register Account</button>
     </form>
+    
+    <div class="auth-footer-container">
+      <p class="auth-footer">
+        Already have an account? <a href="{% url 'login' %}" class="auth-link">Login here</a>
+      </p>
+    </div>
+  </div>
+</main>
 {% endblock %}

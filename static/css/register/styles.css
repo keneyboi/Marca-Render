@@ -1,0 +1,163 @@
+/* Container Layout */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 75vh;
+    padding: 2.5rem 1rem;
+}
+
+/* Floating Elevation Card */
+.auth-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover elevation matching the login component */
+.auth-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(74, 13, 13, 0.12);
+}
+
+/* Header & Typography */
+.auth-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 3rem;
+    font-weight: 400;
+    color: var(--text-main);
+    margin-top: 1rem;
+    margin-bottom: -1.2rem;
+    text-align: left;
+}
+
+.auth-subtitle {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    color: #665b55;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+/* Form Layout */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Fallback for small screens: stack back to 1 column on mobile */
+@media (max-width: 480px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Targets all input types rendered inside form-group */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: #fcfbf9;
+    color: var(--text-main);
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-dark);
+    box-shadow: 0 0 0 3px rgba(74, 13, 13, 0.1);
+}
+
+/* Submit Button */
+.auth-btn {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--accent-dark);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.auth-btn:hover {
+    background-color: #330808;
+    transform: translateY(-1px);
+}
+
+/* Card Footer */
+.auth-footer-container {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.auth-footer {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    color: #665b55;
+}
+
+.auth-link {
+    color: var(--accent-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Field & General Error Messaging */
+.auth-error-container {
+    margin-top: 0.25rem;
+}
+
+.auth-error-container.non-field-errors {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.auth-error-text {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    color: #b30000;
+    display: block;
+}
+
+/* Two-Column Form Grid for First & Last Name */

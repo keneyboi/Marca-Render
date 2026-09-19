@@ -1,0 +1,408 @@
+/* Regular Style */
+@font-face {
+    font-family: 'Tiro Telugu';
+    src: url('../fonts/TiroTelugu-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Italic Style */
+@font-face {
+    font-family: 'Tiro Telugu';
+    src: url('../fonts/TiroTelugu-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SF Pro';
+    src: url('../fonts/SFPro-Regular.OTF') format('opentype');
+    font-weight: 400; /* or normal */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* SF Pro Display Bold */
+@font-face {
+    font-family: 'SF Pro';
+    src: url('../fonts/SFPro-Bold.OTF') format('opentype');
+    font-weight: 700; /* or bold */
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --bg-color: #f7f4ed;
+    --text-main: #331010;
+    --accent-dark: #4a0d0d;
+    --accent-light: #e8e2d5;
+    --border-color: #d1c8b8;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.5;
+    margin: 0;
+    font-size: 16px;
+    font-family: 'SF Pro';
+}
+
+/* Apply to headings or your brand logo */
+.logo, h1, h2 {
+    font-family: 'Tiro Telugu', Georgia, serif;
+}
+
+/* Use italic version naturally */
+.italic-text {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-style: italic;
+}
+
+/* Navigation Header */
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Changed from 'left' (invalid) to 'center' */
+    padding: 1.5rem 4rem;
+    max-width: 100%; /* Spans full width so logo touches left and nav leans right */
+    margin: 0;
+}
+
+.logo {
+    font-family: 'Tiro Telugu', serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-main);
+    text-decoration: none;
+    margin-right: auto; /* Pushes everything after the logo to the far right */
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    list-style: none;
+    margin-left: auto; /* Ensures navigation links hug the right side next to the button */
+}
+
+.nav-links a {
+    text-decoration: none;
+    font-family: 'SF Pro';
+    color: #665b55;
+    font-size: 1.2rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--text-main);
+}
+
+.nav-links a.btn-get-started {
+    background-color: var(--accent-dark);
+    color: var(--accent-light) !important;
+    padding: 1rem 3rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Main Container */
+.main-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem 4rem;
+}
+
+
+
+
+/* Footer Styling */
+    .site-footer {
+        background-color: #4a0d0d; /* Deep burgundy matching header/accent */
+        color: #e8e2d5;
+        padding: 3rem 4rem 2rem;
+        margin-top: 0;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .footer-divider {
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin: 1.5rem 0;
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    .footer-column h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-column ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-column li {
+        margin-bottom: 0.6rem;
+    }
+
+    .footer-column a {
+        color: #c9bfb5;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: color 0.2s ease;
+    }
+
+    .footer-column a:hover {
+        color: #ffffff;
+    }
+
+    /* Footer Bottom Section */
+    .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        font-size: 0.8rem;
+        color: #b0a498;
+    }
+
+    .footer-bottom-links {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .footer-bottom-links a {
+        color: #b0a498;
+        text-decoration: none;
+    }
+
+    .footer-bottom-links a:hover {
+        color: #ffffff;
+    }
+
+    @media (max-width: 768px) {
+        .footer-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .footer-bottom {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+    }
+
+
+/* Dashboard base */
+/* --- DASHBOARD BASE LAYOUT & SIDEBAR --- */
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    align-items: stretch;
+    background-color: #fcfbf9; /* Main content background */
+}
+
+.dashboard-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background-color:  #580c0c;
+    color: #ffffff;
+    display: flex;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    flex-direction: column;
+    padding: 2.5rem 1.5rem;
+    box-sizing: border-box;
+}
+
+.sidebar-brand h2 {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin: 0 0 4px 0;
+}
+
+.user-badge {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    color: #e5dfd8;
+    opacity: 0.8;
+}
+
+.sidebar-nav {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.logout-btn-sidebar {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+    width: 100%;
+}
+
+.logout-btn-sidebar:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- MAIN CONTENT & HEADERS --- */
+.dashboard-main-content {
+    flex: 1;
+    min-width: 0;
+    padding: 40px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5dfd8;
+}
+
+.dashboard-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-weight: 400;
+    font-size: 2.25rem;
+    color: var(--text-main, #2b2320);
+    margin: 0 0 6px 0;
+}
+
+.dashboard-subtitle {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: #665b55;
+    margin: 0;
+}
+
+.panel-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.75rem;
+    color: var(--text-main, #2b2320);
+    margin: 0 0 16px 0;
+}
+
+/* --- REUSABLE BUTTON PRIMITIVES --- */
+.btn-primary,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-dark, #4a0d0d);
+    border: 1px solid var(--accent-dark, #4a0d0d);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #6b1414; /* Slightly lighter wine for hover */
+    border-color: #6b1414;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--accent-dark, #4a0d0d);
+    color: var(--accent-dark, #4a0d0d);
+}
+
+.btn-secondary:hover {
+    background-color: #f5f2ed;
+}
+
+/* --- FORM GROUP PRIMITIVES --- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.form-label {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #665b55;
+    text-transform: uppercase;
+}
+
+.form-error {
+    color: #b30000;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    width: 100%;
+}

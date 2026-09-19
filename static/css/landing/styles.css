@@ -1,0 +1,91 @@
+.hero-section {
+    display: flex;
+    justify-content: flex-end; /* Align child content to the right */
+    align-items: center;       /* Center content vertically */
+    min-height: 80vh;           /* Give section enough height */    /* Space from page edges */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.hero-content {
+    max-width: 50vw;          /* Limit width so text stays readable */
+    text-align: left; 
+    margin: 0 10vw;          /* Keep text left-aligned inside its container */
+}
+
+/* Hero Title */
+.hero-title {
+    text-align: center;
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 4rem;
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text-main); /* #331010 */
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+}
+
+/* Hero Description */
+.hero-description {
+    text-align: center;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 800px;
+    color: var(--text-main);
+    margin-bottom: 2rem;
+}
+
+/* Hero Actions Container */
+.hero-actions {
+    display: flex;             /* Centering works best with standard flex */
+    justify-content: center;   /* Centers the buttons horizontally next to each other */
+    align-items: center;       /* Aligns the buttons vertically */
+    gap: 1rem;                 /* Keeps spacing between the two buttons */
+    width: 100%;               /* Ensures the container takes up full width to allow centering */
+}
+
+/* Primary Button ("Create your Marca ID") */
+.btn-primary {
+    display: inline-block;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--accent-dark); /* #4a0d0d */
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 1rem 3rem;
+    border-radius: 16px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #330808;
+    transform: translateY(-1px);
+}
+
+/* Secondary Button ("Explore Features") */
+.btn-secondary {
+    display: inline-block;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--accent-light); /* #e8e2d5 */
+    color: var(--text-main); /* #331010 */
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    text-decoration: none;
+    border: 1px solid var(--border-color); /* #d1c8b8 */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #ded7c8;
+    transform: translateY(-1px);
+}

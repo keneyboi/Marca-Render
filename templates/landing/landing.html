@@ -1,8 +1,22 @@
-{% extends 'core/base.html' %}
-{% block title %}Welcome | Attendance System{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/landing/styles.css" %}">
+{% endblock %}
+
+{% block title %}Marca{% endblock %}
 {% block content %}
-    <h1>Class & Event Attendance Check-in</h1>
-    <p>Upload your roster, verify scans seamlessly, and track entries in real time.</p>
-    <a href="{% url 'register:register' %}">Create an Account</a> or 
-    <a href="{% url 'login:login' %}">Log In</a>
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Attendance Verification,<br>Built for Seamless Events</h1>
+            <p class="hero-description">
+                Marca simplifies event management with a universal ID system. Attendees generate one permanent code that works across all events, while organizers verify participation in real time with quick scanning.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'register' %}" class="btn-primary">Create your Marca ID</a>
+                <a href="#features" class="btn-secondary">Explore Features</a>
+            </div>
+        </div>
+    </section>
 {% endblock %}

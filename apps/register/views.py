@@ -5,14 +5,13 @@ from .forms import RegisterForm
 # Create your views here.
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('home:home')
+        return redirect('home')
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home:home')
+            form.save()
+            return redirect('login')
     else: 
         form = RegisterForm()
 

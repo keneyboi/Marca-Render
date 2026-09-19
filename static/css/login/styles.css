@@ -1,0 +1,132 @@
+/* Card Container Layout */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem 1rem;
+}
+
+/* Floating Card Base */
+.login-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect lifting the card */
+.login-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(74, 13, 13, 0.12);
+}
+
+/* Typography matching design system */
+.login-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 3rem;
+    font-weight: 400;
+    color: var(--text-main);
+    margin-top: 1rem;
+    margin-bottom: -1.2rem;
+    text-align: left;
+}
+
+.login-subtitle {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    color: #665b55;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+/* Form Controls */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.form-group input {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: #fcfbf9;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-dark);
+    box-shadow: 0 0 0 3px rgba(74, 13, 13, 0.1);
+}
+
+/* Submit Button */
+.btn-login-submit {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--accent-dark);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-login-submit:hover {
+    background-color: #330808;
+    transform: translateY(-1px);
+}
+
+/* Card Footer */
+.login-card-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    color: #665b55;
+}
+
+.login-card-footer a {
+    color: var(--accent-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-card-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Form Error Messaging */
+.field-errors {
+    margin-top: 0.2rem;
+}
+
+.error-text {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    color: #b30000;
+}

@@ -1,0 +1,191 @@
+/* Dashboard Container */
+.dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Header Card */
+.dashboard-header-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color, #e5dfd8);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.welcome-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--text-main, #2b2320);
+    margin: 0 0 0.25rem 0;
+}
+
+.user-email {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    color: #665b55;
+    margin: 0;
+}
+
+.user-email span {
+    color: var(--text-main, #2b2320);
+    font-weight: 600;
+}
+
+/* Session ID Badge */
+.session-badge-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background-color: #fcfbf9;
+    padding: 0.6rem 1rem;
+    border: 1px dashed var(--border-color, #e5dfd8);
+    border-radius: 12px;
+}
+
+.session-label {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8c7e75;
+    font-weight: 600;
+}
+
+.session-id {
+    font-family: 'SF Mono', Consolas, Monaco, monospace;
+    font-size: 0.85rem;
+    color: var(--accent-dark, #4a0d0d);
+    font-weight: 600;
+}
+
+/* Section Titles */
+.section-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--text-main, #2b2320);
+    margin-bottom: 1.25rem;
+}
+
+/* Events Grid */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.event-display {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect lifting the card */
+.event-display:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(74, 13, 13, 0.12);
+}
+
+/* Individual Event Card */
+.event-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color, #e5dfd8);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+    transition: transform 0.25 ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(74, 13, 13, 0.08);
+}
+
+.event-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.75rem;
+}
+
+.event-name {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: var(--text-main, #2b2320);
+    margin: 0;
+}
+
+/* Status Pill */
+.status-pill {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background-color: #f5f2ed;
+    color: #665b55;
+    white-space: nowrap;
+}
+
+.status-pill.status-active,
+.status-pill.status-ongoing {
+    background-color: #e6f4ea;
+    color: #137333;
+}
+
+.status-pill.status-upcoming,
+.status-pill.status-draft {
+    background-color: #fef7e0;
+    color: #b06000;
+}
+
+/* Event Card Body Details */
+.event-card-body {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.event-detail {
+    font-size: 0.9rem;
+    color: #665b55;
+    margin: 0;
+}
+
+.detail-label {
+    color: var(--text-main, #2b2320);
+    font-weight: 600;
+}
+
+/* Empty State Card */
+.empty-state-card {
+    background-color: #ffffff;
+    border: 1px dashed var(--border-color, #e5dfd8);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.empty-state-text {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    color: #665b55;
+    margin: 0;
+}

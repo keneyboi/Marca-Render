@@ -1,10 +1,48 @@
-{% extends 'core/base.html' %}
-{% block title %}Log In{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login | Marca{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/login/styles.css" %}">
+{% endblock %}
+
 {% block content %}
-    <h2>Log In</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign In</button>
-    </form>
+<div class="login-container">
+    <div class="login-card">
+        <h2 class="login-title">Login</h2>
+        <p class="login-subtitle">Let's get started!</p>
+        <form method="POST" class="login-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="field-errors non-field-errors">
+                    {% for error in form.non_field_errors %}
+                        <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-errors">
+                            {% for error in field.errors %}
+                                <span class="error-text">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-login-submit">Sign In</button>
+        </form>
+
+        <div class="login-card-footer">
+            <p>Don't have an account? <a href="{% url 'register' %}">Create your Marca ID</a></p>
+        </div>
+    </div>
+</div>
 {% endblock %}

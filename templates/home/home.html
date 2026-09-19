@@ -1,21 +1,60 @@
-{% extends 'core/base.html' %}
-{% block title %}Dashboard{% endblock %}
-{% block content %}
-    <h2>Welcome, {{ request.user.first_name }}!</h2>
-    <p>Logged in as: {{ request.user.email }}</p>
+{% extends 'dashboard_base.html' %}
+{% load static %}
 
-    <h3>Your Managed Events</h3>
-    {% if events %}
-        <ul>
-            {% for event in events %}
-                <li>
-                    <strong>{{ event.name }}</strong> [{{ event.status }}]<br>
-                    Venue: {{ event.location }}<br>
-                    Starts: {{ event.start_time|date:"M d, Y H:i" }} | Ends: {{ event.end_time|date:"M d, Y H:i" }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No events found. Create your first event roster to start tracking scans.</p>
-    {% endif %}
+{% block title %}Dashboard | Marca{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/home/styles.css" %}">
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- Dashboard Header Section -->
+<header class="dashboard-header">
+  <div>
+    <h1 class="dashboard-title">Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
+    <p class="dashboard-subtitle">
+      Logged in as: <strong>{{ request.user.email }}</strong> 
+      {% if request.session.session_key %}
+        | Session ID: <code>{{ request.session.session_key }}</code>
+      {% endif %}
+    </p>
+  </div>
+  <div>
+    <a href="{% url 'home' %}" class="btn-primary">+ Create Event</a>
+  </div>
+</header>
+
+<!-- Managed Events Section -->
+<section class="events-section">
+  <h3 class="panel-title">Your Managed Events</h3>
+
+  {% if events %}
+    <div class="event-display" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+      {% for event in events %}
+        <div style="background-color: #ffffff; border: 1px solid #e5dfd8; border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+          <h4 style="font-family: 'Tiro Telugu', Georgia, serif; font-size: 1.25rem; color: #2b2320; margin: 0 0 12px 0;">
+            {{ event.name }}
+          </h4>
+          <p style="font-family: 'SF Pro', sans-serif; font-size: 14px; color: #665b55; margin: 0 0 6px 0;">
+            <strong style="color: #2b2320;">Status:</strong> {{ event.status }}
+          </p>
+          <p style="font-family: 'SF Pro', sans-serif; font-size: 14px; color: #665b55; margin: 0 0 12px 0;">
+            <strong style="color: #2b2320;">Venue:</strong> {{ event.location }}
+          </p>
+          <div style="padding-top: 12px; border-top: 1px dashed #e5dfd8; font-family: 'SF Pro', sans-serif; font-size: 13px; color: #8c7e75;">
+            Starts: {{ event.start_time|date:"M d, Y H:i" }} <br>
+            Ends: {{ event.end_time|date:"M d, Y H:i" }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="background-color: #ffffff; border: 1px dashed #e5dfd8; border-radius: 12px; padding: 40px; text-align: center;">
+      <p style="color: #665b55; font-size: 15px; margin: 0 0 20px 0;">
+        No events found. Create your first event roster to start tracking scans.
+      </p>
+      <a href="{% url 'home' %}" class="btn-secondary">Create First Event</a>
+    </div>
+  {% endif %}
+</section>
 {% endblock %}
