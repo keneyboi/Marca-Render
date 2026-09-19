@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <h2>Welcome, {{ request.user.first_name }}!</h2>
+    <p>Logged in as: {{ request.user.email }}</p>
+
+    <h3>Your Managed Events</h3>
+    {% if events %}
+        <ul>
+            {% for event in events %}
+                <li>
+                    <strong>{{ event.name }}</strong> [{{ event.status }}]<br>
+                    Venue: {{ event.location }}<br>
+                    Starts: {{ event.start_time|date:"M d, Y H:i" }} | Ends: {{ event.end_time|date:"M d, Y H:i" }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No events found. Create your first event roster to start tracking scans.</p>
+    {% endif %}
+{% endblock %}

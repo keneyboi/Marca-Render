@@ -1,0 +1,8 @@
+{% extends 'core/base.html' %}
+{% block title %}Welcome | Attendance System{% endblock %}
+{% block content %}
+    <h1>Class & Event Attendance Check-in</h1>
+    <p>Upload your roster, verify scans seamlessly, and track entries in real time.</p>
+    <a href="{% url 'register:register' %}">Create an Account</a> or 
+    <a href="{% url 'login:login' %}">Log In</a>
+{% endblock %}
