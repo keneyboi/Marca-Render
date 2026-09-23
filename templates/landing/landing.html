@@ -1,12 +1,16 @@
+
 {% extends "base.html" %}
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static "css/landing/styles.css" %}">
+    <link rel="stylesheet" href="{% static 'css/landing/styles.css' %}">
 {% endblock %}
 
-{% block title %}Marca{% endblock %}
+{% block title %}Marca - Attendance Verification{% endblock %}
+
 {% block content %}
+
+    <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
             <h1 class="hero-title">Attendance Verification,<br>Built for Seamless Events</h1>
@@ -15,8 +19,209 @@
             </p>
             <div class="hero-actions">
                 <a href="{% url 'register' %}" class="btn-primary">Create your Marca ID</a>
-                <a href="#features" class="btn-secondary">Explore Features</a>
+                <a href="#how-it-works" class="btn-secondary">Explore Features</a>
             </div>
         </div>
     </section>
+
+    <section class="partner-experiences-section">
+        <h2 class="partner-heading">Our partner's experiences</h2>
+        <div class="marquee-container">
+            <div class="marquee-track">
+                <!-- Set 1 (6 Cards) -->
+                <div class="experience-card">
+                    <p class="experience-quote">"Registering our 24/7 store as a partner establishment took less than 10 minutes. Last month, our night shift team sheltered event participants safely. It gives our business real purpose."</p>
+                    <span class="experience-author">— Branch Manager, ExpressMart (Partner Establishment)</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"Having a quick escape button and discrete verification tools gave our attendees the absolute courage to participate. I reached a verified coordinator immediately."</p>
+                    <span class="experience-author">— R. T., Cebu City (Event Attendee)</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"I didn't know where to run at 2 AM. The map guided me to a 24-hour convenience store three blocks away. The staff knew exactly what to do and gave me a safe place to sit while calling support."</p>
+                    <span class="experience-author">— M. K., Quezon City (Marca User)</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"Managing multi-venue attendance verification used to take hours of manual reconciliation. Marca's universal ID system cut our check-in bottlenecks down to zero."</p>
+                    <span class="experience-author">— CIT-U Event Coordinator</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"Our student organizers no longer need to manage messy spreadsheet logs. Everything updates live, and verifying attendee credentials takes just a second per person."</p>
+                    <span class="experience-author">— Student Council Lead, CIT-U</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"The seamless digital check-in system completely eliminated long queues at the venue entrance. Attendees were able to enter smoothly without any registration delays."</p>
+                    <span class="experience-author">— Logistics Head, Tech Summit 2026</span>
+                </div>
+
+                <!-- Set 2 (Exact Duplicate for Infinite Loop) -->
+                <div class="experience-card">
+                    <p class="experience-quote">"Registering our 24/7 store as a partner establishment took less than 10 minutes. Last month, our night shift team sheltered event participants safely. It gives our business real purpose."</p>
+                    <span class="experience-author">— Branch Manager, ExpressMart (Partner Establishment)</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"Having a quick escape button and discrete verification tools gave our attendees the absolute courage to participate. I reached a verified coordinator immediately."</p>
+                    <span class="experience-author">— R. T., Cebu City (Event Attendee)</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"I didn't know where to run at 2 AM. The map guided me to a 24-hour convenience store three blocks away. The staff knew exactly what to do and gave me a safe place to sit while calling support."</p>
+                    <span class="experience-author">— M. K., Quezon City (Marca User)</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"Managing multi-venue attendance verification used to take hours of manual reconciliation. Marca's universal ID system cut our check-in bottlenecks down to zero."</p>
+                    <span class="experience-author">— CIT-U Event Coordinator</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"Our student organizers no longer need to manage messy spreadsheet logs. Everything updates live, and verifying attendee credentials takes just a second per person."</p>
+                    <span class="experience-author">— Student Council Lead, CIT-U</span>
+                </div>
+                <div class="experience-card">
+                    <p class="experience-quote">"The seamless digital check-in system completely eliminated long queues at the venue entrance. Attendees were able to enter smoothly without any registration delays."</p>
+                    <span class="experience-author">— Logistics Head, Tech Summit 2026</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Use Marca Section -->
+    <section class="why-marca-section" id="about">
+        <div class="why-marca-container">
+            <div class="why-marca-text">
+                <h2 class="section-heading">Why use Marca?</h2>
+                <p>
+                    Marca transforms attendance tracking from a slow, paper-based hassle into a fast, reliable, two-way digital experience.
+                </p>
+                <p>
+                    Designed to bridge the gap between event organizers and participants, Marca reduces check-in bottlenecks, provides real-time verification, and eliminates the need to register repeatedly across different events.
+                </p>
+                <a href="#contact" class="btn-primary btn-contact">Contact us!</a>
+            </div>
+            <div class="why-marca-media">
+                <div class="mockup-frame">
+                    <img src="" alt="Marca Dashboard Preview" class="laptop-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section" id="how-it-works">
+        <div class="how-it-works-container">
+            <h2 class="section-heading-center">How it works?</h2>
+            
+            <div class="steps-grid">
+                <!-- Step 1 -->
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <h3 class="step-title">Create Universal ID</h3>
+                    <p class="step-desc">Event attendees generate one permanent digital ID code that works seamlessly across all Marca-supported events.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <h3 class="step-title">Create an Event</h3>
+                    <p class="step-desc">Organizers set up their event in minutes, defining check-in parameters and assigning attendance checkers.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <h3 class="step-title">Scan & Verify</h3>
+                    <p class="step-desc">Marca scans attendee QR codes and instantly logs verification in real time through verified scanners.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-card">
+                    <div class="step-number">04</div>
+                    <h3 class="step-title">Live View & Export</h3>
+                    <p class="step-desc">Organizers and users access live check-in feeds, edit logs on the fly, and export formatted attendance data easily.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+<!-- Create Marca ID Section -->
+    <section class="create-id-section" id="create-id">
+        <div class="create-id-header">
+            <hr class="header-line">
+            <h2 class="create-id-title">create a marca id</h2>
+            <hr class="header-line">
+        </div>
+
+        <div class="cards-wrapper">
+            <!-- ID Output Card -->
+            <div class="id-card output-card" id="id-card-element">
+                <h3 class="card-user-name" id="display-name">Your Name</h3>
+                <div class="qr-code-wrapper" id="qr-code">
+                    <!-- Default initial QR image or fallback -->
+                    <img src="{% static 'images/sample-qr.png' %}" alt="Marca ID QR Code" class="qr-code-img">
+                </div>
+                <div class="card-actions-row">
+                    <!-- Scan Action Button -->
+                    <button type="button" class="btn-action-outline" onclick="openScanner()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                            <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                        </svg>
+                        <span>Scan QR</span>
+                    </button>
+
+                    <!-- Download Action Button -->
+                    <button type="button" id="download-btn" class="btn-action-primary" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download Card</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Info Input Card -->
+            <div class="id-card input-card">
+                <div class="details-divider">
+                    <span>ID Details :</span>
+                    <hr>
+                </div>
+                <form class="id-form" onsubmit="return false;">
+                    <div class="form-row">
+                        <input type="text" id="input-first-name" class="marca-input" placeholder="First Name">
+                        <input type="text" id="input-last-name" class="marca-input" placeholder="Last Name">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="input-email" class="marca-input" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="input-phone" class="marca-input" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="input-student-id" class="marca-input" placeholder="Student ID">
+                    </div>
+                    <button type="button" id="generate-btn" class="btn-generate">Generate New ID</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scanner Modal Dialog -->
+    <dialog id="scanner-modal" class="scanner-dialog">
+        <div class="scanner-modal-content">
+            <h3>Scan Marca QR Code</h3>
+            <div id="reader" style="width: 100%; max-width: 320px; margin: 0 auto;"></div>
+            <button type="button" class="btn-close-modal" onclick="resetScanner()">Cancel</button>
+        </div>
+    </dialog>
+
+    <!-- Required JS Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
+    <script src="{% static 'js/landing/qrcode.min.js' %}"></script>
+    <script src="{% static 'js/landing/encryption.js' %}"></script>
+    <script src="{% static 'js/landing/app.js' %}"></script>
 {% endblock %}
