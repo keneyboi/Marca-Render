@@ -10,12 +10,16 @@ class User(AbstractUser):
 
 
 class Event(models.Model):
-    STATUS_CHOICES = [
-        ('SCHEDULED', 'Scheduled'),
-        ('ONGOING', 'Ongoing'),
-        ('COMPLETED', 'Completed'),
-        ('CANCELLED', 'Cancelled'),
-    ]
+    class Status(models.TextChoices):
+        SCHEDULED = 'SCHEDULED', 'Scheduled'
+        ONGOING = 'ONGOING', 'Ongoing'
+        COMPLETED = 'COMPLETED', 'Completed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+
+    class SessionType(models.TextChoices):
+        MORNING = '1', '1'
+        AFTERNOON = '2', '2'
+        BOTH = '3', '3'
 
     user = models.ForeignKey(
         User,
@@ -24,20 +28,28 @@ class Event(models.Model):
     )
     name = models.CharField(max_length=150)
     location = models.CharField(max_length=255)
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='SCHEDULED')
+    session_type = models.CharField(
+        max_length=20,
+        choices=SessionType.choices,
+        default=SessionType.BOTH
+    )
+    status = models.CharField(
+        max_length=30,
+        choices=Status.choices,
+        default=Status.SCHEDULED
+    )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.name} - {self.location}"
+        return f"{self.name} ({self.get_session_type_display()}) - {self.location}"
 
 
 class AttendanceRecord(models.Model):
-    STATUS_CHOICES = [
-        ('ABSENT', 'Absent'),
-        ('PRESENT', 'Present'),
-        ('LATE', 'Late')
-    ]
+    class Status(models.TextChoices):
+        ABSENT = 'ABSENT', 'Absent'
+        PRESENT = 'PRESENT', 'Present'
+        LATE = 'LATE', 'Late'
 
     event = models.ForeignKey(
         Event,
@@ -52,13 +64,20 @@ class AttendanceRecord(models.Model):
     year_level = models.CharField(max_length=20, blank=True, null=True)
     course = models.CharField(max_length=50, blank=True, null=True)
 
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='ABSENT')
-    timed_in = models.DateTimeField(blank=True, null=True)
-    timed_out = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(
+        max_length=30,
+        choices=Status.choices,
+        default=Status.ABSENT
+    )
+
+    timed_in_1 = models.DateTimeField(blank=True, null=True)
+    timed_out_1 = models.DateTimeField(blank=True, null=True)
+    timed_in_2 = models.DateTimeField(blank=True, null=True)
+    timed_out_2 = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields = ['event', 'email'], name = 'unique_event_attendee')
+            models.UniqueConstraint(fields=['event', 'email'], name='unique_event_attendee')
         ]
 
     def __str__(self):
