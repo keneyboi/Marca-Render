@@ -27,6 +27,7 @@ class Event(models.Model):
         related_name='organized_events'
     )
     name = models.CharField(max_length=150)
+    description = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255)
     session_type = models.CharField(
         max_length=20,
