@@ -1,0 +1,113 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{{ event.name }} | Attendance Dashboard{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/event/detail.css' %}">
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="event-detail-container">
+  
+  <!-- Header & Back Navigation -->
+  <a href="{% url 'home' %}" class="back-link">
+    &larr; Back to Dashboard
+  </a>
+
+  <header class="detail-header">
+    <div>
+      <h1 class="event-headline">{{ event.name }}</h1>
+      <div class="event-meta-strip">
+        <span><strong>Venue:</strong> {{ event.location }}</span>
+        <span><strong>Time:</strong> {{ event.start_time|date:"M d, Y H:i" }} &ndash; {{ event.end_time|date:"H:i" }}</span>
+        <span><strong>Session:</strong> {{ event.get_session_type_display }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- High-Level Metric Tiles -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Roster</div>
+      <p class="stat-value">{{ total_roster }}</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Present</div>
+      <p class="stat-value" style="color: #137333;">{{ present_count }}</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Absent</div>
+      <p class="stat-value" style="color: #c5221f;">{{ absent_count }}</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Excused</div>
+      <p class="stat-value" style="color: #b06000;">{{ excused_count }}</p>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="roster-toolbar">
+    <form method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <input 
+        type="text" 
+        name="q" 
+        class="search-input" 
+        placeholder="Search name, ID, or email..." 
+        value="{{ query }}"
+      >
+      <button type="submit" class="btn-primary" style="padding: 8px 18px; border: none; cursor: pointer;">
+        Search
+      </button>
+      {% if query or status_filter %}
+        <a href="{% url 'event_detail' event.id %}" style="display: flex; align-items: center; font-size: 13px; color: #665b55; text-decoration: none; padding-left: 6px;">
+          Clear
+        </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Attendee Table -->
+  <div class="table-container">
+    <table class="roster-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Student ID</th>
+          <th>Course & Year</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+          <tr>
+            <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
+            <td>{{ record.email }}</td>
+            <td>{{ record.student_id|default:"&mdash;" }}</td>
+            <td>
+              {% if record.course or record.year_level %}
+                {{ record.course|default:"" }} {{ record.year_level|default:"" }}
+              {% else %}
+                &mdash;
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge badge-{{ record.status|lower|default:'pending' }}">
+                {{ record.status|default:"PENDING" }}
+              </span>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 3rem; color: #8c7e75;">
+              No attendees found matching your criteria.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

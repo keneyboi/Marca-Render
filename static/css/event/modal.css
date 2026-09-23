@@ -1,0 +1,296 @@
+/* Modal Overlay / Backdrop */
+.custom-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.custom-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.custom-modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  z-index: 10000;
+}
+
+/* Modal Card */
+.custom-modal-card {
+  background: #ffffff;
+  border: 2px solid #2b2320;
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  font-size: 1.75rem;
+  cursor: pointer;
+  color: #2b2320;
+  line-height: 1;
+}
+
+.modal-label {
+  display: block;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  color: #2b2320;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.modal-title-center {
+  text-align: center;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  color: #2b2320;
+  margin: 0 0 1.25rem 0;
+  text-transform: uppercase;
+}
+
+/* Form inputs inside modal */
+.custom-modal-card input[type="text"],
+.custom-modal-card input[type="datetime-local"],
+.custom-modal-card textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #2b2320;
+  border-radius: 10px;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: #2b2320;
+  box-sizing: border-box;
+  background: #fdfdfd;
+}
+
+.custom-modal-card input:focus,
+.custom-modal-card textarea:focus {
+  outline: none;
+  border-color: #000000;
+}
+
+/* Radio buttons matching wireframe */
+.type-radio-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.type-radio-label {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid #2b2320;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2b2320;
+}
+
+.type-radio-label input {
+  margin-right: 6px;
+}
+
+/* Preview Box (Wireframe Step 2) */
+.modal-preview-box {
+  border: 2px solid #2b2320;
+  border-radius: 16px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #faf9f6;
+  margin-bottom: 1.25rem;
+  color: #8c7e75;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+}
+
+/* Buttons */
+.btn-step-action,
+.btn-step-back {
+  border: 2px solid #2b2320;
+  background: transparent;
+  color: #2b2320;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 10px;
+  padding: 8px 24px;
+  cursor: pointer;
+}
+
+.btn-step-submit {
+  border: 2px solid #2b2320;
+  background: #2b2320;
+  color: #ffffff;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 10px;
+  padding: 8px 24px;
+  cursor: pointer;
+}
+
+.btn-download {
+  border: 1.5px solid #2b2320;
+  background: transparent;
+  color: #2b2320;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 8px;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+/* Instructions and Terms Container */
+.instructions-section {
+  background-color: #fcfbf9;
+  border: 1px solid #e5dfd8;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 1rem;
+}
+
+.instructions-heading {
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #2b2320;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+}
+
+.instructions-text {
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  color: #665b55;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.instructions-text code {
+  background-color: #efebe4;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+}
+
+.term-definitions-list {
+  margin: 0;
+  padding-left: 20px;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12.5px;
+  color: #665b55;
+  line-height: 1.6;
+}
+
+.term-definitions-list strong {
+  color: #2b2320;
+}
+
+.term-definitions-list em {
+  color: #8c7e75;
+}
+
+/* Download Template Button Row */
+.download-action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid #2b2320;
+  background: transparent;
+  color: #2b2320;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 8px;
+  padding: 7px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  background: #2b2320;
+  color: #ffffff;
+}
+
+/* Interactive Drag and Drop Zone */
+.dropzone-box {
+  border: 2px dashed #b5aba1;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  background-color: #faf9f6;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dropzone-box.dragover {
+  border-color: #4a0d0d;
+  background-color: #f4ede4;
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dropzone-title {
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2b2320;
+  margin: 8px 0 2px 0;
+}
+
+.dropzone-subtitle {
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  color: #8c7e75;
+  margin: 0;
+}
+
+.file-name-preview {
+  margin-top: 10px;
+  padding: 4px 12px;
+  background-color: #e6f4ea;
+  border: 1px solid #c2e2c9;
+  border-radius: 20px;
+  color: #137333;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
