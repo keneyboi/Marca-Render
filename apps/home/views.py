@@ -1,9 +1,13 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from apps.core.models import Event
+from apps.event.forms import EventForm
 
-# Create your views here.
-@login_required(login_url='login')
+@login_required
 def show_home(request):
-    # Fetch user events if event model exists, or pass an empty list for now
-    events = [] 
-    return render(request, "home/home.html", {'events': events})
+    events = Event.objects.filter(user=request.user).order_by('-start_time')
+    form = EventForm()
+    return render(request, 'home/home.html', {
+        'events': events,
+        'event_form': form,
+    })

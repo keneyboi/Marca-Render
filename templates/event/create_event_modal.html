@@ -1,0 +1,113 @@
+<div id="createEventModal" class="custom-modal-overlay" style="display: none;">
+  <div class="custom-modal-backdrop" onclick="closeEventModal()"></div>
+  
+  <div class="custom-modal-container">
+    <div class="custom-modal-card">
+      
+      <button type="button" class="modal-close-btn" onclick="closeEventModal()">&times;</button>
+
+      <form method="POST" action="{% url 'create_event' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ event_form.roster_file }}
+
+        <!-- STEP 1: EVENT DETAILS -->
+        <div id="modal-step-1">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="modal-label">EVENT NAME:</label>
+            {{ event_form.name }}
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="modal-label">DESCRIPTION:</label>
+            {{ event_form.description }}
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="modal-label">LOCATION:</label>
+            {{ event_form.location }}
+          </div>
+
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+              <label class="modal-label">START TIME:</label>
+              {{ event_form.start_time }}
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+              <label class="modal-label">END TIME:</label>
+              {{ event_form.end_time }}
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="modal-label">TYPE</label>
+            <div class="type-radio-group">
+              {% for radio in event_form.session_type %}
+                <label class="type-radio-label">
+                  {{ radio.tag }}
+                  <span>{{ radio.choice_label }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="button" class="btn-step-action" onclick="toggleEventStep(2)">NEXT</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: ATTENDANCE REQUIREMENTS & ROSTER UPLOAD -->
+        <div id="modal-step-2" style="display: none;">
+          <h4 class="modal-title-center">ATTENDANCE REQUIREMENTS</h4>
+
+          <div class="instructions-section">
+            <h5 class="instructions-heading">ROSTER FORMAT INSTRUCTIONS</h5>
+            <p class="instructions-text">
+              Upload a <code>.csv</code> or <code>.xlsx</code> roster. Only <strong>Email</strong>, <strong>First Name</strong>, and <strong>Last Name</strong> are required for participation.
+            </p>
+
+            <div style="background-color: #f4ede4; border-left: 3px solid #4a0d0d; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px;">
+              <p style="font-size: 12px; margin: 0; color: #331010; font-family: 'SF Pro', sans-serif;">
+                <strong>Not a school event?</strong> You can completely delete the <code>student_id</code>, <code>course</code>, and <code>year_level</code> columns from your spreadsheet. The system will process non-academic rosters without errors.
+              </p>
+            </div>
+            
+            <ul class="term-definitions-list">
+              <li><strong>email:</strong> Attendee's primary email address <em>(Required)</em>.</li>
+              <li><strong>first_name & last_name:</strong> Attendee's legal or recognized names <em>(Required)</em>.</li>
+              <li><strong>student_id:</strong> Campus ID number <em>(Optional - delete column if not applicable)</em>.</li>
+              <li><strong>course:</strong> Degree or academic program <em>(Optional - delete column if not applicable)</em>.</li>
+              <li><strong>year_level:</strong> Year level <em>(Optional - delete column if not applicable)</em>.</li>
+            </ul>
+          </div>
+
+          <div class="download-action-row">
+            <a href="{% url 'download_template' %}" class="btn-download" download>
+              DOWNLOAD TEMPLATE (.CSV)
+            </a>
+          </div>
+
+          <div id="dropzone" class="dropzone-box" onclick="triggerFileInput()">
+            <div class="dropzone-content">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#665b55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <p class="dropzone-title">Click to upload or drag & drop</p>
+              <p class="dropzone-subtitle">CSV rosters supported</p>
+              <div id="fileNamePreview" class="file-name-preview" style="display: none;"></div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="button" class="btn-step-back" onclick="toggleEventStep(1)">Back</button>
+            <button type="submit" class="btn-step-submit">CREATE EVENT</button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
