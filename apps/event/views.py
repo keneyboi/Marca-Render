@@ -14,6 +14,7 @@ from apps.core.models import Event, AttendanceRecord
 from .forms import EventForm
 
 
+@login_required(login_url='landing')
 def create_event(request):
     if request.method != 'POST':
         return redirect('home')
@@ -56,7 +57,8 @@ def create_event(request):
     except Exception as e:
         messages.error(request, f'Database error while saving event: {e}')
         return redirect('home')
-
+    
+@login_required(login_url='landing')
 def download_attendance_template_csv(request):
     """Generates and serves a clean pre-formatted CSV template."""
     response = HttpResponse(content_type='text/csv')
@@ -68,6 +70,7 @@ def download_attendance_template_csv(request):
     writer.writerow(['jane.guest@company.com', 'Jane', 'Smith', '', '', ''])
     return response
 
+@login_required(login_url='landing')
 def download_attendance_template_xlsx(request):
     """Generates and serves a formatted Excel (.xlsx) attendance template in memory."""
     wb = openpyxl.Workbook()
@@ -94,7 +97,6 @@ def download_attendance_template_xlsx(request):
     wb.save(response)
     return response
 
-
 def _clean_cell_value(val):
     """Normalizes cell values, converting whole floats (e.g., 3.0) to strings ('3')."""
     if val is None:
@@ -102,7 +104,6 @@ def _clean_cell_value(val):
     if isinstance(val, float) and val.is_integer():
         return str(int(val))
     return str(val).strip()
-
 
 def _normalize_attendee(row_dict):
     """Sanitizes row keys/values and returns an attendee dict if valid."""
@@ -125,7 +126,6 @@ def _normalize_attendee(row_dict):
             'year_level': clean_row.get('year_level') or None,
         }
     return None
-
 
 def parse_roster_file(uploaded_file):
     """Parses in-memory CSV or Excel files into a deduplicated list of attendee dicts."""
@@ -171,7 +171,7 @@ def parse_roster_file(uploaded_file):
 
     return records_to_create
 
-
+@login_required(login_url='landing')
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id, user=request.user)
 
@@ -193,8 +193,9 @@ def event_detail(request, event_id):
     has_academic_info = bool(courses or year_levels)
 
     st = str(event.session_type).strip().upper()
-    show_session_1 = st in ('1', '3', 'MORNING', 'BOTH')
-    show_session_2 = st in ('2', '3', 'AFTERNOON', 'BOTH')
+    show_session_1 = st in ('1')
+    show_session_2 = st in ('2')
+    show_session_3 = st in ('3')
 
     context = {
         'event': event,
@@ -204,6 +205,7 @@ def event_detail(request, event_id):
         'unique_year_levels': year_levels,
         'show_session_1': show_session_1,
         'show_session_2': show_session_2,
+        'show_session_3': show_session_3,
         'has_student_id': has_student_id,
         'has_academic_info': has_academic_info,
         'total_attendance': records.count(),
@@ -213,6 +215,7 @@ def event_detail(request, event_id):
     }
     return render(request, 'event/event_detail.html', context)
 
+@login_required(login_url='landing')
 @require_POST
 def delete_attendance_record(request, event_id, record_id):
     event = get_object_or_404(Event, id=event_id, user=request.user)
@@ -224,6 +227,7 @@ def delete_attendance_record(request, event_id, record_id):
     messages.success(request, f'Attendee "{attendee_name}" was removed from attendance records.')
     return redirect('event_detail', event_id=event.id)
 
+@login_required(login_url='landing')
 @require_POST
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id, user=request.user)

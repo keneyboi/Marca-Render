@@ -28,7 +28,7 @@
   {% endif %}
 
   <header class="detail-header">
-    <div>
+    <div class="detail-header-left">
       <h1 class="event-headline">{{ event.name }}</h1>
       <div class="event-meta-strip">
         <span><strong>Venue:</strong> {{ event.location }}</span>
@@ -36,7 +36,78 @@
         <span><strong>Session:</strong> {{ event.get_session_type_display }}</span>
       </div>
     </div>
+    <div class="detail-header-right">
+      <button type="button" class="btn-action-outline" onclick="openScanner()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+              <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+          </svg>
+          <span>Scan Attendace</span>
+      </button> 
+    </div>
+
+    
   </header>
+<dialog id="attendance-scanner" class="scanner-modal">
+  <div class="scanner-modal-body">
+    
+    <!-- LEFT COLUMN: Scanner Camera -->
+    <div class="scanner-modal-left">
+      <h3>Scan Attendance</h3>
+      <div id="reader" style="width: 100%; margin: 0 auto;"></div>
+    </div>
+
+    <!-- RIGHT COLUMN: Verification Form & Buttons -->
+    <div class="scanner-modal-right">
+      <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
+        {% csrf_token %}
+
+        <!-- Header containing Title and Inline Session Select -->
+        <div class="scanner-modal-header">
+          <h2>Verify Details:</h2>
+
+          {% if event.session_type == '1' %}
+            <select name="session_type" id="session-select" class="session-select-inline">
+              <option value="1">Time In</option>
+            </select>
+
+          {% elif event.session_type == '2' %}
+            <select name="session_type" id="session-select" class="session-select-inline">
+              <option value="1">Time In</option>
+              <option value="2">Time Out</option>
+            </select>
+
+          {% elif event.session_type == '3' %}
+            <select name="session_type" id="session-select" class="session-select-inline">
+              <option value="1">Morning Time In</option>
+              <option value="2">Morning Time Out</option>
+              <option value="3">Afternoon Time In</option>
+              <option value="4">Afternoon Time Out</option>
+            </select>
+          {% endif %}
+        </div>
+
+        <div class="scanner-modal-information">
+          <input type="hidden" name="event_id" value={{ event.id }}>
+          <input placeholder="Student ID" name="student_id" id="input-student-id">
+          <input placeholder="Email" name="email" id="input-email">
+          <input placeholder="First Name" name="first_name" id="input-first-name">
+          <input placeholder="Last Name" name="last_name" id="input-last-name">
+          <input placeholder="Phone Number" name="phone" id="input-phone">
+        </div>
+
+        <div class="scanner-modal-buttons">
+          <button type="submit" class="btn-confirm-modal">Confirm Attendance</button>
+          <button type="button" class="btn-close-modal" onclick="resetScanner()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</dialog>
 
   <!-- High-Level Metric Tiles -->
   <div class="stats-grid">
@@ -133,11 +204,18 @@
           {# Dynamic Session 1 Columns #}
           {% if show_session_1 %}
             <th>Time In (S1)</th>
-            <th>Time Out (S1)</th>
           {% endif %}
 
           {# Dynamic Session 2 Columns #}
           {% if show_session_2 %}
+            <th>Time In (S1)</th>
+            <th>Time Out (S1)</th>
+          {% endif %}
+
+          {# Dynamic Session 3 Columns #}
+          {% if show_session_3 %}
+            <th>Time In (S1)</th>
+            <th>Time Out (S1)</th>
             <th>Time In (S2)</th>
             <th>Time Out (S2)</th>
           {% endif %}
@@ -176,11 +254,17 @@
             {# Session 1 Data #}
             {% if show_session_1 %}
               <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
             {% endif %}
 
             {# Session 2 Data #}
             {% if show_session_2 %}
+              <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
+            {% endif %}
+
+            {% if show_session_3 %}
+              <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
               <td>{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
               <td>{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
             {% endif %}
@@ -268,5 +352,7 @@
 </div>
 
 <!-- Load Filter & Search Script Directly in Dashboard Content -->
+  <script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
+ <script src="{% static 'js/event/scan_attendance.js' %}"></script>
 <script src="{% static 'js/event/attendance_filter.js' %}"></script>
 {% endblock %}

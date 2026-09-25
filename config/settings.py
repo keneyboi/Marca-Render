@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.register',
     'apps.home',
     'apps.event',
+    'apps.attendance',
 ]
 
 MIDDLEWARE = [
@@ -59,6 +60,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # REQUIRED BEFORE YOUR MIDDLEWARE
+    'apps.login.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -125,7 +128,9 @@ LOGOUT_REDIRECT_URL = 'landing'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'
+
+
 
 USE_I18N = True
 

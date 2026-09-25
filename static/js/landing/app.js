@@ -60,7 +60,7 @@ function createMarcaIDQR() {
                 height: 210,
                 colorDark: "#4a0d0d",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
+                correctLevel: QRCode.CorrectLevel.H
             });
         } else {
             qrCodeInstance.clear();
