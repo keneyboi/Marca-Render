@@ -8,6 +8,17 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.email})"
 
+class Folder(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders')
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ('user', 'name')
+
+    def __str__(self):
+        return self.name
+
 
 class Event(models.Model):
     class Status(models.TextChoices):
@@ -41,6 +52,14 @@ class Event(models.Model):
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+    folder = models.ForeignKey(
+        Folder,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events'
+    )
 
     def __str__(self):
         return f"{self.name} ({self.get_session_type_display()}) - {self.location}"

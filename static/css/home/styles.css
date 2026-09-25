@@ -41,34 +41,56 @@
     font-weight: 600;
 }
 
-/* Session ID Badge */
-.session-badge-wrapper {
+/* Button & Breadcrumb */
+.btn-folder {
+    background-color: #f5f2ed;
+    color: var(--text-main, #2b2320);
+    border: 1px solid var(--border-color, #e5dfd8);
+    padding: 0.65rem 1.25rem;
+    border-radius: 8px;
+    font-family: 'SF Pro', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-folder:hover {
+    background-color: #eae5de;
+    border-color: #dcd4cc;
+}
+
+.fm-breadcrumb-bar {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    background-color: #fcfbf9;
-    padding: 0.6rem 1rem;
-    border: 1px dashed var(--border-color, #e5dfd8);
-    border-radius: 12px;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'SF Pro', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 0;
 }
 
-.session-label {
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+.breadcrumb-item a {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--text-main, #2b2320);
+}
+
+.drop-hint {
+    font-size: 0.75rem;
     color: #8c7e75;
-    font-weight: 600;
+    margin-left: 0.25rem;
 }
 
-.session-id {
-    font-family: 'SF Mono', Consolas, Monaco, monospace;
-    font-size: 0.85rem;
+.breadcrumb-separator {
+    color: #8c7e75;
+}
+
+.breadcrumb-current {
+    font-weight: 600;
     color: var(--accent-dark, #4a0d0d);
-    font-weight: 600;
 }
 
-/* Section Titles */
 .section-title {
     font-family: 'Tiro Telugu', Georgia, serif;
     font-size: 1.75rem;
@@ -77,40 +99,115 @@
     margin-bottom: 1.25rem;
 }
 
-/* Events Grid */
+/* Grids */
+.folders-section {
+    margin-bottom: 2rem;
+}
+
+.folders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
 .events-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.5rem;
 }
 
-.event-display {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Folder Card */
+.folder-card {
+    position: relative;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color, #e5dfd8);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
-/* Hover effect lifting the card */
-.event-display:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(74, 13, 13, 0.12);
+.folder-card:hover {
+    background-color: #fcfbf9;
+    border-color: #dcd4cc;
 }
 
-/* Individual Event Card */
+.folder-card-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: inherit;
+}
+
+.folder-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.folder-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.folder-name {
+    font-family: 'SF Pro', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main, #2b2320);
+}
+
+.folder-count {
+    font-family: 'SF Pro', sans-serif;
+    font-size: 0.78rem;
+    color: #8c7e75;
+}
+
+.delete-folder-form {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+}
+
+.delete-folder-form button {
+    background: transparent;
+    border: none;
+    color: #8c7e75;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.delete-folder-form button:hover {
+    color: #c5221f;
+}
+
+/* Event Card */
 .event-card {
     background-color: #ffffff;
     border: 1px solid var(--border-color, #e5dfd8);
     border-radius: 16px;
     padding: 1.75rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
-    transition: transform 0.25 ease, box-shadow 0.25s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    cursor: grab;
+    user-select: none;
 }
 
 .event-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 14px 30px rgba(74, 13, 13, 0.08);
+}
+
+.event-card:active {
+    cursor: grabbing;
+}
+
+.event-card.is-dragging {
+    opacity: 0.35;
+    transform: scale(0.97);
 }
 
 .event-card-header {
@@ -121,6 +218,12 @@
     gap: 0.75rem;
 }
 
+.drag-grip {
+    color: #b5aba4;
+    font-size: 1.15rem;
+    cursor: grab;
+}
+
 .event-name {
     font-family: 'Tiro Telugu', Georgia, serif;
     font-size: 1.35rem;
@@ -129,7 +232,6 @@
     margin: 0;
 }
 
-/* Status Pill */
 .status-pill {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.75rem;
@@ -143,19 +245,14 @@
     white-space: nowrap;
 }
 
-.status-pill.status-active,
-.status-pill.status-ongoing {
-    background-color: #e6f4ea;
-    color: #137333;
-}
-
+.status-pill.status-scheduled,
 .status-pill.status-upcoming,
-.status-pill.status-draft {
-    background-color: #fef7e0;
-    color: #b06000;
-}
+.status-pill.status-draft { background-color: #fef7e0; color: #b06000; }
+.status-pill.status-active,
+.status-pill.status-ongoing { background-color: #e6f4ea; color: #137333; }
+.status-pill.status-completed { background-color: #edf2f7; color: #4a5568; }
+.status-pill.status-cancelled { background-color: #fde8e8; color: #c5221f; }
 
-/* Event Card Body Details */
 .event-card-body {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
@@ -174,7 +271,6 @@
     font-weight: 600;
 }
 
-/* Empty State Card */
 .empty-state-card {
     background-color: #ffffff;
     border: 1px dashed var(--border-color, #e5dfd8);
@@ -188,4 +284,30 @@
     font-size: 1rem;
     color: #665b55;
     margin: 0;
+}
+
+/* ==========================================================================
+   Drag & Drop Targets & Hover Highlights
+   ========================================================================== */
+
+/* Dropping into a folder */
+.drop-zone.drag-over {
+    background-color: #fbf7f4 !important;
+    border: 2px dashed var(--accent-dark, #4a0d0d) !important;
+    transform: scale(1.02);
+}
+
+.breadcrumb-item.drag-over {
+    background-color: #fbf7f4;
+    border: 2px dashed var(--accent-dark, #4a0d0d);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+}
+
+/* Dropping an event ONTO another event to merge into a folder */
+.event-card.event-merge-hover {
+    border: 2px dashed #4a0d0d !important;
+    background-color: #faf5f3 !important;
+    box-shadow: 0 0 15px rgba(74, 13, 13, 0.2) !important;
+    transform: scale(1.02);
 }
