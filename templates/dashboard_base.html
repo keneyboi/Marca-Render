@@ -1,35 +1,113 @@
 <!-- templates/dashboard_base.html -->
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Welcome to Marca{% endblock %}</title>
+    {% block extra_css %}
+    
+    {% endblock %}
+    <link rel="stylesheet" href="{% static "css/styles.css" %}">
+</head>
+<body>
+  <div class="dashboard-wrapper">
 
-{% block content %}
-<div class="dashboard-wrapper">
+    <!-- Left Sidebar / Quick Actions Bar -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-brand">
+        <a href="{% url 'landing' %}" class="logo" style="font-size: 2rem; color: #ffffff; text-align: center;">marca</a>
+      </div>
 
-  <!-- Left Sidebar / Quick Actions Bar -->
-  <aside class="dashboard-sidebar">
-    <div class="sidebar-brand">
-      <h2>DASHBOARD</h2>
-      <span class="user-badge">@{{ request.user.username }}</span>
+      <nav class="sidebar-nav">
+        <a href="{% url 'home' %}" class="sidebar-link">Home</a>
+        <a href="" class="sidebar-link">Profile</a>
+        <a href="" class="sidebar-link">Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <form method="POST" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn-sidebar">Logout</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Right Main View Area -->
+    <main class="dashboard-main-content">
+      {% block dashboard_content %}{% endblock %}
+    </main>
+
+  </div>
+</body>
+<footer class="site-footer">
+    <div class="footer-container">
+        <hr class="footer-divider">
+        
+        <div class="footer-grid">
+            <!-- Column 1: Marca ID -->
+            <div class="footer-column">
+                <h4>Marca ID</h4>
+                <ul>
+                    <li><a href="{% url 'register' %}">Create Marca ID</a></li>
+                    <li><a href="#">QR Scanner</a></li>
+                    <li><a href="#">Digital Wallet</a></li>
+                    <li><a href="#">Attendance Logs</a></li>
+                    <li><a href="#">Security & Encryption</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 2: Event Solutions -->
+            <div class="footer-column">
+                <h4>Solutions</h4>
+                <ul>
+                    <li><a href="#">Event Organizers</a></li>
+                    <li><a href="#">Partner Establishments</a></li>
+                    <li><a href="#">Real-time Verification</a></li>
+                    <li><a href="#">Developer APIs</a></li>
+                    <li><a href="#">Support & Help Center</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Account -->
+            <div class="footer-column">
+                <h4>Account</h4>
+                <ul>
+                    <li><a href="{% url 'login' %}">Log In</a></li>
+                    <li><a href="">Manage Profile</a></li>
+                    <li><a href="#">Registered Events</a></li>
+                    <li><a href="#">Verification History</a></li>
+                    <li><a href="#">Account Settings</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: About Marca -->
+            <div class="footer-column">
+                <h4>About Marca</h4>
+                <ul>
+                    <li><a href="#">Overview</a></li>
+                    <li><a href="#">Our Mission</a></li>
+                    <li><a href="#">Plans & Pricing</a></li>
+                    <li><a href="#">Press & News</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 Marca Inc. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
+                <a href="#">Legal</a>
+                <a href="#">Site Map</a>
+            </div>
+        </div>
     </div>
+    </footer>
+</body>
+</html>
 
-    <nav class="sidebar-nav">
-      <a href="{% url 'home' %}" class="sidebar-link">Home</a>
-      <a href="" class="sidebar-link">Profile</a>
-      <a href="" class="sidebar-link">Settings</a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn-sidebar">Logout</button>
-      </form>
-    </div>
-  </aside>
-
-  <!-- Right Main View Area -->
-  <main class="dashboard-main-content">
-    {% block dashboard_content %}{% endblock %}
-  </main>
-
-</div>
-{% endblock %}

@@ -11,17 +11,18 @@
 {% block content %}
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" id="hero">
         <div class="hero-content">
-            <h1 class="hero-title">Attendance Verification,<br>Built for Seamless Events</h1>
+            <h1 class="hero-title">Easy & Quick Attendance with <i>Marca</i></h1>
             <p class="hero-description">
-                Marca simplifies event management with a universal ID system. Attendees generate one permanent code that works across all events, while organizers verify participation in real time with quick scanning.
+                Say goodbye to long lines and messy sign-in sheets. With Marca, one permanent digital ID gets you into every campus event in seconds fast, effortless, and completely hassle-free.
             </p>
             <div class="hero-actions">
                 <a href="{% url 'register' %}" class="btn-primary">Create your Marca ID</a>
                 <a href="#how-it-works" class="btn-secondary">Explore Features</a>
             </div>
         </div>
+        <img src="{% static 'images/design.png' %}" class="hero-image">
     </section>
 
     <section class="partner-experiences-section">
@@ -83,64 +84,78 @@
         </div>
     </section>
 
-    <!-- Why Use Marca Section -->
-    <section class="why-marca-section" id="about">
-        <div class="why-marca-container">
-            <div class="why-marca-text">
-                <h2 class="section-heading">Why use Marca?</h2>
-                <p>
-                    Marca transforms attendance tracking from a slow, paper-based hassle into a fast, reliable, two-way digital experience.
-                </p>
-                <p>
-                    Designed to bridge the gap between event organizers and participants, Marca reduces check-in bottlenecks, provides real-time verification, and eliminates the need to register repeatedly across different events.
-                </p>
-                <a href="#contact" class="btn-primary btn-contact">Contact us!</a>
-            </div>
-            <div class="why-marca-media">
-                <div class="mockup-frame">
-                    <img src="" alt="Marca Dashboard Preview" class="laptop-img">
-                </div>
-            </div>
+<!-- Interactive Overview Section -->
+<section class="marca-overview-section" id="about">
+    <div class="marca-overview-container">
+        
+        <!-- Toggle Pill Bar -->
+        <div class="toggle-pill-wrapper">
+            <button class="toggle-btn active" onclick="switchTab('why')">Why Use Marca?</button>
+            <button class="toggle-btn" onclick="switchTab('how')">How It Works</button>
         </div>
-    </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works-section" id="how-it-works">
-        <div class="how-it-works-container">
-            <h2 class="section-heading-center">How it works?</h2>
+        <!-- Main White Rounded Card Container -->
+        <div class="overview-white-card">
             
-            <div class="steps-grid">
-                <!-- Step 1 -->
-                <div class="step-card">
-                    <div class="step-number">01</div>
-                    <h3 class="step-title">Create Universal ID</h3>
-                    <p class="step-desc">Event attendees generate one permanent digital ID code that works seamlessly across all Marca-supported events.</p>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="step-card">
-                    <div class="step-number">02</div>
-                    <h3 class="step-title">Create an Event</h3>
-                    <p class="step-desc">Organizers set up their event in minutes, defining check-in parameters and assigning attendance checkers.</p>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="step-card">
-                    <div class="step-number">03</div>
-                    <h3 class="step-title">Scan & Verify</h3>
-                    <p class="step-desc">Marca scans attendee QR codes and instantly logs verification in real time through verified scanners.</p>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="step-card">
-                    <div class="step-number">04</div>
-                    <h3 class="step-title">Live View & Export</h3>
-                    <p class="step-desc">Organizers and users access live check-in feeds, edit logs on the fly, and export formatted attendance data easily.</p>
+            <!-- View 1: Why Use Marca -->
+            <div id="view-why" class="overview-view active">
+                <div class="why-marca-grid">
+                    <div class="why-marca-text">
+                        <h2 class="section-heading">Why use Marca?</h2>
+                        <p>
+                            Marca transforms attendance tracking from a slow, paper-based hassle into a fast, reliable, two-way digital experience.
+                        </p>
+                        <p>
+                            Designed to bridge the gap between event organizers and participants, Marca reduces check-in bottlenecks, provides real-time verification, and eliminates the need to register repeatedly across different events.
+                        </p>
+                        <a href="#contact" class="btn-primary btn-contact">Contact us!</a>
+                    </div>
+                    <div class="why-marca-media">
+                        <div class="mockup-frame">
+                            <img src="{% static "images/marca_web.png" %}" alt="Marca Dashboard Preview" class="laptop-img">
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
 
+            <!-- View 2: How It Works -->
+            <div id="view-how" class="overview-view">
+                <h2 class="section-heading-center">How it works?</h2>
+                <div class="steps-grid">
+                    <!-- Step 1 -->
+                    <div class="step-card">
+                        <div class="step-number">01</div>
+                        <h3 class="step-title">Create Universal ID</h3>
+                        <p class="step-desc">Event attendees generate one permanent digital ID code that works seamlessly across all Marca-supported events.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="step-card">
+                        <div class="step-number">02</div>
+                        <h3 class="step-title">Create an Event</h3>
+                        <p class="step-desc">Organizers set up their event in minutes, defining check-in parameters and assigning attendance checkers.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="step-card">
+                        <div class="step-number">03</div>
+                        <h3 class="step-title">Scan & Verify</h3>
+                        <p class="step-desc">Marca scans attendee QR codes and instantly logs verification in real time through verified scanners.</p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="step-card">
+                        <div class="step-number">04</div>
+                        <h3 class="step-title">Live View & Export</h3>
+                        <p class="step-desc">Organizers and users access live check-in feeds, edit logs on the fly, and export formatted attendance data easily.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
 
 <!-- Create Marca ID Section -->
     <section class="create-id-section" id="create-id">
@@ -218,7 +233,81 @@
         </div>
     </dialog>
 
+
     <!-- Required JS Libraries -->
+<!-- Contact Us Section -->
+<section class="contact-section" id="contact">
+    <div class="contact-container">
+        
+        <!-- White Elevated Floating Card -->
+        <div class="contact-white-card">
+            <div class="contact-grid">
+                
+                <!-- Left Side Info -->
+                <div class="contact-info">
+                    <h2 class="section-heading">Have any questions?</h2>
+                    <p class="contact-desc">
+                        Have questions about implementing Marca for your events, need custom solutions, or want to partner up? Send us a message and our team will get back to you shortly.
+                    </p>
+                </div>
+
+                <!-- Right Side Form -->
+                <form class="contact-form" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label for="contact-name">Full Name</label>
+                        <input type="text" id="contact-name" class="marca-input" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-email">Email Address</label>
+                        <input type="email" id="contact-email" class="marca-input" placeholder="Your email here" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-message">Message</label>
+                        <textarea id="contact-message" class="marca-input marca-textarea" rows="4" placeholder="How can we help you?" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-submit">Send Message</button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+    <script>
+        window.switchTab = function(tabName) {
+            const buttons = document.querySelectorAll('.toggle-btn');
+            const viewWhy = document.getElementById('view-why');
+            const viewHow = document.getElementById('view-how');
+
+            // Prevent redundant triggers if already active
+            if ((tabName === 'why' && viewWhy.classList.contains('active')) ||
+                (tabName === 'how' && viewHow.classList.contains('active'))) {
+                return;
+            }
+
+            // 1. Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // 2. Hide both views first
+            viewWhy.classList.remove('active');
+            viewHow.classList.remove('active');
+
+            // 3. Trigger reflow and show active view to restart animation cleanly
+            requestAnimationFrame(() => {
+                if (tabName === 'why') {
+                    buttons[0].classList.add('active');
+                    viewWhy.classList.add('active');
+                } else {
+                    buttons[1].classList.add('active');
+                    viewHow.classList.add('active');
+                }
+            });
+        };
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
     <script src="{% static 'js/landing/qrcode.min.js' %}"></script>

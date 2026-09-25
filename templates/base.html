@@ -11,20 +11,26 @@
     <link rel="stylesheet" href="{% static "css/styles.css" %}">
 </head>
 <body>
-    <header class="site-header">
-        <a href="{% url 'landing' %}" class="logo">marca</a>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About Us</a></li>
-                <li><a href="#create-id">Create Marca ID</a></li>
-                <li><a href="#plans">Plans</a></li>
-                <li><a href="#contact">Contact Us</a></li>
-                <li><a href="{% url 'login' %}" class="btn-get-started">Get Started</a></li>
-            </ul>
-        </nav>
+    <header class="site-header-wrapper">
+        <div class="glass-navbar">
+            <a href="{% url 'landing' %}" class="logo">marca</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'landing' %}#hero">Home</a></li>
+                    <li><a href="{% url 'landing' %}#about">About Us</a></li>
+                    <li><a href="{% url 'landing' %}#create-id">Create Marca ID</a></li>
+                    <li><a href="{% url 'landing' %}#contact">Contact Us</a></li>
+                    </ul>
+            </nav>
+            <a href="{% url 'login' %}" class="btn-get-started">
+                {% if user.is_authenticated %}
+                    My Dashboard
+                {% else %}
+                    Get Started
+                {% endif %}
+            </a>
+        </div>
     </header>
-    <hr style="color: #a0a0a0; margin-top: -5px; margin-bottom: 0;">
     <main>
         <div class="container">
         {% block content %}

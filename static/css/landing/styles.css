@@ -1,18 +1,22 @@
+/* Hero Section Container */
 .hero-section {
     display: flex;
-    justify-content: flex-end; /* Align child content to the right */
-    align-items: center;       /* Center content vertically */
-    min-height: 80vh;           /* Give section enough height */    /* Space from page edges */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    flex-direction: column;    /* Stacks hero-content on top and hero-image on bottom */
+    align-items: center;       /* Centers content horizontally */
+    width: 100%;
+    padding-top: 4rem;         /* Space from top header/nav */
     position: relative;
+    box-sizing: border-box;
+    overflow: hidden;          /* Prevents unwanted horizontal scrollbars */
 }
 
+/* Hero Content Wrapper */
 .hero-content {
-    max-width: 50vw;          /* Limit width so text stays readable */
-    text-align: left; 
-    margin: 0 10vw;          /* Keep text left-aligned inside its container */
+    max-width: 800px;         /* Keeps text block clean and readable */
+    width: 90%;
+    text-align: center;       /* Centers heading, paragraph, and buttons */
+    margin: 0 auto 0 auto; /* Bottom margin creates space before the image */
+    z-index: 2;                /* Keeps text clickable above any overlays */
 }
 
 /* Hero Title */
@@ -22,7 +26,7 @@
     font-size: 4rem;
     font-weight: 400;
     line-height: 1.15;
-    color: var(--text-main); /* #331010 */
+    color: var(--text-main, #331010);
     margin-bottom: 1.25rem;
     letter-spacing: -0.02em;
 }
@@ -31,28 +35,27 @@
 .hero-description {
     text-align: center;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 400;
     line-height: 1.6;
-    max-width: 800px;
-    color: var(--text-main);
-    margin-bottom: 2rem;
+    color: var(--text-main, #331010);
+    margin: 0 auto 2.25rem auto;
 }
 
-/* Hero Actions Container */
+/* Hero Action Buttons */
 .hero-actions {
-    display: flex;             /* Centering works best with standard flex */
-    justify-content: center;   /* Centers the buttons horizontally next to each other */
-    align-items: center;       /* Aligns the buttons vertically */
-    gap: 1rem;                 /* Keeps spacing between the two buttons */
-    width: 100%;               /* Ensures the container takes up full width to allow centering */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
 }
 
 /* Primary Button ("Create your Marca ID") */
 .btn-primary {
     display: inline-block;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--accent-dark); /* #4a0d0d */
+    background-color: var(--accent-dark, #4a0d0d);
     color: #ffffff;
     font-size: 0.95rem;
     font-weight: 600;
@@ -73,14 +76,14 @@
 .btn-secondary {
     display: inline-block;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--accent-light); /* #e8e2d5 */
-    color: var(--text-main); /* #331010 */
+    background-color: var(--accent-light, #e8e2d5);
+    color: var(--text-main, #331010);
     font-size: 0.95rem;
     font-weight: 600;
     padding: 1rem 2rem;
     border-radius: 16px;
     text-decoration: none;
-    border: 1px solid var(--border-color); /* #d1c8b8 */
+    border: 1px solid var(--border-color, #d1c8b8);
     transition: background-color 0.2s ease, transform 0.1s ease;
     cursor: pointer;
 }
@@ -90,31 +93,105 @@
     transform: translateY(-1px);
 }
 
-/* --- WHY USE MARCA SECTION --- */
-.why-marca-section {
-    background-color: var(--bg-color, #f7f4ed);
-    padding: 6rem 4rem;
+/* Edge-to-Edge Hero Image */
+.hero-image {
+    z-index: -1;
+    width: 100%;               /* Spans full container width from side to side */
+    height: auto;              /* Maintains correct aspect ratio */
+    display: block;            /* Prevents inline element gap at bottom */
+    object-fit: cover;         /* Ensures image scales cleanly */
 }
 
-.why-marca-container {
-    max-width: 1200px;
+
+
+/* Outer Section Setup */
+.marca-overview-section {
+    background-color: var(--accent-dark, #4a0d0d);
+    padding: 5rem 2rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.marca-overview-container {
+    max-width: 1100px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+/* --- PILL TOGGLE BAR --- */
+.toggle-pill-wrapper {
+    display: flex;
+    background: rgba(254, 252, 239, 0.4); /* Translucent pill background */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.4rem;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 30px;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.toggle-btn.active {
+    background-color: #4a0d0d;
+    color: #fefcef;
+    box-shadow: 0 4px 14px rgba(74, 13, 13, 0.25);
+}
+
+/* --- WHITE ROUNDED CONTAINER CARD --- */
+.overview-white-card {
+    background-color: #fdfbf7;
+    border: 2px solid #ffffff;
+    border-radius: 28px;
+    padding: 3.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 16px 40px rgba(51, 16, 16, 0.08);
+}
+
+/* View Switcher Visibility */
+.overview-view {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.overview-view.active {
+    display: block;
+    opacity: 1;
+}
+
+/* --- WHY MARCA STYLING --- */
+.why-marca-grid {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 4rem;
+    gap: 3.5rem;
 }
 
 .why-marca-text {
     flex: 1;
-    max-width: 500px;
 }
 
 .section-heading {
     font-family: 'Tiro Telugu', Georgia, serif;
-    font-size: 3.25rem;
-    color: var(--text-main, #331010);
-    margin-bottom: 1.5rem;
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    color: #4a0d0d;
+    margin-bottom: 1.25rem;
     font-weight: 400;
     line-height: 1.1;
 }
@@ -122,15 +199,15 @@
 .why-marca-text p {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1rem;
-    color: var(--text-main, #331010);
+    color: #331010;
     line-height: 1.6;
     margin-bottom: 1.25rem;
 }
 
 .btn-contact {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     border-radius: 20px;
-    padding: 0.8rem 2.5rem;
+    padding: 0.8rem 2.25rem;
     display: inline-block;
 }
 
@@ -146,37 +223,28 @@
     display: block;
 }
 
-/* --- HOW IT WORKS SECTION --- */
-.how-it-works-section {
-    background-color: #e5822f; /* Orange background matching design mockup */
-    padding: 2rem 4rem 4rem 4rem;
-}
-
-.how-it-works-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
+/* --- HOW IT WORKS STYLING --- */
 .section-heading-center {
     font-family: 'Tiro Telugu', Georgia, serif;
-    font-size: 3.5rem;
-    color: #4a0d0d; /* Deep burgundy heading */
+    font-size: clamp(2.25rem, 4vw, 3rem);
+    color: #4a0d0d;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-top: 0;
+    margin-bottom: 2.5rem;
     font-weight: 400;
 }
 
 .steps-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .step-card {
     background-color: #f7f4ed;
+    border: 1px solid rgba(209, 200, 184, 0.5);
     border-radius: 16px;
-    padding: 2rem 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 1.75rem 1.25rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -185,18 +253,18 @@
 
 .step-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
 .step-number {
     font-family: 'Tiro Telugu', Georgia, serif;
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: bold;
     color: #4a0d0d;
     margin-bottom: 1rem;
     background-color: #e8e2d5;
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -205,42 +273,98 @@
 
 .step-title {
     font-family: 'Tiro Telugu', Georgia, serif;
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     color: #331010;
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 0.5rem 0;
     font-weight: 400;
 }
 
 .step-desc {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #665b55;
     line-height: 1.5;
     margin: 0;
 }
 
-/* Responsive adjustments */
-@media (max-width: 992px) {
-    .steps-grid {
-        grid-template-columns: repeat(2, 1fr);
+/* Responsive Adjustments */
+@media (max-width: 900px) {
+    .overview-white-card {
+        padding: 2rem 1.5rem;
     }
-    .why-marca-container {
+
+    .why-marca-grid {
         flex-direction: column;
         text-align: center;
     }
-    .why-marca-text {
-        max-width: 100%;
+
+    .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 550px) {
     .steps-grid {
         grid-template-columns: 1fr;
     }
-}/* --- OUR PARTNER EXPERIENCES (COMPACT VERSION) --- */
+    
+    .toggle-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* --- VIEW TRANSITIONS & ANIMATIONS --- */
+
+/* Hide inactive panels */
+.overview-view {
+    display: none;
+    opacity: 0;
+}
+
+/* Active panel display */
+.overview-view.active {
+    display: block;
+    animation: fadeInUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+/* Keyframe for entering content (Fades in and slides up slightly) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Optional Stagger Animation for Step Cards */
+.overview-view.active .step-card {
+    animation: fadeInCard 0.7s cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
+}
+
+.overview-view.active .step-card:nth-child(1) { animation-delay: 0.05s; }
+.overview-view.active .step-card:nth-child(2) { animation-delay: 0.10s; }
+.overview-view.active .step-card:nth-child(3) { animation-delay: 0.15s; }
+.overview-view.active .step-card:nth-child(4) { animation-delay: 0.20s; }
+
+@keyframes fadeInCard {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- OUR PARTNER EXPERIENCES (COMPACT VERSION) --- */
 
 .partner-experiences-section {
-    margin-top: 3rem;
+    margin-top: -2rem;
     background-color: #4a0d0d;
     padding: 0 0 2rem 0; /* Reduced top/bottom section padding */
     overflow: hidden;
@@ -355,21 +479,16 @@
 
 /* --- CREATE A MARCA ID SECTION --- */
 
+
 .create-id-section {
-    background-color: #f7f4ed;
-    padding: 4rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.create-id-section {
-    background-color: #f7f4ed;
+    background-color: var(--bg-color, #fefcef);
     padding: 4rem 0; /* Set horizontal padding to 0 so lines reach the screen edges */
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    overflow: hidden; /* Prevents horizontal scrollbars */
+    overflow: hidden; 
+    margin: 0 0 3rem 0;/* Prevents horizontal scrollbars */
 }
 
 /* Header container spans 100% width edge-to-edge */
@@ -641,7 +760,6 @@
     border-color: var(--accent-dark);
 }
 
-CSS
 /* --- ID CARD ACTION BUTTONS --- */
 
 .card-actions-row {
@@ -700,4 +818,226 @@ CSS
 .btn-action-primary:disabled svg,
 .btn-action-outline:disabled svg {
     stroke: #b0a89e;
+}
+
+/* --- CONTACT US SECTION --- */
+.contact-section {
+    margin: -3rem 0;
+    background-color:#e5822f; /* Clean standard background color */
+    padding: 6rem 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.contact-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* White Card with Deep Elevated Box Shadow */
+.contact-white-card {
+    background-color: #fdfbf7;
+    border: 1px solid rgba(209, 200, 184, 0.4);
+    border-radius: 28px;
+    padding: 3.5rem;
+    /* Elevated box-shadow underneath the card */
+    box-shadow: 0 20px 50px rgba(51, 16, 16, 0.12),
+                0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.contact-white-card:hover {
+    /* Subtle hover lift to enhance depth */
+    box-shadow: 0 24px 60px rgba(51, 16, 16, 0.15),
+                0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.contact-grid {
+    justify-con: center;
+    display: flex;
+    gap: 4rem;
+    align-items: flex-start;
+}
+
+/* Left Side: Text & Contact Details */
+.contact-info {
+    flex: 1;
+}
+
+.contact-info .section-heading {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    color: #4a0d0d;
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.contact-desc {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    color: #331010;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+}
+
+.contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.contact-icon {
+    font-size: 1.25rem;
+    background-color: #e8e2d5;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.detail-label {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.1rem;
+    color: #4a0d0d;
+    margin: 0;
+    font-weight: 400;
+}
+
+.detail-val {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    color: #665b55;
+    margin: 0;
+}
+
+/* Right Side: Contact Form Box */
+.contact-form {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background-color: #f7f4ed;
+    border: 1px solid rgba(209, 200, 184, 0.5);
+    border-radius: 20px;
+    padding: 2.25rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #4a0d0d;
+}
+
+.marca-input {
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    border: 1.5px solid #e2dacd;
+    background-color: #ffffff;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    color: #331010;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.marca-input::placeholder {
+    color: #a89d95;
+}
+
+.marca-input:focus {
+    border-color: #4a0d0d;
+    box-shadow: 0 0 0 3px rgba(74, 13, 13, 0.12);
+}
+
+.marca-textarea {
+    resize: vertical;
+    min-height: 110px;
+}
+
+.btn-submit {
+    margin-top: 0.5rem;
+    width: 100%;
+    border-radius: 14px;
+    padding: 0.9rem 1.5rem;
+    background-color: #4a0d0d;
+    color: #fefcef;
+    border: none;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(74, 13, 13, 0.2);
+}
+
+.btn-submit:hover {
+    background-color: #330808;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 13, 13, 0.3);
+}
+
+@media (max-width: 900px) {
+    /* 1. Prevent outer overflow by keeping padding tight */
+    .contact-section {
+        padding: 3rem 2rem;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden; /* Guards against horizontal scrolling */
+    }
+
+    /* 2. Make the card fit full width within outer section padding */
+    .contact-white-card {
+        padding: 3rem 3rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 3. Set flex grid to full width and center items */
+    .contact-grid {
+        flex-direction: column;
+        justify-items: center;
+        align-items: center; /* Centers children horizontally */
+        gap: 2rem;
+        width: 100%;
+    }
+
+    .contact-info {
+        width: 100%;
+    }
+
+    /* 4. Form occupies 100% of the inner card width cleanly */
+    .contact-form {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 1.5rem 1.25rem;
+    }
+
+    /* 5. Inputs and button stretch 100% inside the form */
+    .marca-input,
+    .btn-submit {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }

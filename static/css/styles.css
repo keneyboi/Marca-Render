@@ -34,7 +34,7 @@
 }
 
 :root {
-    --bg-color: #f7f4ed;
+    --bg-color: #fefcef;
     --text-main: #331010;
     --accent-dark: #4a0d0d;
     --accent-light: #e8e2d5;
@@ -50,6 +50,15 @@ body {
     font-family: 'SF Pro';
 }
 
+section {
+    /* Adjust this value based on the height of your sticky header + desired spacing */
+    scroll-margin-top: 5rem; 
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 /* Apply to headings or your brand logo */
 .logo, h1, h2 {
     font-family: 'Tiro Telugu', Georgia, serif;
@@ -60,54 +69,113 @@ body {
     font-family: 'Tiro Telugu', Georgia, serif;
     font-style: italic;
 }
-
-/* Navigation Header */
-.site-header {
+/* Sticky Outer Wrapper */
+.site-header-wrapper {
+    position: sticky;
+    top: 1rem;
+    z-index: 1000;
     display: flex;
-    justify-content: space-between;
-    align-items: center; /* Changed from 'left' (invalid) to 'center' */
-    padding: 1.5rem 4rem;
-    max-width: 100%; /* Spans full width so logo touches left and nav leans right */
-    margin: 0;
+    justify-content: center;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
+/* Glassmorphism Floating Pill Container */
+.glass-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 0.6rem 1.25rem 0.6rem 1.75rem;
+    
+    /* Glassmorphism Effect */
+    background: rgba(254, 252, 239, 0.65); /* Semi-transparent background matching --bg-color */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(209, 200, 184, 0.5); /* Subtle transparent border */
+    border-radius: 50px;
+    box-shadow: 0 8px 32px rgba(51, 16, 16, 0.06);
+    
+    max-width: 1100px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+/* Logo Styling Inside Pill */
 .logo {
     font-family: 'Tiro Telugu', serif;
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--text-main);
     text-decoration: none;
-    margin-right: auto; /* Pushes everything after the logo to the far right */
+    white-space: nowrap;
 }
 
+/* Middle Navigation Links */
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 4rem;
+    gap: 1.75rem;
     list-style: none;
-    margin-left: auto; /* Ensures navigation links hug the right side next to the button */
+    margin: 0;
+    padding: 0;
 }
 
 .nav-links a {
     text-decoration: none;
-    font-family: 'SF Pro';
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     color: #665b55;
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    transition: color 0.2s;
+    white-space: nowrap;
+    transition: color 0.2s ease;
 }
 
 .nav-links a:hover {
     color: var(--text-main);
 }
 
-.nav-links a.btn-get-started {
+/* Action Button Inside Pill */
+.btn-get-started {
     background-color: var(--accent-dark);
     color: var(--accent-light) !important;
-    padding: 1rem 3rem;
-    border-radius: 20px;
+    padding: 0.65rem 1.5rem;
+    border-radius: 30px;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-get-started:hover {
+    background-color: #330808;
+    transform: translateY(-1px);
+}
+
+/* --- MOBILE RESPONSIVE LAYOUT --- */
+@media (max-width: 880px) {
+    .site-header-wrapper {
+        top: 0.5rem;
+        padding: 0 0.75rem;
+    }
+
+    .glass-navbar {
+        padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+        gap: 1rem;
+    }
+
+    /* Hide middle navigation text links on mobile */
+    .nav-links {
+        display: none;
+    }
+
+    .btn-get-started {
+        padding: 0.55rem 1.1rem;
+        font-size: 0.825rem;
+    }
 }
 
 /* Main Container */
@@ -215,7 +283,7 @@ body {
 /* --- DASHBOARD BASE LAYOUT & SIDEBAR --- */
 .dashboard-wrapper {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     width: 100%;
     align-items: stretch;
     background-color: #fcfbf9; /* Main content background */
@@ -229,7 +297,7 @@ body {
     display: flex;
     position: sticky;
     top: 0;
-    height: 100vh;
+    height: inherit;
     flex-direction: column;
     padding: 2.5rem 1.5rem;
     box-sizing: border-box;

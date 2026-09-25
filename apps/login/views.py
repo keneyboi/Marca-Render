@@ -3,6 +3,8 @@ from .forms import CustomLoginForm
 from django.contrib.auth import login, logout
 
 def show_login(request):
+    if request.user.is_authenticated:
+            return redirect('home')
     if request.method == 'POST':
         form = CustomLoginForm(request, data=request.POST)
         
