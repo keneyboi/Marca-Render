@@ -15,6 +15,18 @@
     &larr; Back to Dashboard
   </a>
 
+  <!-- Message Notification Alerts -->
+  {% if messages %}
+    <div style="margin-bottom: 1.5rem;">
+      {% for message in messages %}
+        <div style="padding: 12px 18px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; 
+          {% if message.tags == 'success' %}background-color: #e6f4ea; color: #137333; border: 1px solid #c2e2c9;{% else %}background-color: #fce8e6; color: #c5221f; border: 1px solid #f5c2be;{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <header class="detail-header">
     <div>
       <h1 class="event-headline">{{ event.name }}</h1>
@@ -29,8 +41,8 @@
   <!-- High-Level Metric Tiles -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label">Total Roster</div>
-      <p class="stat-value">{{ total_roster }}</p>
+      <div class="stat-label">Total Attendance</div>
+      <p class="stat-value">{{ total_attendance }}</p>
     </div>
     <div class="stat-card">
       <div class="stat-label">Present</div>
@@ -46,34 +58,62 @@
     </div>
   </div>
 
-  <p style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; font-family: monospace;">
-    has_student_id: <strong>{{ has_student_id }}</strong> | 
-    has_academic_info: <strong>{{ has_academic_info }}</strong> | 
-    show_session_1: <strong>{{ show_session_1 }}</strong> | 
-    show_session_2: <strong>{{ show_session_2 }}</strong>
-  </p>
+  <!-- Instant Search & Filter Toolbar (Client-Side, No Requery) -->
+  <div class="attendance-toolbar" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+    <input 
+      type="text" 
+      id="attendanceSearchInput"
+      placeholder="Search name, ID, or email..." 
+      style="padding: 7px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; min-width: 240px;"
+      autocomplete="off"
+    >
 
-  <!-- Search & Filter Controls -->
-  <div class="roster-toolbar">
-    <form id="rosterSearchForm" method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-      <input 
-        type="text" 
-        id="rosterSearchInput"
-        name="q" 
-        class="search-input" 
-        placeholder="Search name, ID, or email..." 
-        value="{{ query }}"
-        autocomplete="off"
+    <select 
+      id="attendanceStatusFilter"
+      style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;"
+    >
+      <option value="">All Statuses</option>
+      {% for val, label in status_choices %}
+        <option value="{{ val }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    {# Conditionally render Course filter only if course records exist #}
+    {% if unique_courses %}
+      <select 
+        id="attendanceCourseFilter"
+        style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;"
       >
-      {% if query or status_filter %}
-        <a href="{% url 'event_detail' event.id %}" style="display: flex; align-items: center; font-size: 13px; color: #665b55; text-decoration: none; padding-left: 6px;">
-          Clear
-        </a>
-      {% endif %}
-    </form>
+        <option value="">All Courses</option>
+        {% for course in unique_courses %}
+          <option value="{{ course }}">{{ course }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    {# Conditionally render Year Level filter only if year records exist #}
+    {% if unique_year_levels %}
+      <select 
+        id="attendanceYearFilter"
+        style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;"
+      >
+        <option value="">All Years</option>
+        {% for year in unique_year_levels %}
+          <option value="{{ year }}">Year {{ year }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <a 
+      href="#" 
+      id="clearAttendanceFiltersBtn" 
+      style="display: none; font-size: 12.5px; color: #8c7e75; text-decoration: none; padding-left: 4px;"
+    >
+      Clear
+    </a>
   </div>
 
-  <!-- Dynamic Attendee Table -->
+  <!-- Dynamic Attendance Table -->
   <div class="table-container">
     <table class="roster-table">
       <thead>
@@ -81,7 +121,7 @@
           <th>Name</th>
           <th>Email</th>
 
-          {# Dynamic Optional Roster Columns #}
+          {# Dynamic Optional Attendance Columns #}
           {% if has_student_id %}
             <th>Student ID</th>
           {% endif %}
@@ -103,11 +143,17 @@
           {% endif %}
 
           <th>Status</th>
+          <th style="text-align: right;">Action</th>
         </tr>
       </thead>
       <tbody>
         {% for record in records %}
-          <tr>
+          <tr 
+            class="attendance-row" 
+            data-status="{{ record.status }}" 
+            data-course="{{ record.course|default:'' }}" 
+            data-year="{{ record.year_level|default:'' }}"
+          >
             <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
             <td>{{ record.email }}</td>
 
@@ -144,36 +190,83 @@
                 {{ record.get_status_display }}
               </span>
             </td>
+
+            <!-- Single Attendee Delete Trigger -->
+            <td style="text-align: right;">
+              <button 
+                type="button" 
+                onclick="openDeleteRecordModal('{% url 'delete_attendance_record' event.id record.id %}', '{{ record.first_name|escapejs }} {{ record.last_name|escapejs }}')"
+                style="background: transparent; border: none; color: #c5221f; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px;"
+              >
+                Remove
+              </button>
+            </td>
           </tr>
         {% empty %}
           <tr>
             <td colspan="12" style="text-align: center; padding: 3rem; color: #8c7e75;">
-              No attendees found matching your criteria.
+              No attendees found for this event.
             </td>
           </tr>
         {% endfor %}
+
+        <!-- Filter Match Empty State -->
+        <tr id="noAttendanceMatchRow" style="display: none;">
+          <td colspan="12" style="text-align: center; padding: 2.5rem; color: #8c7e75;">
+            No attendees match your search or filter criteria.
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Pagination Controls -->
+  <!-- Pagination Controls (Only rendered if pagination is active) -->
   {% if records.has_other_pages %}
     <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
       {% if records.has_previous %}
-        <a href="?page={{ records.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn-step-back" style="text-decoration: none;">Previous</a>
+        <a href="?page={{ records.previous_page_number }}" class="btn-step-back" style="text-decoration: none;">Previous</a>
       {% endif %}
       <span style="display: flex; align-items: center; font-size: 13px; color: #665b55;">
         Page {{ records.number }} of {{ records.paginator.num_pages }}
       </span>
       {% if records.has_next %}
-        <a href="?page={{ records.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn-step-back" style="text-decoration: none;">Next</a>
+        <a href="?page={{ records.next_page_number }}" class="btn-step-back" style="text-decoration: none;">Next</a>
       {% endif %}
     </div>
   {% endif %}
 
-  {% block extra_js %}
-    <script src="{% static 'js/event/event_search.js' %}"></script>
-  {% endblock %}
-
 </div>
+
+<!-- Attendee Delete Confirmation Modal -->
+<div 
+  id="deleteRecordModal" 
+  style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;"
+>
+  <div style="background: #ffffff; border-radius: 10px; width: 90%; max-width: 400px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.12); font-family: 'SF Pro', sans-serif;">
+    <h3 style="margin-top: 0; color: #1f1f1f; font-size: 17px; font-weight: 600;">Remove Attendee</h3>
+    <p style="color: #5f6368; font-size: 13.5px; line-height: 1.5; margin: 0.75rem 0 1.5rem;">
+      Are you sure you want to remove <strong id="deleteAttendeeName" style="color: #1f1f1f;"></strong> from this event's attendance records?
+    </p>
+
+    <form id="deleteRecordForm" method="POST" action="" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+      {% csrf_token %}
+      <button 
+        type="button" 
+        onclick="closeDeleteRecordModal()" 
+        style="padding: 7px 14px; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 6px; cursor: pointer; font-size: 13px;"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        style="padding: 7px 14px; background: #c5221f; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"
+      >
+        Confirm Remove
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Load Filter & Search Script Directly in Dashboard Content -->
+<script src="{% static 'js/event/attendance_filter.js' %}"></script>
 {% endblock %}

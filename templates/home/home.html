@@ -41,13 +41,51 @@
 
 <!-- Managed Events Section -->
 <section class="events-section">
-  <h3 class="panel-title">Your Managed Events</h3>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+    <h3 class="panel-title" style="margin: 0;">Your Managed Events</h3>
+
+    <!-- Instant Client-Side Search & Filter Toolbar -->
+    {% if events %}
+      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <input 
+          type="text" 
+          id="eventSearchInput" 
+          placeholder="Search title, venue..." 
+          style="padding: 7px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-family: 'SF Pro', sans-serif; font-size: 13px; outline: none; background: #fff;"
+          autocomplete="off"
+        >
+
+        <select 
+          id="eventStatusFilter" 
+          style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-family: 'SF Pro', sans-serif; font-size: 13px; outline: none; background: #fff;"
+        >
+          <option value="">All Statuses</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <a 
+          href="#" 
+          id="clearFiltersBtn" 
+          style="display: none; font-size: 12.5px; color: #8c7e75; text-decoration: none; padding-left: 4px;"
+        >
+          Clear
+        </a>
+      </div>
+    {% endif %}
+  </div>
 
   {% if events %}
     <div class="events-grid">
       {% for event in events %}
-        <!-- Entire card wrapped as a clickable link -->
-        <a href="{% url 'event_detail' event.id %}" class="event-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+        <!-- Entire card wrapped as a clickable link with data-status attribute -->
+        <a 
+          href="{% url 'event_detail' event.id %}" 
+          class="event-card" 
+          data-status="{{ event.status }}"
+          style="text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;"
+        >
           <div>
             <div class="event-card-header">
               <h4 class="event-name">{{ event.name }}</h4>
@@ -72,13 +110,29 @@
             </div>
           </div>
 
-          <div style="padding-top: 14px; margin-top: 14px; border-top: 1px dashed #e5dfd8; font-family: 'SF Pro', sans-serif; font-size: 12.5px; color: #8c7e75; display: flex; justify-content: space-between;">
-            <span>Starts: {{ event.start_time|date:"M d, Y H:i" }}</span>
-            <span>Ends: {{ event.end_time|date:"M d, Y H:i" }}</span>
+          <div style="padding-top: 14px; margin-top: 14px; border-top: 1px dashed #e5dfd8; font-family: 'SF Pro', sans-serif; font-size: 12.5px; color: #8c7e75; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span>Starts: {{ event.start_time|date:"M d, Y H:i" }}</span>
+              <span>Ends: {{ event.end_time|date:"M d, Y H:i" }}</span>
+            </div>
+
+            <!-- Delete Trigger Button (prevents parent anchor click) -->
+            <button 
+              type="button" 
+              onclick="event.preventDefault(); event.stopPropagation(); openDeleteModal('{{ event.id }}', '{{ event.name|escapejs }}');"
+              style="background: transparent; border: none; color: #c5221f; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px; border-radius: 4px;"
+            >
+              Delete
+            </button>
           </div>
         </a>
       {% endfor %}
     </div>
+
+    <!-- Client-Side Empty State -->
+    <p id="noResultsMessage" style="display: none; text-align: center; padding: 3rem; color: #8c7e75; font-size: 14px;">
+      No events found matching your filter criteria.
+    </p>
   {% else %}
     <div class="empty-state-card">
       <p class="empty-state-text" style="margin-bottom: 20px;">
@@ -91,7 +145,38 @@
   {% endif %}
 </section>
 
+<!-- Delete Event Confirmation Modal -->
+<div 
+  id="deleteModal" 
+  style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;"
+>
+  <div style="background: #ffffff; border-radius: 10px; width: 90%; max-width: 420px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.12); font-family: 'SF Pro', sans-serif;">
+    <h3 style="margin-top: 0; color: #1f1f1f; font-size: 18px; font-weight: 600;">Delete Event</h3>
+    <p style="color: #5f6368; font-size: 14px; line-height: 1.5; margin: 0.75rem 0 1.5rem;">
+      Are you sure you want to delete <strong id="deleteEventName" style="color: #1f1f1f;"></strong>? This action cannot be undone and will permanently remove all associated attendee records.
+    </p>
+
+    <form id="deleteEventForm" method="POST" action="" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+      {% csrf_token %}
+      <button 
+        type="button" 
+        onclick="closeDeleteModal()" 
+        style="padding: 8px 16px; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 6px; cursor: pointer; font-size: 13px;"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        style="padding: 8px 16px; background: #c5221f; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"
+      >
+        Confirm Delete
+      </button>
+    </form>
+  </div>
+</div>
+
 {% include 'event/create_event_modal.html' %}
 
 <script src="{% static 'js/event/event_modal.js' %}"></script>
+<script src="{% static 'js/event/event_filter.js' %}"></script>
 {% endblock %}
