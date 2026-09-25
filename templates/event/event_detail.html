@@ -37,28 +37,34 @@
       <p class="stat-value" style="color: #137333;">{{ present_count }}</p>
     </div>
     <div class="stat-card">
+      <div class="stat-label">Late</div>
+      <p class="stat-value" style="color: #b06000;">{{ late_count }}</p>
+    </div>
+    <div class="stat-card">
       <div class="stat-label">Absent</div>
       <p class="stat-value" style="color: #c5221f;">{{ absent_count }}</p>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Excused</div>
-      <p class="stat-value" style="color: #b06000;">{{ excused_count }}</p>
-    </div>
   </div>
+
+  <p style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; font-family: monospace;">
+    has_student_id: <strong>{{ has_student_id }}</strong> | 
+    has_academic_info: <strong>{{ has_academic_info }}</strong> | 
+    show_session_1: <strong>{{ show_session_1 }}</strong> | 
+    show_session_2: <strong>{{ show_session_2 }}</strong>
+  </p>
 
   <!-- Search & Filter Controls -->
   <div class="roster-toolbar">
-    <form method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    <form id="rosterSearchForm" method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
       <input 
         type="text" 
+        id="rosterSearchInput"
         name="q" 
         class="search-input" 
         placeholder="Search name, ID, or email..." 
         value="{{ query }}"
+        autocomplete="off"
       >
-      <button type="submit" class="btn-primary" style="padding: 8px 18px; border: none; cursor: pointer;">
-        Search
-      </button>
       {% if query or status_filter %}
         <a href="{% url 'event_detail' event.id %}" style="display: flex; align-items: center; font-size: 13px; color: #665b55; text-decoration: none; padding-left: 6px;">
           Clear
@@ -67,15 +73,35 @@
     </form>
   </div>
 
-  <!-- Attendee Table -->
+  <!-- Dynamic Attendee Table -->
   <div class="table-container">
     <table class="roster-table">
       <thead>
         <tr>
           <th>Name</th>
           <th>Email</th>
-          <th>Student ID</th>
-          <th>Course & Year</th>
+
+          {# Dynamic Optional Roster Columns #}
+          {% if has_student_id %}
+            <th>Student ID</th>
+          {% endif %}
+
+          {% if has_academic_info %}
+            <th>Course & Year</th>
+          {% endif %}
+
+          {# Dynamic Session 1 Columns #}
+          {% if show_session_1 %}
+            <th>Time In (S1)</th>
+            <th>Time Out (S1)</th>
+          {% endif %}
+
+          {# Dynamic Session 2 Columns #}
+          {% if show_session_2 %}
+            <th>Time In (S2)</th>
+            <th>Time Out (S2)</th>
+          {% endif %}
+
           <th>Status</th>
         </tr>
       </thead>
@@ -84,23 +110,44 @@
           <tr>
             <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
             <td>{{ record.email }}</td>
-            <td>{{ record.student_id|default:"&mdash;" }}</td>
+
+            {# Dynamic Student ID #}
+            {% if has_student_id %}
+              <td>{{ record.student_id|default:"&mdash;" }}</td>
+            {% endif %}
+
+            {# Dynamic Academic Info #}
+            {% if has_academic_info %}
+              <td>
+                {% if record.course or record.year_level %}
+                  {{ record.course|default:"" }} {{ record.year_level|default:"" }}
+                {% else %}
+                  &mdash;
+                {% endif %}
+              </td>
+            {% endif %}
+
+            {# Session 1 Data #}
+            {% if show_session_1 %}
+              <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
+            {% endif %}
+
+            {# Session 2 Data #}
+            {% if show_session_2 %}
+              <td>{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
+              <td>{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
+            {% endif %}
+
             <td>
-              {% if record.course or record.year_level %}
-                {{ record.course|default:"" }} {{ record.year_level|default:"" }}
-              {% else %}
-                &mdash;
-              {% endif %}
-            </td>
-            <td>
-              <span class="badge badge-{{ record.status|lower|default:'pending' }}">
-                {{ record.status|default:"PENDING" }}
+              <span class="badge badge-{{ record.status|lower }}">
+                {{ record.get_status_display }}
               </span>
             </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="5" style="text-align: center; padding: 3rem; color: #8c7e75;">
+            <td colspan="12" style="text-align: center; padding: 3rem; color: #8c7e75;">
               No attendees found matching your criteria.
             </td>
           </tr>
@@ -108,6 +155,25 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination Controls -->
+  {% if records.has_other_pages %}
+    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+      {% if records.has_previous %}
+        <a href="?page={{ records.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn-step-back" style="text-decoration: none;">Previous</a>
+      {% endif %}
+      <span style="display: flex; align-items: center; font-size: 13px; color: #665b55;">
+        Page {{ records.number }} of {{ records.paginator.num_pages }}
+      </span>
+      {% if records.has_next %}
+        <a href="?page={{ records.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn-step-back" style="text-decoration: none;">Next</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% block extra_js %}
+    <script src="{% static 'js/event/event_search.js' %}"></script>
+  {% endblock %}
 
 </div>
 {% endblock %}

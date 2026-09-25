@@ -81,9 +81,12 @@
             </ul>
           </div>
 
-          <div class="download-action-row">
-            <a href="{% url 'download_template' %}" class="btn-download" download>
+          <div class="download-action-row" style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'download_template_csv' %}" class="btn-download" style="flex: 1; text-align: center;" download>
               DOWNLOAD TEMPLATE (.CSV)
+            </a>
+            <a href="{% url 'download_template_xlsx' %}" class="btn-download" style="flex: 1; text-align: center;" download>
+              DOWNLOAD TEMPLATE (.XLSX)
             </a>
           </div>
 
@@ -95,7 +98,7 @@
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
               <p class="dropzone-title">Click to upload or drag & drop</p>
-              <p class="dropzone-subtitle">CSV rosters supported</p>
+              <p class="dropzone-subtitle">CSV or XLSX rosters supported</p>
               <div id="fileNamePreview" class="file-name-preview" style="display: none;"></div>
             </div>
           </div>
