@@ -90,18 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hasStudentId && !hasEmail) {
       lblStudentId.textContent = "Student ID *";
       lblEmail.textContent = "Email (Optional)";
-      studentIdInput.required = true;
-      emailInput.required = false;
     } else if (!hasStudentId && hasEmail) {
       lblStudentId.textContent = "Student ID (Optional)";
       lblEmail.textContent = "Email *";
-      studentIdInput.required = false;
-      emailInput.required = true;
     } else {
       lblStudentId.textContent = "Student ID";
       lblEmail.textContent = "Email";
-      studentIdInput.required = false;
-      emailInput.required = false;
     }
   }
 
@@ -112,13 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (addForm) {
     addForm.addEventListener('submit', (e) => {
-      const hasStudentId = studentIdInput.value.trim().length > 0;
-      const hasEmail = emailInput.value.trim().length > 0;
+      const hasStudentId = studentIdInput ? studentIdInput.value.trim().length > 0 : false;
+      const hasEmail = emailInput ? emailInput.value.trim().length > 0 : false;
 
       if (!hasStudentId && !hasEmail) {
         e.preventDefault();
-        alert('Please provide either a Student ID or an Email address.');
-        studentIdInput.focus();
+        alert('Please provide at least a Student ID or an Email address.');
+        if (studentIdInput) studentIdInput.focus();
       }
     });
   }
@@ -159,7 +153,7 @@ function closeAddRecordModal() {
   }
 }
 
-// Click outside detection for all modals
+// Click outside detection for all detail modals
 window.addEventListener('click', (e) => {
   const deleteModal = document.getElementById('deleteRecordModal');
   const addModal = document.getElementById('addRecordModal');

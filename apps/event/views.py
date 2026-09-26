@@ -14,6 +14,193 @@ from apps.core.models import Event, AttendanceRecord
 from .forms import EventForm
 
 
+def _clean_cell_value(val):
+    if val is None:
+        return ''
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    return str(val).strip()
+
+
+def _normalize_attendee(row_dict, row_number):
+    """
+    Sanitizes row keys/values and handles both:
+    1. Separate 'first_name' and 'last_name' columns
+    2. A single 'full name' / 'name' column (e.g. 'LASTNAME, FIRSTNAME')
+    Accepts aliases: 'id number' -> student_id, 'email address' -> email.
+    """
+    clean_row = {
+        str(k).strip().lower(): _clean_cell_value(v)
+        for k, v in row_dict.items() if k is not None
+    }
+
+    # Ignore trailing empty lines
+    if not any(clean_row.values()):
+        return None
+
+    # Handle First and Last Name resolution
+    first_name = clean_row.get('first_name', '')
+    last_name = clean_row.get('last_name', '')
+
+    if not first_name or not last_name:
+        # Check for unified "full name" or "name" column
+        full_name = clean_row.get('full name') or clean_row.get('name') or ''
+        if full_name:
+            if ',' in full_name:
+                parts = full_name.split(',', 1)
+                last_name = parts[0].strip().title()
+                first_name = parts[1].strip().title()
+            else:
+                parts = full_name.split()
+                if len(parts) >= 2:
+                    first_name = ' '.join(parts[:-1]).title()
+                    last_name = parts[-1].title()
+                else:
+                    first_name = full_name.strip().title()
+                    last_name = ''
+
+    # Handle Student ID aliases
+    student_id = (
+        clean_row.get('student_id') or 
+        clean_row.get('id number') or 
+        clean_row.get('id_number') or 
+        clean_row.get('student id') or 
+        None
+    )
+
+    # Handle Email aliases
+    email = (
+        clean_row.get('email') or 
+        clean_row.get('email address') or 
+        clean_row.get('email_address') or 
+        None
+    )
+
+    # Validation guards
+    if not first_name:
+        raise ValueError(f"Row {row_number}: First name is missing.")
+    if not last_name:
+        raise ValueError(f"Row {row_number}: Last name is missing.")
+    if not student_id and not email:
+        raise ValueError(f"Row {row_number} ({first_name} {last_name}): Either Student ID or Email must be provided.")
+
+    return {
+        'first_name': first_name,
+        'last_name': last_name,
+        'student_id': student_id,
+        'email': email,
+        'course': clean_row.get('course') or None,
+        'year_level': clean_row.get('year_level') or None,
+    }
+
+
+def parse_roster_file(uploaded_file):
+    records_to_create = []
+    seen_student_ids = set()
+    seen_emails = set()
+    filename = uploaded_file.name.lower()
+
+    def is_header_row(cleaned_cells):
+        has_separate_names = 'first_name' in cleaned_cells and 'last_name' in cleaned_cells
+        has_full_name = 'full name' in cleaned_cells or 'name' in cleaned_cells
+        has_id = any(h in cleaned_cells for h in ('student_id', 'id number', 'id_number', 'student id'))
+        has_email = any(h in cleaned_cells for h in ('email', 'email address', 'email_address'))
+        return (has_separate_names or has_full_name) and (has_id or has_email)
+
+    if filename.endswith('.csv'):
+        raw_content = uploaded_file.read()
+        try:
+            text = raw_content.decode('utf-8-sig')
+        except UnicodeDecodeError:
+            text = raw_content.decode('latin-1')
+
+        lines = text.splitlines()
+
+        header_idx = -1
+        for idx, line in enumerate(lines):
+            row_items = [item.strip().lower() for item in line.split(',')]
+            if is_header_row(row_items):
+                header_idx = idx
+                break
+
+        if header_idx == -1:
+            raise ValueError("Could not find valid column headers. Ensure the file has Name ('first_name'/'last_name' or 'full name') and an ID or Email.")
+
+        reader = csv.DictReader(lines[header_idx:])
+        for idx, row in enumerate(reader, start=header_idx + 2):
+            attendee = _normalize_attendee(row, row_number=idx)
+            if attendee is None:
+                continue
+
+            sid, em = attendee['student_id'], attendee['email']
+            if sid:
+                sid_lower = sid.lower()
+                if sid_lower in seen_student_ids:
+                    raise ValueError(f"Row {idx}: Duplicate Student ID '{sid}' found in file.")
+                seen_student_ids.add(sid_lower)
+            if em:
+                em_lower = em.lower()
+                if em_lower in seen_emails:
+                    raise ValueError(f"Row {idx}: Duplicate Email '{em}' found in file.")
+                seen_emails.add(em_lower)
+
+            records_to_create.append(attendee)
+
+    elif filename.endswith(('.xlsx', '.xlsm')):
+        wb = openpyxl.load_workbook(uploaded_file, read_only=True, data_only=True)
+        sheet = wb.active
+
+        rows_iter = sheet.iter_rows(values_only=True)
+        headers = None
+        start_row_num = 0
+
+        for idx, row in enumerate(rows_iter, start=1):
+            cleaned = [str(cell).strip().lower() if cell is not None else '' for cell in row]
+            if is_header_row(cleaned):
+                headers = cleaned
+                start_row_num = idx
+                break
+
+        if not headers:
+            wb.close()
+            raise ValueError("Could not find valid column headers. Ensure the sheet has Name ('first_name'/'last_name' or 'full name') and an ID or Email.")
+
+        for idx, row in enumerate(rows_iter, start=start_row_num + 1):
+            row_dict = {
+                headers[c_idx]: val
+                for c_idx, val in enumerate(row)
+                if c_idx < len(headers)
+            }
+            attendee = _normalize_attendee(row_dict, row_number=idx)
+            if attendee is None:
+                continue
+
+            sid, em = attendee['student_id'], attendee['email']
+            if sid:
+                sid_lower = sid.lower()
+                if sid_lower in seen_student_ids:
+                    wb.close()
+                    raise ValueError(f"Row {idx}: Duplicate Student ID '{sid}' found in file.")
+                seen_student_ids.add(sid_lower)
+            if em:
+                em_lower = em.lower()
+                if em_lower in seen_emails:
+                    wb.close()
+                    raise ValueError(f"Row {idx}: Duplicate Email '{em}' found in file.")
+                seen_emails.add(em_lower)
+
+            records_to_create.append(attendee)
+
+        wb.close()
+    else:
+        raise ValueError('Unsupported file format. Please upload a .csv or .xlsx file.')
+
+    if not records_to_create:
+        raise ValueError("Roster contains no valid attendee records.")
+
+    return records_to_create
+
+
 @login_required(login_url='landing')
 def create_event(request):
     if request.method != 'POST':
@@ -26,35 +213,36 @@ def create_event(request):
         return redirect('home')
 
     uploaded_file = request.FILES.get('roster_file')
-    records_to_create = []
+    if not uploaded_file:
+        messages.error(request, 'Please upload a roster file.')
+        return redirect('home')
 
-    if uploaded_file:
-        try:
-            records_to_create = parse_roster_file(uploaded_file)
-            if not records_to_create:
-                messages.warning(request, 'Roster contained no valid attendees with required fields.')
-        except Exception as e:
-            messages.error(request, f'Roster error: {e}')
-            return redirect('home')
+    # Parse and validate the file BEFORE creating the event
+    try:
+        records_to_create = parse_roster_file(uploaded_file)
+    except Exception as e:
+        # Abort immediately if any error occurs
+        messages.error(request, f'Roster error: {e}')
+        return redirect('home')
 
+    # Atomic creation: If any database error occurs, roll back the event completely
     try:
         with transaction.atomic():
             event = form.save(commit=False)
             event.user = request.user
             event.save()
 
-            if records_to_create:
-                attendees = [
-                    AttendanceRecord(event=event, **data)
-                    for data in records_to_create
-                ]
-                AttendanceRecord.objects.bulk_create(attendees, ignore_conflicts=True)
+            attendees = [
+                AttendanceRecord(event=event, **data)
+                for data in records_to_create
+            ]
+            AttendanceRecord.objects.bulk_create(attendees)
 
-        messages.success(request, 'Event and roster created successfully!')
+        messages.success(request, f'Event "{event.name}" and {len(records_to_create)} attendee records created successfully!')
         return redirect('home')
 
     except Exception as e:
-        messages.error(request, f'Database error while saving event: {e}')
+        messages.error(request, f'Failed to create event: {e}')
         return redirect('home')
 
 
@@ -95,83 +283,6 @@ def download_attendance_template_xlsx(request):
     return response
 
 
-def _clean_cell_value(val):
-    if val is None:
-        return ''
-    if isinstance(val, float) and val.is_integer():
-        return str(int(val))
-    return str(val).strip()
-
-
-def _normalize_attendee(row_dict):
-    clean_row = {
-        str(k).strip().lower(): _clean_cell_value(v)
-        for k, v in row_dict.items() if k is not None
-    }
-
-    email = clean_row.get('email', '') or None
-    student_id = clean_row.get('student_id', '') or None
-    first_name = clean_row.get('first_name', '')
-    last_name = clean_row.get('last_name', '')
-
-    if first_name and last_name and (student_id or email):
-        return {
-            'email': email,
-            'student_id': student_id,
-            'first_name': first_name,
-            'last_name': last_name,
-            'course': clean_row.get('course') or None,
-            'year_level': clean_row.get('year_level') or None,
-        }
-    return None
-
-
-def parse_roster_file(uploaded_file):
-    records_to_create = []
-    seen_identifiers = set()
-    filename = uploaded_file.name.lower()
-
-    def process_row(row_dict):
-        attendee = _normalize_attendee(row_dict)
-        if attendee:
-            key = f"id:{attendee['student_id'].lower()}" if attendee['student_id'] else f"email:{attendee['email'].lower()}"
-            if key not in seen_identifiers:
-                seen_identifiers.add(key)
-                records_to_create.append(attendee)
-
-    if filename.endswith('.csv'):
-        csv_file = io.TextIOWrapper(uploaded_file.file, encoding='utf-8-sig')
-        reader = csv.DictReader(csv_file)
-        for row in reader:
-            process_row(row)
-
-    elif filename.endswith(('.xlsx', '.xlsm')):
-        wb = openpyxl.load_workbook(uploaded_file, read_only=True, data_only=True)
-        sheet = wb.active
-
-        rows = sheet.iter_rows(values_only=True)
-        raw_headers = next(rows, None)
-        if not raw_headers:
-            wb.close()
-            return []
-
-        headers = [str(h).strip().lower() if h is not None else '' for h in raw_headers]
-
-        for row in rows:
-            row_dict = {
-                headers[idx]: val
-                for idx, val in enumerate(row)
-                if idx < len(headers)
-            }
-            process_row(row_dict)
-
-        wb.close()
-    else:
-        raise ValueError('Unsupported file format. Please upload a .csv or .xlsx file.')
-
-    return records_to_create
-
-
 @login_required(login_url='landing')
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id, user=request.user)
@@ -203,7 +314,7 @@ def event_detail(request, event_id):
 
     context = {
         'event': event,
-        'records': records,  
+        'records': records,
         'status_choices': AttendanceRecord.Status.choices,
         'unique_courses': courses,
         'unique_year_levels': year_levels,
