@@ -71,9 +71,60 @@ document.addEventListener('DOMContentLoaded', () => {
       applyFilters();
     });
   }
+
+  // -------------------------------------------------------------
+  // CONDITIONAL IDENTIFIER VALIDATION FOR ADD ATTENDEE MODAL
+  // -------------------------------------------------------------
+  const studentIdInput = document.getElementById('add_student_id');
+  const emailInput = document.getElementById('add_email');
+  const lblStudentId = document.getElementById('lbl_student_id');
+  const lblEmail = document.getElementById('lbl_email');
+  const addForm = document.getElementById('addAttendeeForm');
+
+  function syncIdentifierRequirements() {
+    if (!studentIdInput || !emailInput) return;
+
+    const hasStudentId = studentIdInput.value.trim().length > 0;
+    const hasEmail = emailInput.value.trim().length > 0;
+
+    if (hasStudentId && !hasEmail) {
+      lblStudentId.textContent = "Student ID *";
+      lblEmail.textContent = "Email (Optional)";
+      studentIdInput.required = true;
+      emailInput.required = false;
+    } else if (!hasStudentId && hasEmail) {
+      lblStudentId.textContent = "Student ID (Optional)";
+      lblEmail.textContent = "Email *";
+      studentIdInput.required = false;
+      emailInput.required = true;
+    } else {
+      lblStudentId.textContent = "Student ID";
+      lblEmail.textContent = "Email";
+      studentIdInput.required = false;
+      emailInput.required = false;
+    }
+  }
+
+  if (studentIdInput && emailInput) {
+    studentIdInput.addEventListener('input', syncIdentifierRequirements);
+    emailInput.addEventListener('input', syncIdentifierRequirements);
+  }
+
+  if (addForm) {
+    addForm.addEventListener('submit', (e) => {
+      const hasStudentId = studentIdInput.value.trim().length > 0;
+      const hasEmail = emailInput.value.trim().length > 0;
+
+      if (!hasStudentId && !hasEmail) {
+        e.preventDefault();
+        alert('Please provide either a Student ID or an Email address.');
+        studentIdInput.focus();
+      }
+    });
+  }
 });
 
-// Attendee Modal Handlers
+// Delete Modal Handlers
 function openDeleteRecordModal(deleteUrl, attendeeName) {
   const modal = document.getElementById('deleteRecordModal');
   const form = document.getElementById('deleteRecordForm');
@@ -93,9 +144,29 @@ function closeDeleteRecordModal() {
   }
 }
 
+// Add Modal Handlers
+function openAddRecordModal() {
+  const modal = document.getElementById('addRecordModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeAddRecordModal() {
+  const modal = document.getElementById('addRecordModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+// Click outside detection for all modals
 window.addEventListener('click', (e) => {
-  const modal = document.getElementById('deleteRecordModal');
-  if (e.target === modal) {
+  const deleteModal = document.getElementById('deleteRecordModal');
+  const addModal = document.getElementById('addRecordModal');
+  if (e.target === deleteModal) {
     closeDeleteRecordModal();
+  }
+  if (e.target === addModal) {
+    closeAddRecordModal();
   }
 });

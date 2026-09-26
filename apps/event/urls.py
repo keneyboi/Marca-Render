@@ -7,5 +7,6 @@ urlpatterns = [
     path('download-template-xlsx/', views.download_attendance_template_xlsx, name='download_template_xlsx'),
     path('<int:event_id>/', views.event_detail, name='event_detail'),
     path('<int:event_id>/delete/', views.delete_event, name='delete_event'),
+    path('<int:event_id>/records/add/', views.add_attendance_record, name='add_attendance_record'),
     path('<int:event_id>/records/<int:record_id>/delete/', views.delete_attendance_record, name='delete_attendance_record'),
 ]

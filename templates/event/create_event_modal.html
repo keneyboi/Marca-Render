@@ -40,7 +40,7 @@
           </div>
 
           <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label class="modal-label">TYPE</label>
+            <label class="modal-label">SESSION CONFIGURATION</label>
             <div class="type-radio-group">
               {% for radio in event_form.session_type %}
                 <label class="type-radio-label">
@@ -63,21 +63,21 @@
           <div class="instructions-section">
             <h5 class="instructions-heading">ROSTER FORMAT INSTRUCTIONS</h5>
             <p class="instructions-text">
-              Upload a <code>.csv</code> or <code>.xlsx</code> roster. Only <strong>Email</strong>, <strong>First Name</strong>, and <strong>Last Name</strong> are required for participation.
+              Upload a <code>.csv</code> or <code>.xlsx</code> roster. <strong>First Name</strong>, <strong>Last Name</strong>, and at least one identifier (<strong>Student ID</strong> or <strong>Email</strong>) are required.
             </p>
 
             <div style="background-color: #f4ede4; border-left: 3px solid #4a0d0d; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px;">
               <p style="font-size: 12px; margin: 0; color: #331010; font-family: 'SF Pro', sans-serif;">
-                <strong>Not a school event?</strong> You can completely delete the <code>student_id</code>, <code>course</code>, and <code>year_level</code> columns from your spreadsheet. The system will process non-academic rosters without errors.
+                <strong>Flexible Identifiers:</strong> Non-academic events can leave <code>student_id</code>, <code>course</code>, and <code>year_level</code> empty. If emails are not available, you can supply only student IDs.
               </p>
             </div>
             
             <ul class="term-definitions-list">
-              <li><strong>email:</strong> Attendee's primary email address <em>(Required)</em>.</li>
+              <li><strong>student_id:</strong> Campus ID number <em>(Required if email is not provided)</em>.</li>
+              <li><strong>email:</strong> Attendee's email address <em>(Required if student_id is not provided)</em>.</li>
               <li><strong>first_name & last_name:</strong> Attendee's legal or recognized names <em>(Required)</em>.</li>
-              <li><strong>student_id:</strong> Campus ID number <em>(Optional - delete column if not applicable)</em>.</li>
-              <li><strong>course:</strong> Degree or academic program <em>(Optional - delete column if not applicable)</em>.</li>
-              <li><strong>year_level:</strong> Year level <em>(Optional - delete column if not applicable)</em>.</li>
+              <li><strong>course:</strong> Degree or academic program <em>(Optional)</em>.</li>
+              <li><strong>year_level:</strong> Year level <em>(Optional)</em>.</li>
             </ul>
           </div>
 

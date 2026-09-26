@@ -1,6 +1,7 @@
 from django import forms
 from apps.core.models import Event
 
+
 class EventForm(forms.ModelForm):
     roster_file = forms.FileField(
         required=True,

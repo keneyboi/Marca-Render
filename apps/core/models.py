@@ -28,9 +28,9 @@ class Event(models.Model):
         CANCELLED = 'CANCELLED', 'Cancelled'
 
     class SessionType(models.TextChoices):
-        MORNING = '1', '1'
-        AFTERNOON = '2', '2'
-        BOTH = '3', '3'
+        SESSION_1 = '1', 'Time In Only'
+        SESSION_2 = '2', 'Time In & Time Out'
+        SESSION_3 = '3', 'Two-Part (Time In 1, Time Out 1, Time In 2, Time Out 2)'
 
     user = models.ForeignKey(
         User,
@@ -43,7 +43,7 @@ class Event(models.Model):
     session_type = models.CharField(
         max_length=20,
         choices=SessionType.choices,
-        default=SessionType.BOTH
+        default=SessionType.SESSION_1
     )
     status = models.CharField(
         max_length=30,
@@ -77,7 +77,7 @@ class AttendanceRecord(models.Model):
         related_name='attendance_records'
     )
     
-    email = models.EmailField()
+    email = models.EmailField(blank=True, null=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     student_id = models.CharField(max_length=50, blank=True, null=True)
@@ -97,8 +97,18 @@ class AttendanceRecord(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['event', 'email'], name='unique_event_attendee')
+            models.UniqueConstraint(
+                fields=['event', 'email'],
+                condition=models.Q(email__isnull=False) & ~models.Q(email=''),
+                name='unique_event_email'
+            ),
+            models.UniqueConstraint(
+                fields=['event', 'student_id'],
+                condition=models.Q(student_id__isnull=False) & ~models.Q(student_id=''),
+                name='unique_event_student_id'
+            ),
         ]
 
     def __str__(self):
-        return f"{self.last_name}, {self.first_name} ({self.email}) - {self.status}"
+        ident = self.student_id or self.email or "No ID"
+        return f"{self.last_name}, {self.first_name} ({ident}) - {self.status}"

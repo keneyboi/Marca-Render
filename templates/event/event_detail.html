@@ -15,7 +15,7 @@
     &larr; Back to Dashboard
   </a>
 
-  <!-- Message Notification Alerts -->
+  <!-- Message Alerts -->
   {% if messages %}
     <div style="margin-bottom: 1.5rem;">
       {% for message in messages %}
@@ -36,7 +36,15 @@
         <span><strong>Session:</strong> {{ event.get_session_type_display }}</span>
       </div>
     </div>
-    <div class="detail-header-right">
+    <div class="detail-header-right" style="display: flex; gap: 0.5rem; align-items: center;">
+      <button type="button" class="btn-action-outline" onclick="openAddRecordModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Add Attendee</span>
+      </button>
+
       <button type="button" class="btn-action-outline" onclick="openScanner()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
@@ -45,71 +53,66 @@
               <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
               <rect x="7" y="7" width="10" height="10" rx="1"></rect>
           </svg>
-          <span>Scan Attendace</span>
+          <span>Scan Attendance</span>
       </button> 
     </div>
-
-    
   </header>
-<dialog id="attendance-scanner" class="scanner-modal">
-  <div class="scanner-modal-body">
-    
-    <!-- LEFT COLUMN: Scanner Camera -->
-    <div class="scanner-modal-left">
-      <h3>Scan Attendance</h3>
-      <div id="reader" style="width: 100%; margin: 0 auto;"></div>
+
+  <!-- EXISTING ATTENDANCE SCANNER (UNTOUCHED) -->
+  <dialog id="attendance-scanner" class="scanner-modal">
+    <div class="scanner-modal-body">
+      <div class="scanner-modal-left">
+        <h3>Scan Attendance</h3>
+        <div id="reader" style="width: 100%; margin: 0 auto;"></div>
+      </div>
+
+      <div class="scanner-modal-right">
+        <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
+          {% csrf_token %}
+
+          <div class="scanner-modal-header">
+            <h2>Verify Details:</h2>
+
+            {% if event.session_type == '1' %}
+              <select name="session_type" id="session-select" class="session-select-inline">
+                <option value="1">Time In</option>
+              </select>
+
+            {% elif event.session_type == '2' %}
+              <select name="session_type" id="session-select" class="session-select-inline">
+                <option value="1">Time In</option>
+                <option value="2">Time Out</option>
+              </select>
+
+            {% elif event.session_type == '3' %}
+              <select name="session_type" id="session-select" class="session-select-inline">
+                <option value="1">Morning Time In</option>
+                <option value="2">Morning Time Out</option>
+                <option value="3">Afternoon Time In</option>
+                <option value="4">Afternoon Time Out</option>
+              </select>
+            {% endif %}
+          </div>
+
+          <div class="scanner-modal-information">
+            <input type="hidden" name="event_id" value="{{ event.id }}">
+            <input placeholder="Student ID" name="student_id" id="input-student-id">
+            <input placeholder="Email" name="email" id="input-email">
+            <input placeholder="First Name" name="first_name" id="input-first-name">
+            <input placeholder="Last Name" name="last_name" id="input-last-name">
+            <input placeholder="Phone Number" name="phone" id="input-phone">
+          </div>
+
+          <div class="scanner-modal-buttons">
+            <button type="submit" class="btn-confirm-modal">Confirm Attendance</button>
+            <button type="button" class="btn-close-modal" onclick="resetScanner()">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </dialog>
 
-    <!-- RIGHT COLUMN: Verification Form & Buttons -->
-    <div class="scanner-modal-right">
-      <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
-        {% csrf_token %}
-
-        <!-- Header containing Title and Inline Session Select -->
-        <div class="scanner-modal-header">
-          <h2>Verify Details:</h2>
-
-          {% if event.session_type == '1' %}
-            <select name="session_type" id="session-select" class="session-select-inline">
-              <option value="1">Time In</option>
-            </select>
-
-          {% elif event.session_type == '2' %}
-            <select name="session_type" id="session-select" class="session-select-inline">
-              <option value="1">Time In</option>
-              <option value="2">Time Out</option>
-            </select>
-
-          {% elif event.session_type == '3' %}
-            <select name="session_type" id="session-select" class="session-select-inline">
-              <option value="1">Morning Time In</option>
-              <option value="2">Morning Time Out</option>
-              <option value="3">Afternoon Time In</option>
-              <option value="4">Afternoon Time Out</option>
-            </select>
-          {% endif %}
-        </div>
-
-        <div class="scanner-modal-information">
-          <input type="hidden" name="event_id" value={{ event.id }}>
-          <input placeholder="Student ID" name="student_id" id="input-student-id">
-          <input placeholder="Email" name="email" id="input-email">
-          <input placeholder="First Name" name="first_name" id="input-first-name">
-          <input placeholder="Last Name" name="last_name" id="input-last-name">
-          <input placeholder="Phone Number" name="phone" id="input-phone">
-        </div>
-
-        <div class="scanner-modal-buttons">
-          <button type="submit" class="btn-confirm-modal">Confirm Attendance</button>
-          <button type="button" class="btn-close-modal" onclick="resetScanner()">Cancel</button>
-        </div>
-      </form>
-    </div>
-
-  </div>
-</dialog>
-
-  <!-- High-Level Metric Tiles -->
+  <!-- Metric Tiles -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Total Attendance</div>
@@ -129,7 +132,7 @@
     </div>
   </div>
 
-  <!-- Instant Search & Filter Toolbar (Client-Side, No Requery) -->
+  <!-- Search & Filter Toolbar -->
   <div class="attendance-toolbar" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
     <input 
       type="text" 
@@ -149,7 +152,6 @@
       {% endfor %}
     </select>
 
-    {# Conditionally render Course filter only if course records exist #}
     {% if unique_courses %}
       <select 
         id="attendanceCourseFilter"
@@ -162,7 +164,6 @@
       </select>
     {% endif %}
 
-    {# Conditionally render Year Level filter only if year records exist #}
     {% if unique_year_levels %}
       <select 
         id="attendanceYearFilter"
@@ -184,7 +185,7 @@
     </a>
   </div>
 
-  <!-- Dynamic Attendance Table -->
+  <!-- Attendance Table -->
   <div class="table-container">
     <table class="roster-table">
       <thead>
@@ -192,7 +193,6 @@
           <th>Name</th>
           <th>Email</th>
 
-          {# Dynamic Optional Attendance Columns #}
           {% if has_student_id %}
             <th>Student ID</th>
           {% endif %}
@@ -201,23 +201,20 @@
             <th>Course & Year</th>
           {% endif %}
 
-          {# Dynamic Session 1 Columns #}
           {% if show_session_1 %}
-            <th>Time In (S1)</th>
+            <th>Time In</th>
           {% endif %}
 
-          {# Dynamic Session 2 Columns #}
           {% if show_session_2 %}
-            <th>Time In (S1)</th>
-            <th>Time Out (S1)</th>
+            <th>Time In</th>
+            <th>Time Out</th>
           {% endif %}
 
-          {# Dynamic Session 3 Columns #}
           {% if show_session_3 %}
-            <th>Time In (S1)</th>
-            <th>Time Out (S1)</th>
-            <th>Time In (S2)</th>
-            <th>Time Out (S2)</th>
+            <th>Time In 1</th>
+            <th>Time Out 1</th>
+            <th>Time In 2</th>
+            <th>Time Out 2</th>
           {% endif %}
 
           <th>Status</th>
@@ -233,14 +230,12 @@
             data-year="{{ record.year_level|default:'' }}"
           >
             <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
-            <td>{{ record.email }}</td>
+            <td>{{ record.email|default:"&mdash;" }}</td>
 
-            {# Dynamic Student ID #}
             {% if has_student_id %}
               <td>{{ record.student_id|default:"&mdash;" }}</td>
             {% endif %}
 
-            {# Dynamic Academic Info #}
             {% if has_academic_info %}
               <td>
                 {% if record.course or record.year_level %}
@@ -251,12 +246,10 @@
               </td>
             {% endif %}
 
-            {# Session 1 Data #}
             {% if show_session_1 %}
               <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
             {% endif %}
 
-            {# Session 2 Data #}
             {% if show_session_2 %}
               <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
               <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
@@ -275,7 +268,6 @@
               </span>
             </td>
 
-            <!-- Single Attendee Delete Trigger -->
             <td style="text-align: right;">
               <button 
                 type="button" 
@@ -294,7 +286,6 @@
           </tr>
         {% endfor %}
 
-        <!-- Filter Match Empty State -->
         <tr id="noAttendanceMatchRow" style="display: none;">
           <td colspan="12" style="text-align: center; padding: 2.5rem; color: #8c7e75;">
             No attendees match your search or filter criteria.
@@ -304,7 +295,6 @@
     </table>
   </div>
 
-  <!-- Pagination Controls (Only rendered if pagination is active) -->
   {% if records.has_other_pages %}
     <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
       {% if records.has_previous %}
@@ -321,7 +311,7 @@
 
 </div>
 
-<!-- Attendee Delete Confirmation Modal -->
+<!-- Delete Confirmation Modal -->
 <div 
   id="deleteRecordModal" 
   style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;"
@@ -351,8 +341,80 @@
   </div>
 </div>
 
-<!-- Load Filter & Search Script Directly in Dashboard Content -->
-  <script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
- <script src="{% static 'js/event/scan_attendance.js' %}"></script>
+<!-- Add Attendee Modal -->
+<div 
+  id="addRecordModal" 
+  style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;"
+>
+  <div style="background: #ffffff; border-radius: 10px; width: 90%; max-width: 480px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.12); font-family: 'SF Pro', sans-serif;">
+    <h3 style="margin-top: 0; color: #1f1f1f; font-size: 17px; font-weight: 600;">Add Attendee</h3>
+
+    <form id="addAttendeeForm" method="POST" action="{% url 'add_attendance_record' event.id %}">
+      {% csrf_token %}
+      
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 0.25rem;">
+        <div style="flex: 1;">
+          <label id="lbl_student_id" style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">Student ID</label>
+          <input type="text" name="student_id" id="add_student_id" placeholder="e.g. 21-1234-567" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+        <div style="flex: 1;">
+          <label id="lbl_email" style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">Email</label>
+          <input type="email" name="email" id="add_email" placeholder="e.g. student@example.com" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+      </div>
+      <p style="font-size: 11px; color: #8c7e75; margin-top: 0.25rem; margin-bottom: 0.75rem;">* Either Student ID or Email is required.</p>
+
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">First Name *</label>
+          <input type="text" name="first_name" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">Last Name *</label>
+          <input type="text" name="last_name" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">Course</label>
+          <input type="text" name="course" placeholder="e.g. BSCS" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">Year Level</label>
+          <input type="text" name="year_level" placeholder="e.g. 3" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none;">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px;">Initial Status</label>
+        <select name="status" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;">
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if val == 'ABSENT' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button 
+          type="button" 
+          onclick="closeAddRecordModal()" 
+          style="padding: 7px 14px; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 6px; cursor: pointer; font-size: 13px;"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          style="padding: 7px 14px; background: #137333; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"
+        >
+          Add Record
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
+<script src="{% static 'js/event/scan_attendance.js' %}"></script>
 <script src="{% static 'js/event/attendance_filter.js' %}"></script>
 {% endblock %}
