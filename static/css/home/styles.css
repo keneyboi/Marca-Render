@@ -7,51 +7,52 @@
     gap: 2rem;
 }
 
-/* Header Card */
+/* Header Card Container */
 .dashboard-header-card {
-    background-color: #ffffff;
-    border: 1px solid var(--border-color, #e5dfd8);
-    border-radius: 20px;
-    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-    flex-wrap: wrap;
+    align-items: center; /* Vertical alignment */
+    flex-wrap: nowrap;
     gap: 1.5rem;
 }
 
+/* Text Container */
+.dashboard-header-card > div:first-child {
+    display: flex;
+    align-items: center;
+}
+
+/* Header Text Fix */
 .welcome-title {
     font-family: 'Tiro Telugu', Georgia, serif;
     font-size: 2.25rem;
     font-weight: 400;
     color: var(--text-main, #2b2320);
-    margin: 0 0 0.25rem 0;
+    margin: 0;           /* Resets default browser h1 margins */
+    padding: 0;          /* Resets default browser h1 padding */
+    line-height: 1;      /* Fixes vertical text box offset */
 }
 
-.user-email {
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 0.95rem;
-    color: #665b55;
-    margin: 0;
+/* Button Group Container */
+.header-actions {
+    display: flex;
+    align-items: center; /* Ensures buttons align vertically with each other */
+    gap: 0.75rem;
 }
 
-.user-email span {
-    color: var(--text-main, #2b2320);
-    font-weight: 600;
-}
-
-/* Button & Breadcrumb */
+/* Secondary Button (+ New Folder) */
 .btn-folder {
     background-color: #f5f2ed;
     color: var(--text-main, #2b2320);
     border: 1px solid var(--border-color, #e5dfd8);
-    padding: 0.65rem 1.25rem;
+    padding: 0.8rem 1.25rem;
     border-radius: 8px;
-    font-family: 'SF Pro', sans-serif;
+    font-family: 'SF Pro', -apple-system, sans-serif;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;            /* Prevents button text wrapping */
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
@@ -60,35 +61,94 @@
     border-color: #dcd4cc;
 }
 
+/* Primary Button (+ Create Event) */
+.btn-primary {
+    background-color: #423733;      /* Dark accent matching text-main */
+    color: #ffffff;
+    border: 1px solid #2b2320;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-family: 'SF Pro', -apple-system, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+    background-color: #423733;
+    border-color: #423733;
+}
+
+
+/* Breadcrumb Container Card with Inset Shadow */
 .fm-breadcrumb-bar {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: 'SF Pro', sans-serif;
-    font-size: 0.95rem;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    
+    /* Recessed / Inset Effect */
+    background-color: #fcfbf9; /* Soft off-white to accentuate depth */
+    border: 1px solid var(--border-color, #e5dfd8);
+    border-radius: 12px;
+    padding: 0.65rem 1.25rem;
     margin-bottom: 1.5rem;
-    padding: 0.5rem 0;
+    
+    /* Inset shadow creates the sunken/recessed look */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Breadcrumb Items */
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
 }
 
 .breadcrumb-item a {
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-main, #2b2320);
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
+.breadcrumb-item a:hover {
+    background-color: #f0ebe3;
+    color: var(--accent-dark, #4a0d0d);
+}
+
+/* Drop Hint Tag */
 .drop-hint {
     font-size: 0.75rem;
     color: #8c7e75;
-    margin-left: 0.25rem;
+    margin-left: 0.5rem;
+    background-color: #f2ede6;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px dashed #d6ccf0;
+    font-weight: 400;
 }
 
+/* Separator */
 .breadcrumb-separator {
-    color: #8c7e75;
+    color: #b5aba4;
+    font-size: 0.85rem;
+    user-select: none;
 }
 
+/* Current Active Folder */
 .breadcrumb-current {
     font-weight: 600;
     color: var(--accent-dark, #4a0d0d);
+    background-color: #ffffff;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #e5dfd8;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Slight pop out against the inner shadow */
 }
 
 .section-title {
@@ -311,3 +371,4 @@
     box-shadow: 0 0 15px rgba(74, 13, 13, 0.2) !important;
     transform: scale(1.02);
 }
+

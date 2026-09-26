@@ -105,7 +105,8 @@ html {
 /* Logo Styling Inside Pill */
 .logo {
     font-family: 'Tiro Telugu', serif;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    margin-left: 0.5rem;
     font-weight: bold;
     color: var(--text-main);
     text-decoration: none;
@@ -306,16 +307,9 @@ html {
 .sidebar-brand h2 {
     font-family: 'Tiro Telugu', Georgia, serif;
     font-weight: 400;
-    font-size: 1.5rem;
+    font-size: 2rem;
     color: #ffffff;
     margin: 0 0 4px 0;
-}
-
-.user-badge {
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 0.85rem;
-    color: #e5dfd8;
-    opacity: 0.8;
 }
 
 .sidebar-nav {
@@ -352,9 +346,9 @@ html {
 
 .logout-btn-sidebar {
     padding: 12px;
-    background: transparent;
+    background-color: #d1c8b8;
     border: 1px solid #ffffff;
-    color: #ffffff;
+    color: #4e0505;
     border-radius: 8px;
     cursor: pointer;
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -364,7 +358,7 @@ html {
 }
 
 .logout-btn-sidebar:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #a69e8f;
 }
 
 /* --- MAIN CONTENT & HEADERS --- */
@@ -427,8 +421,8 @@ html {
 }
 
 .btn-primary {
-    background-color: var(--accent-dark, #4a0d0d);
-    border: 1px solid var(--accent-dark, #4a0d0d);
+    background-color: #620808;
+    border: 1px solid #720808;
     color: #ffffff;
 }
 
@@ -486,12 +480,27 @@ html {
     display: none;
 }
 
+html {
+  font-size: 16px;
+}
+
+/* On screens smaller than 768px (Mobile/Tablet): 1rem = 14px */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
 /* --- MOBILE HAMBURGER DRAWER MENU --- */
 @media (max-width: 880px) {
+    
+
+
     .dashboard-wrapper {
         flex-direction: column;
         height: auto;
         min-height: 100vh;
+        
     }
 
     /* Fixed Top Header Bar on Mobile */
@@ -607,7 +616,10 @@ html {
 
     /* Adjustment for main content area on mobile */
     .dashboard-main-content {
-        padding: 20px 16px;
+        padding: 20px 20px;
+        margin: 0 1rem;
         overflow-y: visible;
     }
+
+
 }

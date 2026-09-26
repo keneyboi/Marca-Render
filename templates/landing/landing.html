@@ -252,20 +252,24 @@
                 </div>
 
                 <!-- Right Side Form -->
-                <form class="contact-form" onsubmit="event.preventDefault();">
+                <form 
+                class="contact-form" 
+                action="https://formspree.io/f/YOUR_FORM_ID" 
+                method="POST"
+                >
                     <div class="form-group">
                         <label for="contact-name">Full Name</label>
-                        <input type="text" id="contact-name" class="marca-input" placeholder="Enter your full name" required>
+                        <input type="text" name="name" id="contact-name" class="marca-input" placeholder="Enter your full name" required>
                     </div>
 
                     <div class="form-group">
                         <label for="contact-email">Email Address</label>
-                        <input type="email" id="contact-email" class="marca-input" placeholder="Your email here" required>
+                        <input type="email" name="_replyto" id="contact-email" class="marca-input" placeholder="Your email here" required>
                     </div>
 
                     <div class="form-group">
                         <label for="contact-message">Message</label>
-                        <textarea id="contact-message" class="marca-input marca-textarea" rows="4" placeholder="How can we help you?" required></textarea>
+                        <textarea name="message" id="contact-message" class="marca-input marca-textarea" rows="4" placeholder="How can we help you?" required></textarea>
                     </div>
 
                     <button type="submit" class="btn-primary btn-submit">Send Message</button>
@@ -308,6 +312,7 @@
             });
         };
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
     <script src="{% static 'js/landing/qrcode.min.js' %}"></script>

@@ -84,3 +84,35 @@ function handleScannedData(rawJsonText) {
         alert("Invalid or unreadable Marca QR Code.");
     }
 }
+
+
+// Grab the dialog element
+const addRecordModal = document.getElementById('addRecordModal');
+
+// Open as a modal overlay (Places element in the Browser's Top-Layer)
+function openAddRecordModal() {
+  if (addRecordModal) {
+    addRecordModal.showModal();
+  }
+}
+
+// Close function
+function closeAddRecordModal() {
+  if (addRecordModal) {
+    addRecordModal.close();
+  }
+}
+
+// Optional: Close modal automatically when clicking backdrop area
+addRecordModal.addEventListener('click', (event) => {
+  const rect = addRecordModal.getBoundingClientRect();
+  const isInDialog = (
+    rect.top <= event.clientY &&
+    event.clientY <= rect.top + rect.height &&
+    rect.left <= event.clientX &&
+    event.clientX <= rect.left + rect.width
+  );
+  if (!isInDialog) {
+    addRecordModal.close();
+  }
+});

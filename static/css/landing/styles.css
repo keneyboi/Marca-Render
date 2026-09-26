@@ -1001,7 +1001,7 @@
 @media (max-width: 900px) {
     /* 1. Prevent outer overflow by keeping padding tight */
     .contact-section {
-        padding: 3rem 2rem;
+        padding: 3rem 1.5rem;
         width: 100%;
         box-sizing: border-box;
         overflow: hidden; /* Guards against horizontal scrolling */
@@ -1009,7 +1009,7 @@
 
     /* 2. Make the card fit full width within outer section padding */
     .contact-white-card {
-        padding: 3rem 3rem;
+        padding: 3rem 1.5rem;
         width: 100%;
         box-sizing: border-box;
     }
@@ -1025,7 +1025,16 @@
 
     .contact-info {
         width: 100%;
+        margin: 0 0 -1rem;
+        h2 {
+            padding: 0 1rem;
+        }
+        p {
+            padding:  0 1rem;
+        }
     }
+    
+
 
     /* 4. Form occupies 100% of the inner card width cleanly */
     .contact-form {

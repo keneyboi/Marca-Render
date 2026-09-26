@@ -4,7 +4,13 @@
   <div class="custom-modal-container">
     <div class="custom-modal-card">
       
-      <button type="button" class="modal-close-btn" onclick="closeEventModal()">&times;</button>
+      <div class="modal-card-header">
+        <div>
+          <h3 class="modal-card-title">Create Event Attendance</h3>
+          <span style="color: #580c0c;">Enter the necessary details below</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeEventModal()">&times;</button>
+      </div>
 
       <form method="POST" action="{% url 'create_event' %}" enctype="multipart/form-data">
         {% csrf_token %}
@@ -58,15 +64,13 @@
 
         <!-- STEP 2: ATTENDANCE REQUIREMENTS & ROSTER UPLOAD -->
         <div id="modal-step-2" style="display: none;">
-          <h4 class="modal-title-center">ATTENDANCE REQUIREMENTS</h4>
-
           <div class="instructions-section">
             <h5 class="instructions-heading">ROSTER FORMAT INSTRUCTIONS</h5>
             <p class="instructions-text">
               Upload a <code>.csv</code> or <code>.xlsx</code> roster. <strong>First Name</strong>, <strong>Last Name</strong>, and at least one identifier (<strong>Student ID</strong> or <strong>Email</strong>) are required.
             </p>
 
-            <div style="background-color: #f4ede4; border-left: 3px solid #4a0d0d; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px;">
+            <div style="background-color: #f4ede4; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px;">
               <p style="font-size: 12px; margin: 0; color: #331010; font-family: 'SF Pro', sans-serif;">
                 <strong>Flexible Identifiers:</strong> Non-academic events can leave <code>student_id</code>, <code>course</code>, and <code>year_level</code> empty. If emails are not available, you can supply only student IDs.
               </p>

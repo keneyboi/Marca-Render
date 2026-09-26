@@ -4,10 +4,11 @@
 }
 
 .detail-header {
+
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
+  margin: 1rem 0 2rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -361,6 +362,41 @@
     background-color: #ded7c8;
 }
 
+.modal-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* Empty space | Centered Title | Right-aligned Button */
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Ensures grid spans the full width of the modal */
+}
+
+.modal-header h3 {
+  grid-column: 2; /* Places title in column 2 */
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.modal-header .close-modal-button {
+  grid-column: 3; /* Places button in column 3 */
+  justify-self: end; /* Flushes the button to the far right */
+  margin-bottom: 4px;
+ 
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Subtle hover effect */
+.close-modal-button:hover {
+  opacity: 1;
+}
+
 /* Responsive fallback for mobile viewports */
 @media (max-width: 768px) {
     .scanner-modal-body {
@@ -370,5 +406,38 @@
     .scanner-modal-right {
         border-left: none;
         border-top: 1px solid rgba(209, 200, 184, 0.6);
+        height: 300px; /* or max-height: 300px */
+        overflow-y: auto;
     }
+
+    .scanner-modal-right h2 {
+      margin-bottom: -2rem;
+    }
+    .scanner-modal-right h2 {
+      margin-bottom: -2rem;
+    }
+
+    .btn-add {
+        margin-left: 0 !important;
+        margin-right: auto !important; /* Aligns button to the left on mobile */
+    }
+}
+
+.btn-add {
+    margin-left: auto; /* Pushes button to the right on desktop */
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 0.5rem; 
+    padding: 0.6rem 1rem; 
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif; 
+    font-size: 0.9rem; 
+    font-weight: 500; 
+    color: #ffffff; 
+    background-color: #620808; 
+    border: 1px solid #aaaaaa; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    white-space: nowrap;
 }

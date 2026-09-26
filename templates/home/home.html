@@ -31,19 +31,15 @@
 
 <!-- Dashboard Header -->
 <header class="dashboard-header-card">
-  <div>
-    <h1 class="welcome-title">Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
-    <p class="user-email">
-      Logged in as: <span>{{ request.user.email }}</span>
-    </p>
-  </div>
-  <div style="display: flex; gap: 0.75rem; align-items: center;">
+  
+    <h1 class="welcome-title" style="margin-top:  12px;">Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
+  <div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
     {% if not current_folder %}
       <button type="button" class="btn-folder" id="openFolderBtn">
         + New Folder
       </button>
     {% endif %}
-    <button type="button" class="btn-primary" onclick="openEventModal()" style="cursor: pointer; border: none;">
+    <button type="button" class="btn-primary" onclick="openEventModal()">
         + Create Event
     </button>
   </div>

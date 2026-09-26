@@ -1,296 +1,340 @@
-/* Modal Overlay / Backdrop */
+/* ==========================================
+   CREATE EVENT MODAL (STYLED FROM REFERENCE)
+   ========================================== */
+
+/* Fullscreen Overlay & Backdrop */
 .custom-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.modal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(209, 200, 184, 0.6);
+}
+
+.modal-card-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #4a0d0d;
+    margin: 0;
 }
 
 .custom-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(51, 16, 16, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
+/* Modal Outer Container */
 .custom-modal-container {
-  position: relative;
-  width: 100%;
-  max-width: 650px;
-  z-index: 10000;
+    position: relative;
+    z-index: 1001;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Modal Card */
+/* Modal Card Structure */
 .custom-modal-card {
-  background: #ffffff;
-  border: 2px solid #2b2320;
-  border-radius: 24px;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  position: relative;
+    position: relative;
+    background-color: #fdfbf7;
+    border: 1px solid rgba(209, 200, 184, 0.5);
+    border-radius: 24px;
+    padding: 2.5rem 2rem 2rem 2rem;
+    box-shadow: 0 20px 50px rgba(51, 16, 16, 0.2),
+                0 4px 16px rgba(0, 0, 0, 0.06);
+    overflow-y: auto;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
 }
-
+/* Adjust close button to sit cleanly inside flex row */
 .modal-close-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1.25rem;
-  background: transparent;
-  border: none;
-  font-size: 1.75rem;
-  cursor: pointer;
-  color: #2b2320;
-  line-height: 1;
+    position: static; /* Removes absolute positioning */
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    color: #4a0d0d;
+    cursor: pointer;
+    opacity: 0.6;
+    padding: 0;
+    transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
+.modal-close-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Typography & Form Labels */
 .modal-label {
-  display: block;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  color: #2b2320;
-  margin-bottom: 6px;
-  text-transform: uppercase;
+    display: block;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
 }
 
 .modal-title-center {
-  text-align: center;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.5px;
-  color: #2b2320;
-  margin: 0 0 1.25rem 0;
-  text-transform: uppercase;
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #4a0d0d;
+    text-align: center;
+    margin: 0 0 1.25rem 0;
 }
 
-/* Form inputs inside modal */
+/* Standard Django Input Styling */
 .custom-modal-card input[type="text"],
 .custom-modal-card input[type="datetime-local"],
+.custom-modal-card input[type="time"],
+.custom-modal-card input[type="date"],
+.custom-modal-card textarea,
+.custom-modal-card select {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.95rem;
+    color: #331010;
+    background-color: #f7f4ed;
+    border: 1px solid #d1c8b8;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
 .custom-modal-card textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid #2b2320;
-  border-radius: 10px;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  color: #2b2320;
-  box-sizing: border-box;
-  background: #fdfdfd;
+    resize: vertical;
+    min-height: 80px;
 }
 
 .custom-modal-card input:focus,
-.custom-modal-card textarea:focus {
-  outline: none;
-  border-color: #000000;
+.custom-modal-card textarea:focus,
+.custom-modal-card select:focus {
+    border-color: #4a0d0d;
+    box-shadow: 0 0 0 3px rgba(74, 13, 13, 0.1);
+    background-color: #fdfbf7;
 }
 
-/* Radio buttons matching wireframe */
+/* Radio Group Styling (Session Config) */
 .type-radio-group {
-  display: flex;
-  gap: 0.75rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background-color: #f7f4ed;
+    border: 1px solid #d1c8b8;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
 }
 
 .type-radio-label {
-  display: inline-flex;
-  align-items: center;
-  border: 1.5px solid #2b2320;
-  border-radius: 8px;
-  padding: 6px 14px;
-  cursor: pointer;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: #2b2320;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    color: #331010;
+    cursor: pointer;
 }
 
-.type-radio-label input {
-  margin-right: 6px;
+.type-radio-label input[type="radio"] {
+    accent-color: #4a0d0d;
+    cursor: pointer;
 }
 
-/* Preview Box (Wireframe Step 2) */
-.modal-preview-box {
-  border: 2px solid #2b2320;
-  border-radius: 16px;
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #faf9f6;
-  margin-bottom: 1.25rem;
-  color: #8c7e75;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-}
-
-/* Buttons */
-.btn-step-action,
-.btn-step-back {
-  border: 2px solid #2b2320;
-  background: transparent;
-  color: #2b2320;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  border-radius: 10px;
-  padding: 8px 24px;
-  cursor: pointer;
-}
-
-.btn-step-submit {
-  border: 2px solid #2b2320;
-  background: #2b2320;
-  color: #ffffff;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  border-radius: 10px;
-  padding: 8px 24px;
-  cursor: pointer;
-}
-
-.btn-download {
-  border: 1.5px solid #2b2320;
-  background: transparent;
-  color: #2b2320;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  border-radius: 8px;
-  padding: 6px 16px;
-  cursor: pointer;
-}
-
-/* Instructions and Terms Container */
+/* STEP 2: Instructions Section */
 .instructions-section {
-  background-color: #fcfbf9;
-  border: 1px solid #e5dfd8;
-  border-radius: 14px;
-  padding: 16px 20px;
-  margin-bottom: 1rem;
+    background-color: #f7f4ed;
+    border: 1px solid rgba(209, 200, 184, 0.6);
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
 }
 
 .instructions-heading {
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #2b2320;
-  margin: 0 0 6px 0;
-  text-transform: uppercase;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.03em;
 }
 
 .instructions-text {
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 13px;
-  color: #665b55;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    color: #554a44;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
 }
 
 .instructions-text code {
-  background-color: #efebe4;
-  padding: 2px 5px;
-  border-radius: 4px;
-  font-family: 'SF Mono', Consolas, monospace;
-  font-size: 12px;
+    background-color: #e8e2d5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #4a0d0d;
+    font-size: 0.8rem;
 }
 
 .term-definitions-list {
-  margin: 0;
-  padding-left: 20px;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 12.5px;
-  color: #665b55;
-  line-height: 1.6;
+    margin: 0;
+    padding-left: 1.2rem;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.8rem;
+    color: #554a44;
+    line-height: 1.5;
 }
 
-.term-definitions-list strong {
-  color: #2b2320;
+.term-definitions-list li {
+    margin-bottom: 0.25rem;
 }
 
-.term-definitions-list em {
-  color: #8c7e75;
-}
-
-/* Download Template Button Row */
+/* Download Buttons Row */
 .download-action-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
 }
 
 .btn-download {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1.5px solid #2b2320;
-  background: transparent;
-  color: #2b2320;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  border-radius: 8px;
-  padding: 7px 16px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    background-color: #e8e2d5;
+    border: 1px solid #d1c8b8;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    display: inline-block;
+    box-sizing: border-box;
 }
 
 .btn-download:hover {
-  background: #2b2320;
-  color: #ffffff;
+    background-color: #ded7c8;
 }
 
-/* Interactive Drag and Drop Zone */
+/* File Dropzone Box */
 .dropzone-box {
-  border: 2px dashed #b5aba1;
-  border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-  background-color: #faf9f6;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+    border: 2px dashed #d1c8b8;
+    background-color: #f7f4ed;
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.dropzone-box.dragover {
-  border-color: #4a0d0d;
-  background-color: #f4ede4;
+.dropzone-box:hover {
+    border-color: #4a0d0d;
+    background-color: #f4ede4;
 }
 
 .dropzone-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .dropzone-title {
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #2b2320;
-  margin: 8px 0 2px 0;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #331010;
+    margin: 0;
 }
 
 .dropzone-subtitle {
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 12px;
-  color: #8c7e75;
-  margin: 0;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.8rem;
+    color: #a0958d;
+    margin: 0;
 }
 
 .file-name-preview {
-  margin-top: 10px;
-  padding: 4px 12px;
-  background-color: #e6f4ea;
-  border: 1px solid #c2e2c9;
-  border-radius: 20px;
-  color: #137333;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    background-color: #e8e2d5;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+}
+
+/* Action Buttons */
+.btn-step-action,
+.btn-step-submit {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #4a0d0d;
+    border: none;
+    padding: 0.8rem 1.75rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 12px rgba(74, 13, 13, 0.2);
+}
+
+.btn-step-action:hover,
+.btn-step-submit:hover {
+    background-color: #330808;
+    transform: translateY(-1px);
+}
+
+.btn-step-back {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    background-color: #e8e2d5;
+    border: 1px solid #d1c8b8;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-step-back:hover {
+    background-color: #ded7c8;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .custom-modal-card {
+        padding: 2rem 1.25rem 1.5rem 1.25rem;
+    }
+
+    .download-action-row {
+        flex-direction: column;
+    }
 }
