@@ -31,28 +31,40 @@
 
 <!-- Dashboard Header -->
 <header class="dashboard-header-card">
-  
-    <h1 class="welcome-title" style="margin-top:  12px;">Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
-  <div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
+    <h1 class="welcome-title" style="margin-top:  12px;">
+      {% if not current_folder %}
+        Welcome, {{ request.user.first_name|default:request.user.username }}!
+      {% else %}
+        {{ current_folder.name }} - Folder
+      {% endif %}
+    </h1>
+
+    <div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
     {% if not current_folder %}
-      <button type="button" class="btn-folder" id="openFolderBtn">
+      <button type="button" class="btn-secondary" id="openFolderBtn">
         + New Folder
       </button>
-    {% endif %}
-    <button type="button" class="btn-primary" onclick="openEventModal()">
+      <button type="button" class="btn-primary" onclick="openEventModal()">
         + Create Event
-    </button>
+      </button>
+    {% else %}
+        <a href="{% url 'home' %}" class="btn-navigation">
+        &larr; Back to Dashboard
+        </a>
+      {% endif %}
+
+
   </div>
 </header>
 
 <!-- Breadcrumb Navigation & Root Drop Target -->
+{% if current_folder %}
 <nav class="fm-breadcrumb-bar">
   <div class="breadcrumb-item drop-zone" data-folder-id="">
     <a href="{% url 'home' %}">&#128194; Root</a>
-    {% if current_folder %}
-      <span class="drop-hint">(Drop card here to ungroup)</span>
-    {% endif %}
+    <span class="drop-hint">(Drop card here to ungroup)</span>
   </div>
+  {% endif %}
   {% if current_folder %}
     <span class="breadcrumb-separator">/</span>
     <span class="breadcrumb-current">&#128193; {{ current_folder.name }}</span>
@@ -87,9 +99,7 @@
 <section class="events-section">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
     <h3 class="section-title" style="margin: 0;">
-      {% if current_folder %}
-        Events in "{{ current_folder.name }}"
-      {% else %}
+      {% if not current_folder %}
         Ungrouped Events
       {% endif %}
     </h3>
@@ -142,9 +152,49 @@
                 <span class="drag-grip" title="Drag to move">&#8942;&#8942;</span>
                 <h4 class="event-name">{{ event.name }}</h4>
               </div>
-              <span class="status-pill status-{{ event.status|lower }}">
-                {{ event.get_status_display }}
-              </span>
+
+              <!-- Header Right Actions: Status Badge + Kebab Menu -->
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-pill status-{{ event.status|lower }}">
+                  {{ event.get_status_display }}
+                </span>
+
+                <!-- Floating Kebab Action Menu -->
+                <div class="card-action-menu">
+                  <button 
+                    type="button" 
+                    class="btn-kebab" 
+                    onclick="event.stopPropagation(); toggleCardMenu(this);"
+                    aria-label="More options"
+                  >
+                    &#8942;
+                  </button>
+
+                  <div class="card-dropdown-menu">
+                    {% if current_folder %}
+                      <form action="{% url 'remove_from_folder' event.id %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button 
+                          type="submit" 
+                          onclick="event.stopPropagation();"
+                          class="dropdown-item"
+                        
+                        >
+                          <span>📂</span> Ungroup
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    <button 
+                      type="button" 
+                      onclick="event.preventDefault(); event.stopPropagation(); openDeleteModal('{{ event.id }}', '{{ event.name|escapejs }}'); closeAllCardMenus();"
+                      class="dropdown-item danger"
+                    >
+                      <span>🗑️</span> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {% if event.description %}
@@ -163,33 +213,11 @@
             </div>
           </div>
 
-          <div style="padding-top: 14px; margin-top: 14px; border-top: 1px dashed #e5dfd8; font-family: 'SF Pro', sans-serif; font-size: 12.5px; color: #8c7e75; display: flex; justify-content: space-between; align-items: center;">
+          <!-- Card Footer (Timestamps Only) -->
+          <div id="event-detail-more-card" style="padding-top: 14px; margin-top: 14px; border-top: 1px dashed #e5dfd8; font-family: 'SF Pro', sans-serif; font-size: 12.5px; color: #8c7e75; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; flex-direction: column; gap: 2px;">
               <span>Starts: {{ event.start_time|date:"M d, Y H:i" }}</span>
               <span>Ends: {{ event.end_time|date:"M d, Y H:i" }}</span>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 8px;">
-              {% if current_folder %}
-                <form action="{% url 'remove_from_folder' event.id %}" method="POST" style="margin: 0;">
-                  {% csrf_token %}
-                  <button 
-                    type="submit" 
-                    onclick="event.stopPropagation();"
-                    style="background: transparent; border: none; color: #8c7e75; font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: underline;"
-                  >
-                    Ungroup
-                  </button>
-                </form>
-              {% endif %}
-
-              <button 
-                type="button" 
-                onclick="event.preventDefault(); event.stopPropagation(); openDeleteModal('{{ event.id }}', '{{ event.name|escapejs }}');"
-                style="background: transparent; border: none; color: #c5221f; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px; border-radius: 4px;"
-              >
-                Delete
-              </button>
             </div>
           </div>
         </div>
@@ -208,11 +236,12 @@
           No ungrouped events found under your account.
         {% endif %}
       </p>
-      <button type="button" class="btn-secondary" onclick="openEventModal()" style="cursor: pointer; border: 1px solid var(--accent-dark, #4a0d0d);">
+      <button type="button" class="btn-secondary" onclick="openEventModal()" style="cursor: pointer;">
         Create Event
       </button>
     </div>
   {% endif %}
+</section>
 </section>
 
 <!-- Delete Modal -->

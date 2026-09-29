@@ -37,7 +37,7 @@
         
           
           <div style="display: flex; justify-content: flex-end;">
-            <button type="button" class="btn-step-action" onclick="toggleEventStep(2)">NEXT</button>
+            <button type="button" class="btn-primary" onclick="toggleEventStep(2)">NEXT</button>
           </div>
         </div>
         
@@ -93,8 +93,8 @@
             </div>
           </div>
           <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
-            <button type="button" class="btn-step-back" onclick="toggleEventStep(1)">Back</button>
-            <button type="button" class="btn-step-action" onclick="toggleEventStep(3)">NEXT</button>
+            <button type="button" class="btn-secondary" onclick="toggleEventStep(1)">Back</button>
+            <button type="button" class="btn-primary" onclick="toggleEventStep(3)">NEXT</button>
           </div>
         </div>
 
@@ -144,8 +144,8 @@
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
-            <button type="button" class="btn-step-back" onclick="toggleEventStep(2)">Back</button>
-            <button type="submit" class="btn-step-submit">CREATE EVENT</button>
+            <button type="button" class="btn-secondary" onclick="toggleEventStep(2)">Back</button>
+            <button type="submit" class="btn-primary">CREATE EVENT</button>
           </div>
         </div>
 
@@ -207,14 +207,14 @@
       </div>
 
       <!-- AM/PM Toggle Button (Below the White Box) -->
-      <button type="button" id="tpAmpmToggle" class="tp-ampm-toggle-btn">AM</button>
+      <button type="button" id="tpAmpmToggle" class="btn-primary" style="width: 100%;">AM</button>
 
     </div>
 
     <!-- Actions (Divider & Buttons Below) -->
     <div class="tp-actions">
-      <button type="button" id="cancelTimePickerBtn" class="btn-step-back">Cancel</button>
-      <button type="button" id="confirmTimePickerBtn" class="btn-step-submit">Set Time</button>
+      <button type="button" id="cancelTimePickerBtn" class="btn-secondary" style="width: 100%;">Cancel</button>
+      <button type="button" id="confirmTimePickerBtn" class="btn-primary" style="width: 100%;">Set Time</button>
     </div>
 
   </div>

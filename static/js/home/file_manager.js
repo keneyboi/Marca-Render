@@ -201,3 +201,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+function toggleCardMenu(button) {
+  const currentMenu = button.nextElementSibling;
+  const isOpen = currentMenu.classList.contains('show');
+
+  // Close any existing open dropdowns
+  closeAllCardMenus();
+
+  // Open clicked menu
+  if (!isOpen) {
+    currentMenu.classList.add('show');
+  }
+}
+
+function closeAllCardMenus() {
+  document.querySelectorAll('.card-dropdown-menu.show').forEach(menu => {
+    menu.classList.remove('show');
+  });
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.card-action-menu')) {
+    closeAllCardMenus();
+  }
+});

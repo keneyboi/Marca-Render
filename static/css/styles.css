@@ -404,41 +404,117 @@ html {
 
 /* --- REUSABLE BUTTON PRIMITIVES --- */
 .btn-primary,
-.btn-secondary {
+.btn-secondary,
+.btn-navigation {  /* Added missing comma here! */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     height: 44px;
-    padding: 0 20px;
+    padding: 0.6rem 1.25rem;
     border-radius: 8px;
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 14px;
+    font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
     box-sizing: border-box;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
 }
 
+/* Crimson/Burgundy Red Primary Button */
 .btn-primary {
     background-color: #620808;
-    border: 1px solid #720808;
     color: #ffffff;
+    border: 1px solid #4d0606;
+    border-bottom: 3px solid #330404; /* Darker bottom border shelf */
 }
 
 .btn-primary:hover {
-    background-color: #6b1414; /* Slightly lighter wine for hover */
-    border-color: #6b1414;
+    background-color: #520606;
+    border-color: #4d0606;
+    border-bottom-color: #330404;
 }
 
+.btn-primary:active {
+    transform: translateY(2px);       /* Moves down on click */
+    border-bottom-width: 1px;         /* Shrinks bottom border to match */
+}
+
+/* Light Folder-Style Secondary Button */
 .btn-secondary {
-    background-color: transparent;
-    border: 1px solid var(--accent-dark, #4a0d0d);
-    color: var(--accent-dark, #4a0d0d);
+    background-color: #f5f2ed;
+    color: var(--text-main, #2b2320);
+    border: 1px solid var(--border-color, #e5dfd8);
+    border-bottom: 3px solid #dcd4cc;  /* Darker beige bottom border shelf */
 }
 
 .btn-secondary:hover {
-    background-color: #f5f2ed;
+    background-color: #eae5de;
+    border-color: #dcd4cc;
+    border-bottom-color: #c8beac;
+}
+
+.btn-secondary:active {
+    transform: translateY(2px);        /* Moves down on click */
+    border-bottom-width: 1px;          /* Shrinks bottom border to match */
+}
+
+/* White Navigation Button */
+.btn-navigation {
+    background-color: #ffffff;
+    color: #4a0d0d;                    /* Primary brand color for text */
+    border: 1px solid #e2dad0;
+    border-bottom: 3px solid #cbd5e1;  /* Soft cool-gray 3D shelf */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.btn-navigation:hover {
+    background-color: #fcfbf9;
+    border-color: #d8cebf;
+    border-bottom-color: #94a3b8;
+    color: #330808;
+}
+
+.btn-navigation:active {
+    transform: translateY(2px);        /* Moves down on click */
+    border-bottom-width: 1px;          /* Shrinks bottom border to match */
+    box-shadow: none;
+}
+
+/* Small Danger / Delete Button */
+.btn-danger-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;                      /* Compact height */
+    padding: 0 12px;                   /* Smaller padding */
+    border-radius: 6px;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.8rem;                 /* Smaller text size */
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    white-space: nowrap;
+    
+    /* Colors */
+    background-color: #dc2626;         /* Bright clear red */
+    color: #ffffff;                    /* Pure white text */
+    border: 1px solid #b91c1c;
+    border-bottom: 3px solid #991b1b;  /* Darker red 3D bottom shelf */
+    
+    transition: all 0.1s ease;
+}
+
+.btn-danger-sm:hover {
+    background-color: #b91c1c;
+    border-color: #991b1b;
+    border-bottom-color: #7f1d1d;
+}
+
+.btn-danger-sm:active {
+    transform: translateY(2px);        /* Moves down on click */
+    border-bottom-width: 1px;          /* Shrinks bottom border to match */
 }
 
 /* --- FORM GROUP PRIMITIVES --- */
