@@ -227,3 +227,180 @@ document.addEventListener('click', function(event) {
     closeAllCardMenus();
   }
 });
+
+/**
+ * Opens the Edit Modal and populates existing event data
+ * @param {Object} data - Event attributes passed from template
+ */
+function openEditEventModal(data) {
+  const form = document.getElementById('editEventForm');
+  if (!form) return;
+
+  // 1. Update form action URL
+  form.action = `/event/events/${data.id}/update/`;
+
+  // 2. Populate basic text fields
+  document.getElementById('edit_event_name').value = data.name || '';
+  document.getElementById('edit_event_location').value = data.location || '';
+  document.getElementById('edit_event_description').value = data.description || '';
+  
+  const sessionTypeInput = document.getElementById('edit_session_type');
+  if (sessionTypeInput) sessionTypeInput.value = data.sessionType || '1';
+
+  // 3. Extract date and time parts (Expecting "YYYY-MM-DDTHH:MM")
+  if (data.startTime1 && data.startTime1.includes('T')) {
+    const [datePart, timePart] = data.startTime1.split('T');
+    document.getElementById('edit_shared_event_date').value = datePart;
+    document.getElementById('edit_start_time_1_picker').value = timePart;
+  }
+  if (data.endTime1 && data.endTime1.includes('T')) {
+    document.getElementById('edit_end_time_1_picker').value = data.endTime1.split('T')[1];
+  }
+
+  // 4. Handle Session 2 visibility (Display ONLY when sessionType == '3')
+  const session2Container = document.getElementById('edit_time_2');
+  if (session2Container) {
+    if (String(data.sessionType) === '3') {
+      session2Container.style.display = 'flex';
+      
+      if (data.startTime2 && data.startTime2.includes('T')) {
+        document.getElementById('edit_start_time_2_picker').value = data.startTime2.split('T')[1];
+      }
+      if (data.endTime2 && data.endTime2.includes('T')) {
+        document.getElementById('edit_end_time_2_picker').value = data.endTime2.split('T')[1];
+      }
+    } else {
+      session2Container.style.display = 'none';
+      const st2Picker = document.getElementById('edit_start_time_2_picker');
+      const et2Picker = document.getElementById('edit_end_time_2_picker');
+      if (st2Picker) st2Picker.value = '';
+      if (et2Picker) et2Picker.value = '';
+    }
+  }
+
+  // Clear previous validation messages upon opening
+  clearAllValidationErrors();
+
+  // 5. Display Modal Overlay
+  document.getElementById('editEventModal').style.display = 'flex';
+}
+
+function closeEditEventModal() {
+  const modal = document.getElementById('editEventModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function clearAllValidationErrors() {
+  const fields = [
+    { input: 'edit_shared_event_date', error: 'error_edit_shared_event_date' },
+    { input: 'edit_start_time_1_picker', error: 'error_edit_start_time_1' },
+    { input: 'edit_end_time_1_picker', error: 'error_edit_end_time_1' },
+    { input: 'edit_start_time_2_picker', error: 'error_edit_start_time_2' },
+    { input: 'edit_end_time_2_picker', error: 'error_edit_end_time_2' }
+  ];
+
+  fields.forEach(({ input, error }) => {
+    const inputEl = document.getElementById(input);
+    const errorEl = document.getElementById(error);
+    if (inputEl) inputEl.classList.remove('is-invalid');
+    if (errorEl) errorEl.textContent = '';
+  });
+}
+
+// Safely attach submit listener when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+  const editForm = document.getElementById('editEventForm');
+  if (!editForm) return;
+
+  function showFieldError(inputId, errorId, message) {
+    const inputEl = document.getElementById(inputId);
+    const errorEl = document.getElementById(errorId);
+    if (inputEl) inputEl.classList.add('is-invalid');
+    if (errorEl) errorEl.textContent = message;
+  }
+
+  editForm.addEventListener('submit', function (e) {
+    clearAllValidationErrors();
+
+    const dateInput = document.getElementById('edit_shared_event_date');
+    const st1Input = document.getElementById('edit_start_time_1_picker');
+    const et1Input = document.getElementById('edit_end_time_1_picker');
+    const st2Input = document.getElementById('edit_start_time_2_picker');
+    const et2Input = document.getElementById('edit_end_time_2_picker');
+
+    const sessionType = document.getElementById('edit_session_type')?.value;
+
+    const dateVal = dateInput?.value;
+    const st1 = st1Input?.value;
+    const et1 = et1Input?.value;
+    const st2 = st2Input?.value;
+    const et2 = et2Input?.value;
+
+    let hasError = false;
+
+    // 1. Required Checks
+    if (!dateVal) {
+      showFieldError('edit_shared_event_date', 'error_edit_shared_event_date', 'Event date is required.');
+      hasError = true;
+    }
+
+    if (!st1) {
+      showFieldError('edit_start_time_1_picker', 'error_edit_start_time_1', 'Start time (1) is required.');
+      hasError = true;
+    }
+
+    if (!et1) {
+      showFieldError('edit_end_time_1_picker', 'error_edit_end_time_1', 'End time (1) is required.');
+      hasError = true;
+    }
+
+    // 2. Session 1 Validation: Start time must be before End time
+    if (st1 && et1 && st1 >= et1) {
+      showFieldError('edit_end_time_1_picker', 'error_edit_end_time_1', 'End time (1) must be after start time (1).');
+      hasError = true;
+    }
+
+    // 3. Session 2 Validation (For two-part session configurations)
+    if (String(sessionType) === '3') {
+      if (!st2) {
+        showFieldError('edit_start_time_2_picker', 'error_edit_start_time_2', 'Start time (2) is required.');
+        hasError = true;
+      }
+
+      if (!et2) {
+        showFieldError('edit_end_time_2_picker', 'error_edit_end_time_2', 'End time (2) is required.');
+        hasError = true;
+      }
+
+      if (st2 && et2 && st2 >= et2) {
+        showFieldError('edit_end_time_2_picker', 'error_edit_end_time_2', 'End time (2) must be after start time (2).');
+        hasError = true;
+      }
+
+      if (et1 && st2 && st2 <= et1) {
+        showFieldError('edit_start_time_2_picker', 'error_edit_start_time_2', 'Start time (2) must be after Session 1 end time.');
+        hasError = true;
+      }
+    }
+
+    // Block submit if validation fails
+    if (hasError) {
+      e.preventDefault();
+      return false;
+    }
+
+    // ==========================================
+    // HIDDEN INPUT SYNCHRONIZATION
+    // ==========================================
+    document.getElementById('edit_start_time_1').value = `${dateVal}T${st1}`;
+    document.getElementById('edit_end_time_1').value = `${dateVal}T${et1}`;
+
+    if (String(sessionType) === '3' && st2 && et2) {
+      document.getElementById('edit_start_time_2').value = `${dateVal}T${st2}`;
+      document.getElementById('edit_end_time_2').value = `${dateVal}T${et2}`;
+    } else {
+      document.getElementById('edit_start_time_2').value = '';
+      document.getElementById('edit_end_time_2').value = '';
+    }
+  });
+});

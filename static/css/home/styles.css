@@ -12,7 +12,7 @@
     margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Vertical alignment */
+    align-items: center;
     flex-wrap: nowrap;
     gap: 1.5rem;
 }
@@ -29,15 +29,15 @@
     font-size: 2.25rem;
     font-weight: 400;
     color: var(--text-main, #2b2320);
-    margin: 0;           /* Resets default browser h1 margins */
-    padding: 0;          /* Resets default browser h1 padding */
-    line-height: 1;      /* Fixes vertical text box offset */
+    margin: 0;
+    padding: 0;
+    line-height: 1;
 }
 
 /* Button Group Container */
 .header-actions {
     display: flex;
-    align-items: center; /* Ensures buttons align vertically with each other */
+    align-items: center;
     gap: 0.75rem;
 }
 
@@ -58,8 +58,6 @@
     transition: all 0.1s ease;
 }
 
-
-
 /* Breadcrumb Container Card with Inset Shadow */
 .fm-breadcrumb-bar {
     display: flex;
@@ -67,15 +65,11 @@
     gap: 0.5rem;
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.9rem;
-    
-    /* Recessed / Inset Effect */
-    background-color: #fcfbf9; /* Soft off-white to accentuate depth */
+    background-color: #fcfbf9;
     border: 1px solid var(--border-color, #e5dfd8);
     border-radius: 12px;
     padding: 0.65rem 1.25rem;
     margin-bottom: 1.5rem;
-    
-    /* Inset shadow creates the sunken/recessed look */
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
@@ -126,7 +120,7 @@
     padding: 0.25rem 0.6rem;
     border-radius: 6px;
     border: 1px solid #e5dfd8;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Slight pop out against the inner shadow */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .section-title {
@@ -154,19 +148,31 @@
     gap: 1.5rem;
 }
 
-/* Folder Card */
+/* Folder Card - Crimson Brand Styling with 3D Shelf */
 .folder-card {
     position: relative;
-    background-color: #ffffff;
-    border: 1px solid var(--border-color, #e5dfd8);
+    background-color: #620808;
+    color: #ffffff;
+    border: 1px solid #4d0606;
+    border-bottom: 3.5px solid #330404;
     border-radius: 14px;
     padding: 1.1rem 1.25rem;
-    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 4px 12px rgba(51, 4, 4, 0.15);
+    transition: transform 0.1s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .folder-card:hover {
-    background-color: #fcfbf9;
-    border-color: #dcd4cc;
+    background-color: #520606;
+    border-color: #4d0606;
+    border-bottom-color: #330404;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(51, 4, 4, 0.22);
+}
+
+.folder-card:active {
+    transform: translateY(1px);
+    border-bottom-width: 1px;
+    box-shadow: 0 2px 6px rgba(51, 4, 4, 0.1);
 }
 
 .folder-card-link {
@@ -174,12 +180,13 @@
     display: flex;
     align-items: center;
     gap: 0.85rem;
-    color: inherit;
+    color: #ffffff;
 }
 
 .folder-icon {
     font-size: 1.75rem;
     line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .folder-info {
@@ -188,39 +195,51 @@
 }
 
 .folder-name {
-    font-family: 'SF Pro', sans-serif;
+    font-family: 'SF Pro', -apple-system, sans-serif;
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--text-main, #2b2320);
+    color: #ffffff;
 }
 
 .folder-count {
-    font-family: 'SF Pro', sans-serif;
+    font-family: 'SF Pro', -apple-system, sans-serif;
     font-size: 0.78rem;
-    color: #8c7e75;
+    color: #f5f2ed;
+    opacity: 0.85;
 }
 
+/* Kebab / Delete Menu inside Folder */
 .delete-folder-form {
     position: absolute;
-    top: 6px;
-    right: 8px;
+    top: 8px;
+    right: 10px;
+    z-index: 2;
 }
 
 .delete-folder-form button {
     background: transparent;
     border: none;
-    color: #8c7e75;
+    color: #f5f2ed;
     font-size: 1.2rem;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0.75;
+    transition: all 0.15s ease;
 }
 
 .delete-folder-form button:hover {
-    color: #c5221f;
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
 }
 
 /* Event Card */
 .event-card {
+    position: relative;
+    overflow: visible !important;
+    min-height: 200px;
+    max-height: 250px;
     background-color: #ffffff;
     border: 1px solid var(--border-color, #e5dfd8);
     border-radius: 16px;
@@ -251,7 +270,7 @@
 .event-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     margin-bottom: 1rem;
     gap: 0.75rem;
 }
@@ -328,16 +347,18 @@
    Drag & Drop Targets & Hover Highlights
    ========================================================================== */
 
-/* Dropping into a folder */
-.drop-zone.drag-over {
-    background-color: #fbf7f4 !important;
-    border: 2px dashed var(--accent-dark, #4a0d0d) !important;
-    transform: scale(1.02);
+/* Dropping into a folder card (Dark Crimson Theme) */
+.folder-card.drop-zone.drag-over {
+    background-color: #4d0606 !important;
+    border: 2px dashed #f5f2ed !important;
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(51, 4, 4, 0.35) !important;
 }
 
+/* Dropping into breadcrumb folder targets */
 .breadcrumb-item.drag-over {
     background-color: #fbf7f4;
-    border: 2px dashed var(--accent-dark, #4a0d0d);
+    border: 2px dashed #4a0d0d;
     border-radius: 6px;
     padding: 0.2rem 0.5rem;
 }
@@ -348,19 +369,6 @@
     background-color: #faf5f3 !important;
     box-shadow: 0 0 15px rgba(74, 13, 13, 0.2) !important;
     transform: scale(1.02);
-}
-
-
-/* Ensure dropdown overflows card boundary correctly */
-.event-card {
-    position: relative;
-    overflow: visible !important;
-}
-
-.event-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
 /* Kebab Action Menu Container */
@@ -407,7 +415,7 @@
     border: 1px solid #e8e0d0;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(51, 16, 16, 0.12);
-    padding: 0.5rem;
+    padding: 0.35rem;
     z-index: 100;
     display: none;
 }
@@ -424,12 +432,12 @@
 
 /* Menu Action Options */
 .dropdown-item {
-    margin: 0.5rem 0;
+    margin: 0;
     width: 100%;
     background: transparent;
     border: none;
     outline: none;
-    padding: 0.5rem 0.75rem;
+    padding: 0.45rem 0.65rem;
     font-family: 'SF Pro', -apple-system, sans-serif;
     font-size: 0.85rem;
     font-weight: 500;
@@ -440,6 +448,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    box-sizing: border-box;
     transition: background-color 0.15s ease;
 }
 
@@ -448,10 +457,23 @@
 }
 
 .dropdown-item.danger {
-
     color: #dc2626;
 }
 
 .dropdown-item.danger:hover {
     background-color: #fef2f2;
+}
+
+/* Red outline for invalid fields matching design */
+.form-control.is-invalid {
+  border: 1.5px solid #d9534f !important;
+}
+
+/* Inline red error text styling */
+.error-message {
+  color: #d9534f;
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  display: block;
+  font-weight: 400;
 }

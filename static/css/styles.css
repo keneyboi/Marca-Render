@@ -699,3 +699,42 @@ html {
 
 
 }
+
+
+.dashboard-alert-container {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-alert {
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Green Success State */
+.dashboard-alert.success {
+  background-color: #eefbe8;
+  color: #1e7e34;
+  border: 1px solid #c3e6cb;
+}
+
+/* Red Error State */
+.dashboard-alert.error {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+  border: 1px solid #f8b4b4;
+}
+
+.dashboard-alert.fade-out {
+  opacity: 0;
+  transform: translateY(-8px);
+}

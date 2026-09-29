@@ -280,6 +280,9 @@ function toggleEventStep(step) {
 // EVENT LISTENERS INITIALIZATION
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+  // ==========================================
+  // DOM Elements (Create Modal)
+  // ==========================================
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('rosterFileInput');
   const submitBtn = document.querySelector('.btn-step-submit');
@@ -288,24 +291,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameInput = document.getElementById('id_name');
   const locationInput = document.getElementById('id_location');
 
-  // Hidden Django Datetime Inputs
+  // Hidden Django Datetime Inputs (Create Form)
   const startInput1 = document.getElementById('id_start_time_1');
   const endInput1 = document.getElementById('id_end_time_1');
   const startInput2 = document.getElementById('id_start_time_2');
   const endInput2 = document.getElementById('id_end_time_2');
 
-  // Shared Date & Separate Time Pickers
+  // Shared Date & Time Pickers (Create Form)
   const sharedDate = document.getElementById('shared_event_date');
   const startTime1Picker = document.getElementById('start_time_1_picker');
   const endTime1Picker = document.getElementById('end_time_1_picker');
   const startTime2Picker = document.getElementById('start_time_2_picker');
   const endTime2Picker = document.getElementById('end_time_2_picker');
 
-  const timePickers = [
+  // ==========================================
+  // DOM Elements (Edit Modal)
+  // ==========================================
+  const editForm = document.getElementById('editEventForm');
+  const editSharedDate = document.getElementById('edit_shared_event_date');
+
+  // Hidden Django Datetime Inputs (Edit Form)
+  const editStartInput1 = document.getElementById('edit_start_time_1');
+  const editEndInput1 = document.getElementById('edit_end_time_1');
+  const editStartInput2 = document.getElementById('edit_start_time_2');
+  const editEndInput2 = document.getElementById('edit_end_time_2');
+
+  // Time Pickers (Edit Form)
+  const editStartTime1Picker = document.getElementById('edit_start_time_1_picker');
+  const editEndTime1Picker = document.getElementById('edit_end_time_1_picker');
+  const editStartTime2Picker = document.getElementById('edit_start_time_2_picker');
+  const editEndTime2Picker = document.getElementById('edit_end_time_2_picker');
+
+  // Time Mapping Configurations
+  const createTimePickers = [
     { timeInput: startTime1Picker, target: startInput1 },
     { timeInput: endTime1Picker, target: endInput1 },
     { timeInput: startTime2Picker, target: startInput2 },
     { timeInput: endTime2Picker, target: endInput2 }
+  ];
+
+  const editTimePickers = [
+    { timeInput: editStartTime1Picker, target: editStartInput1 },
+    { timeInput: editEndTime1Picker, target: editEndInput1 },
+    { timeInput: editStartTime2Picker, target: editStartInput2 },
+    { timeInput: editEndTime2Picker, target: editEndInput2 }
   ];
 
   // ==========================================
@@ -334,12 +363,10 @@ document.addEventListener('DOMContentLoaded', () => {
   [tpInputHour, tpInputMinute].forEach(input => {
     if (!input) return;
 
-    // Sanitize typing (digits only)
     input.addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/[^0-9]/g, '');
     });
 
-    // Auto-select text on focus for easy typing
     input.addEventListener('focus', (e) => {
       e.target.select();
     });
@@ -428,7 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tpAmpmToggle) tpAmpmToggle.textContent = ampm;
       }
     } else {
-      // Default initial value
       if (tpInputHour) tpInputHour.value = '09';
       if (tpInputMinute) tpInputMinute.value = '00';
       if (tpAmpmToggle) tpAmpmToggle.textContent = 'AM';
@@ -470,24 +496,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Close handlers
   [closeTimePickerBtn, cancelTimePickerBtn].forEach(btn => {
     if (btn) btn.addEventListener('click', closeTimePicker);
   });
 
-  // Attach modal trigger listeners using click & focus prevention
+  // Consolidated picker config covering both Create & Edit modals
   const pickerConfig = [
+    // Create Form Pickers
     { el: startTime1Picker, label: 'Start Time (1)' },
     { el: endTime1Picker, label: 'End Time (1)' },
     { el: startTime2Picker, label: 'Start Time (2)' },
-    { el: endTime2Picker, label: 'End Time (2)' }
+    { el: endTime2Picker, label: 'End Time (2)' },
+    // Edit Form Pickers
+    { el: editStartTime1Picker, label: 'Edit Start Time (1)' },
+    { el: editEndTime1Picker, label: 'Edit End Time (1)' },
+    { el: editStartTime2Picker, label: 'Edit Start Time (2)' },
+    { el: editEndTime2Picker, label: 'Edit End Time (2)' }
   ];
 
   pickerConfig.forEach(({ el, label }) => {
     if (el) {
-      // Set readOnly so native keyboard or picker doesn't block the custom modal
       el.setAttribute('readonly', 'readonly');
-
       el.addEventListener('click', (e) => {
         e.preventDefault();
         openTimePicker(el, label);
@@ -500,19 +529,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Sync Shared Date + Time Inputs
   // ==========================================
   function syncDateTime() {
+    // Create Form Sync
     const dateValue = sharedDate ? sharedDate.value : '';
-
-    timePickers.forEach(({ timeInput, target }) => {
+    createTimePickers.forEach(({ timeInput, target }) => {
       if (dateValue && timeInput && timeInput.value && target) {
-        // Combines into "YYYY-MM-DDTHH:MM" format expected by Django
         target.value = `${dateValue}T${timeInput.value}`;
+      } else if (target) {
+        target.value = '';
+      }
+    });
+
+    // Edit Form Sync
+    const editDateValue = editSharedDate ? editSharedDate.value : '';
+    editTimePickers.forEach(({ timeInput, target }) => {
+      if (editDateValue && timeInput && timeInput.value && target) {
+        target.value = `${editDateValue}T${timeInput.value}`;
       } else if (target) {
         target.value = '';
       }
     });
   }
 
-  // Wrapper function to sync first, then perform validation checks
   function handleDateSyncAndValidate() {
     syncDateTime();
     if (typeof syncAndValidateDates === 'function') {
@@ -524,12 +561,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // 2. Event Listeners for Date and Time Pickers
   // ==========================================
+  // Create Modal Listeners
   if (sharedDate) {
     sharedDate.addEventListener('change', handleDateSyncAndValidate);
     sharedDate.addEventListener('blur', handleDateSyncAndValidate);
   }
 
   [startTime1Picker, endTime1Picker, startTime2Picker, endTime2Picker].forEach(picker => {
+    if (picker) {
+      picker.addEventListener('input', handleDateSyncAndValidate);
+      picker.addEventListener('change', handleDateSyncAndValidate);
+      picker.addEventListener('blur', handleDateSyncAndValidate);
+    }
+  });
+
+  // Edit Modal Listeners
+  if (editSharedDate) {
+    editSharedDate.addEventListener('change', handleDateSyncAndValidate);
+    editSharedDate.addEventListener('blur', handleDateSyncAndValidate);
+  }
+
+  [editStartTime1Picker, editEndTime1Picker, editStartTime2Picker, editEndTime2Picker].forEach(picker => {
     if (picker) {
       picker.addEventListener('input', handleDateSyncAndValidate);
       picker.addEventListener('change', handleDateSyncAndValidate);
@@ -607,7 +659,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectedRadio.value === '1' || selectedRadio.value === '2') {
       if (time2Container) time2Container.style.display = 'none';
 
-      // Clear both UI pickers and hidden Django fields for Session 2
       if (startTime2Picker) startTime2Picker.value = '';
       if (endTime2Picker) endTime2Picker.value = '';
       if (startInput2) startInput2.value = '';
@@ -616,7 +667,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (time2Container) time2Container.style.display = 'flex';
     }
 
-    // Re-sync and re-validate after changing radio session structure
     handleDateSyncAndValidate();
   }
 
@@ -624,15 +674,14 @@ document.addEventListener('DOMContentLoaded', () => {
     radio.addEventListener('change', updateTimeFieldsVisibility);
   });
 
-  // Initial check on load
   updateTimeFieldsVisibility();
 
 
   // ==========================================
-  // 6. Form Submission Guard Function
+  // 6. Form Submission Handlers
   // ==========================================
+  // Create Event Submission Guard
   function handleFormSubmission(e) {
-    // Ensure datetime hidden fields are fully populated right before submitting
     syncDateTime();
 
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -654,13 +703,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Intercept click on the submit button directly
   if (submitBtn) {
     submitBtn.addEventListener('click', handleFormSubmission);
   }
 
-  // Intercept form submit event as fallback
   if (form) {
     form.addEventListener('submit', handleFormSubmission);
+  }
+
+  // Edit Event Pre-Submit Sync
+  if (editForm) {
+    editForm.addEventListener('submit', () => {
+      syncDateTime();
+    });
   }
 });

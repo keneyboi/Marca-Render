@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from openpyxl.utils import get_column_letter
 from django.views.decorators.http import require_POST
 from apps.core.models import Event, AttendanceRecord
-from .forms import EventForm
+from .forms import EventForm, EditEventForm
 
 
 def _clean_cell_value(val):
@@ -395,4 +395,26 @@ def delete_event(request, event_id):
     name = event.name
     event.delete()
     messages.success(request, f'Event "{name}" and its attendance was successfully deleted.')
+    return redirect('home')
+
+
+@login_required(login_url='landing')
+@require_POST
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id, user=request.user)
+
+    # Use EditEventForm instead of EventForm
+    form = EditEventForm(request.POST, instance=event)
+
+    if not form.is_valid():
+        first_error = next(iter(form.errors.values()))[0] if form.errors else 'Invalid input.'
+        messages.error(request, f'Failed to update event: {first_error}')
+        return redirect('home')
+
+    try:
+        updated_event = form.save()
+        messages.success(request, f'Event "{updated_event.name}" was successfully updated!')
+    except Exception as e:
+        messages.error(request, f'Failed to update event: {e}')
+
     return redirect('home')

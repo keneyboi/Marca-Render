@@ -2,6 +2,28 @@ from django import forms
 from apps.core.models import Event
 
 
+from django import forms
+from apps.core.models import Event
+
+class EditEventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = [
+            'name', 
+            'location', 
+            'description', 
+            'session_type', 
+            'start_time_1', 
+            'end_time_1', 
+            'start_time_2', 
+            'end_time_2'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['start_time_2'].required = False
+        self.fields['end_time_2'].required = False
+
 class EventForm(forms.ModelForm):
     roster_file = forms.FileField(
         required=True,
