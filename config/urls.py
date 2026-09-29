@@ -24,5 +24,6 @@ urlpatterns = [
     path('register/', include('apps.register.urls')),     
     path('home/', include('apps.home.urls')),
     path('event/', include('apps.event.urls')),
+    path('officer/', include('apps.officer.urls')),
     path('attendance/', include('apps.attendance.urls')),
 ]

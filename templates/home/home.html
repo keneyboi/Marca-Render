@@ -85,8 +85,8 @@
 {% endif %}
 
 <!-- Dashboard Header -->
-<header class="dashboard-header-card">
-    <h1 class="welcome-title" style="margin-top:  12px;">
+<header class="dashboard-header-card" style="margin-top:  1.5rem;">
+    <h1 class="welcome-title" style="margin: 0;">
       {% if not current_folder %}
         Welcome, {{ request.user.first_name|default:request.user.username }}!
       {% else %}
@@ -129,7 +129,9 @@
 <!-- Folders Grid -->
 {% if not current_folder and folders %}
 <section class="folders-section">
-  <h3 class="section-title">Folders</h3>
+  <div class="section-header">
+    <h3 class="section-title">Folders</h3>
+  </div>
   <div class="folders-grid">
     {% for folder in folders %}
       <div class="folder-card drop-zone" data-folder-id="{{ folder.id }}">
@@ -153,11 +155,13 @@
 <!-- Events Section -->
 <section class="events-section">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-    <h3 class="section-title" style="margin: 0;">
+
       {% if not current_folder %}
-        Ungrouped Events
+        <div class="section-header">
+          <h3 class="section-title">Ungrouped Events</h3>
+        </div>
       {% endif %}
-    </h3>
+
 
     {% if events %}
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
@@ -311,7 +315,7 @@
     </div>
   {% endif %}
 </section>
-</section>
+
 
 <!-- Delete Modal -->
 <div 
