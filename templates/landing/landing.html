@@ -18,8 +18,8 @@
                 Say goodbye to long lines and messy sign-in sheets. With Marca, one permanent digital ID gets you into every campus event in seconds fast, effortless, and completely hassle-free.
             </p>
             <div class="hero-actions">
-                <a href="{% url 'register' %}" class="btn-primary">Create your Marca ID</a>
-                <a href="#how-it-works" class="btn-secondary">Explore Features</a>
+                <a href="{% url 'landing' %}#create-id" class="btn-primary">Create your Marca ID</a>
+                <a href="{% url 'landing' %}#about" class="btn-secondary">Explore Features</a>
             </div>
         </div>
         <img src="{% static 'images/design.png' %}" class="hero-image">
@@ -234,8 +234,6 @@
     </dialog>
 
 
-    <!-- Required JS Libraries -->
-<!-- Contact Us Section -->
 <section class="contact-section" id="contact">
     <div class="contact-container">
         
@@ -253,10 +251,12 @@
 
                 <!-- Right Side Form -->
                 <form 
-                class="contact-form" 
-                action="https://formspree.io/f/YOUR_FORM_ID" 
-                method="POST"
+                  class="contact-form" 
+                  action="{% url 'contact_us' %}" 
+                  method="POST"
                 >
+                    {% csrf_token %}
+                    
                     <div class="form-group">
                         <label for="contact-name">Full Name</label>
                         <input type="text" name="name" id="contact-name" class="marca-input" placeholder="Enter your full name" required>
@@ -264,7 +264,7 @@
 
                     <div class="form-group">
                         <label for="contact-email">Email Address</label>
-                        <input type="email" name="_replyto" id="contact-email" class="marca-input" placeholder="Your email here" required>
+                        <input type="email" name="email" id="contact-email" class="marca-input" placeholder="Your email here" required>
                     </div>
 
                     <div class="form-group">

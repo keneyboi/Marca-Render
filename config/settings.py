@@ -25,14 +25,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@h#pgm$8hdp6l33_r405_lx7((w4=@3dyikv4)530_%av29@$7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MAILERS = {
+    "default": {
+        "BACKEND": os.getenv(
+            "EMAIL_BACKEND", 
+            "django.core.mail.backends.smtp.EmailBackend"
+        ),
+        "OPTIONS": {
+            "host": os.getenv("EMAIL_HOST", "smtp.gmail.com"),
+            "port": int(os.getenv("EMAIL_PORT", 587)),
+            "username": os.getenv("EMAIL_HOST_USER", ""),
+            "password": os.getenv("EMAIL_HOST_PASSWORD", ""),
+            "use_tls": os.getenv("EMAIL_USE_TLS", "True") == "True",
+        },
+    }
+}
+
+# DEFAULT_FROM_EMAIL can stay outside MAILERS
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@marca.com")
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@example.com")
 
 # Application definition
 
@@ -57,7 +74,6 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',  # REQUIRED BEFORE YOUR MIDDLEWARE
@@ -146,12 +162,3 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
