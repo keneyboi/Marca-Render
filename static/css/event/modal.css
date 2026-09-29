@@ -15,6 +15,7 @@
     justify-content: center;
     padding: 1rem;
     box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .modal-card-header {
@@ -69,9 +70,10 @@
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch;
 }
-/* Adjust close button to sit cleanly inside flex row */
+
+/* Close Button with Press Movement */
 .modal-close-btn {
-    position: static; /* Removes absolute positioning */
+    position: static;
     background: none;
     border: none;
     outline: none;
@@ -87,6 +89,10 @@
 .modal-close-btn:hover {
     opacity: 1;
     transform: scale(1.1);
+}
+
+.modal-close-btn:active {
+    transform: scale(0.95) translateY(1px);
 }
 
 /* Typography & Form Labels */
@@ -216,7 +222,7 @@
     margin-bottom: 0.25rem;
 }
 
-/* Download Buttons Row */
+/* Download Buttons Row with Tactile Movement */
 .download-action-row {
     margin-bottom: 1.25rem;
 }
@@ -226,18 +232,24 @@
     font-size: 0.75rem;
     font-weight: 600;
     color: #4a0d0d;
-    background-color: #e8e2d5;
-    border: 1px solid #d1c8b8;
+    background-color: #efe8dc;
+    border: 1px solid #dcd3c3;
+    border-bottom: 3px solid #c8beac;
     padding: 0.65rem 0.75rem;
     border-radius: 10px;
     text-decoration: none;
-    transition: background-color 0.2s ease;
+    transition: all 0.1s ease;
     display: inline-block;
     box-sizing: border-box;
 }
 
 .btn-download:hover {
-    background-color: #ded7c8;
+    background-color: #e6dfd2;
+}
+
+.btn-download:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
 }
 
 /* File Dropzone Box */
@@ -289,43 +301,55 @@
     margin-top: 0.5rem;
 }
 
-/* Action Buttons */
+/* Action Buttons with 3D Tactile Push Movement */
 .btn-step-action,
 .btn-step-submit {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #ffffff;
     background-color: #4a0d0d;
-    border: none;
-    padding: 0.8rem 1.75rem;
-    border-radius: 12px;
+    border: 2px solid #3d0a0a;
+    border-bottom: 4px solid #280505;
+    padding: 0.7rem 1.75rem;
+    border-radius: 14px;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    box-shadow: 0 4px 12px rgba(74, 13, 13, 0.2);
+    transition: all 0.1s ease;
+    box-shadow: 0 4px 12px rgba(74, 13, 13, 0.15);
 }
 
 .btn-step-action:hover,
 .btn-step-submit:hover {
-    background-color: #330808;
-    transform: translateY(-1px);
+    background-color: #3b0a0a;
+}
+
+.btn-step-action:active,
+.btn-step-submit:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
 }
 
 .btn-step-back {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #4a0d0d;
-    background-color: #e8e2d5;
-    border: 1px solid #d1c8b8;
-    padding: 0.8rem 1.5rem;
-    border-radius: 12px;
+    background-color: #efe8dc;
+    border: 2px solid #dcd3c3;
+    border-bottom: 4px solid #c8beac;
+    padding: 0.7rem 1.5rem;
+    border-radius: 14px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.1s ease;
 }
 
 .btn-step-back:hover {
-    background-color: #ded7c8;
+    background-color: #e6dfd2;
+}
+
+.btn-step-back:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
 }
 
 /* Responsive Adjustments */
@@ -337,4 +361,240 @@
     .download-action-row {
         flex-direction: column;
     }
+}
+/* ==========================================
+   TIME PICKER MODAL (TACTILE APP DESIGN)
+   ========================================== */
+
+/* Fullscreen Overlay & Backdrop */
+#timePickerModal,
+.time-picker-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    display: none; /* JS toggles to 'flex' */
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    box-sizing: border-box;
+    background: rgba(51, 16, 16, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Modal Card Structure */
+#timePickerModal .modal-content,
+.time-picker-modal-card {
+    position: relative;
+    background-color: #fdfbf7;
+    border: 2px solid #e8e0d0;
+    border-radius: 28px;
+    padding: 1.75rem 1.5rem 1.25rem 1.5rem; /* Proper padding restored */
+    box-shadow: 0 16px 40px rgba(51, 16, 16, 0.22);
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+}
+
+/* Modal Title Header */
+.tp-header-container {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.tp-main-title {
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #4a0d0d;
+    margin: 0 0 0.2rem 0;
+    line-height: 1.2;
+}
+
+.tp-subtitle {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #786558;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+}
+
+/* Layout Wrapper */
+.tp-stepper-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    padding-bottom: 1.25rem;
+}
+
+/* Rounded White/Cream Card Housing Hours, Separator, and Minutes */
+.tp-picker-card {
+    background: none;
+    border-top: 2px solid #e5dccb;
+    border-bottom: 2px solid #e5dccb;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.tp-stepper-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Minimal Tactile Arrow Buttons */
+.tp-step-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    width: 44px;
+    height: 30px;
+    font-size: 0.9rem;
+    color: #4a0d0d;
+    opacity: 0.45;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.tp-step-btn:hover {
+    opacity: 0.95;
+}
+
+.tp-step-btn:active {
+    transform: scale(0.82);
+}
+
+/* Time Input Numbers */
+.tp-time-input {
+    width: 60px;
+    height: 48px;
+    text-align: center;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #331010;
+    background: transparent;
+    border: none;
+    outline: none;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.tp-time-input:focus {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Colon Separator */
+.tp-time-separator {
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #4a0d0d;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+/* Full-width Tactile 3D AM/PM Toggle Button */
+.tp-ampm-toggle-btn {
+    width: 100%;
+    height: 46px;
+    background-color: #4a0d0d;
+    color: #ffffff;
+    border: 2px solid #3d0a0a;
+    border-bottom: 4px solid #280505;
+    border-radius: 14px;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 0 4px 12px rgba(74, 13, 13, 0.15);
+}
+
+.tp-ampm-toggle-btn:hover {
+    background-color: #3b0a0a;
+}
+
+.tp-ampm-toggle-btn:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+}
+
+/* Tactile 3D Action Footer Buttons */
+.tp-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 2px solid #f0e8da;
+}
+
+.tp-actions .btn-step-back {
+    flex: 1;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #4a0d0d;
+    background-color: #efe8dc;
+    border: 2px solid #dcd3c3;
+    border-bottom: 4px solid #c8beac;
+    padding: 0.65rem 0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-align: center;
+}
+
+.tp-actions .btn-step-back:hover {
+    background-color: #e6dfd2;
+}
+
+.tp-actions .btn-step-back:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+}
+
+.tp-actions .btn-step-submit {
+    flex: 1;
+    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: #4a0d0d;
+    border: 2px solid #3d0a0a;
+    border-bottom: 4px solid #280505;
+    padding: 0.65rem 0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(74, 13, 13, 0.15);
+}
+
+.tp-actions .btn-step-submit:hover {
+    background-color: #3b0a0a;
+}
+
+.tp-actions .btn-step-submit:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
 }

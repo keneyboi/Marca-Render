@@ -9,13 +9,12 @@ from apps.core.models import AttendanceRecord, Event
 @login_required(login_url='landing')
 @require_POST
 def set_attendance(request):
-    # 1. Validate event_id format BEFORE hitting the DB
     event_id = request.POST.get('event_id', '')
     if not str(event_id).isdigit():
         messages.error(request, "Invalid event ID.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    # 2. Scope Event query to the logged-in user (Ownership Fix)
+
     event = get_object_or_404(Event, id=event_id, user=request.user)
 
     # Reliable fallback redirect using event.id
@@ -53,10 +52,17 @@ def set_attendance(request):
         messages.error(request, "Multiple matching records found — please contact support.")
         return redirect(fallback_redirect)
 
+    """Make this a derived state rather than a stored attribute to make 
+    it more flexible when an event organizer wants to change the late time
+    
+    This allows for situations wherein organizers of said event decide to be
+    lenient and change the late time to allow students not be marked late
+    """
+    
     # 4. Update attendance fields
     if option == '1':
         record.timed_in_1 = timezone.now()
-        if record.timed_in_1 > event.start_time:
+        if record.timed_in_1 > event.start_time_1:
             record.status = AttendanceRecord.Status.LATE
         else: 
             record.status = AttendanceRecord.Status.PRESENT
@@ -66,8 +72,10 @@ def set_attendance(request):
             record.status = AttendanceRecord.Status.LATE
     elif option == '3':
         record.timed_in_2 = timezone.now()
-        if record.status == AttendanceRecord.Status.ABSENT:
+        if record.timed_in_2 > event.start_time_2:
             record.status = AttendanceRecord.Status.LATE
+        else: 
+            record.status = AttendanceRecord.Status.PRESENT
     elif option == '4':
         record.timed_out_2 = timezone.now()
         if record.status == AttendanceRecord.Status.ABSENT:

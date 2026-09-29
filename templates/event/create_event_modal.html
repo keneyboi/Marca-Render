@@ -25,26 +25,24 @@
           </div>
 
           <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="modal-label">DESCRIPTION:</label>
-            {{ event_form.description }}
-          </div>
-
-          <div class="form-group" style="margin-bottom: 1rem;">
             <label class="modal-label">LOCATION:</label>
             {{ event_form.location }}
           </div>
 
-          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <div class="form-group" style="flex: 1; min-width: 200px;">
-              <label class="modal-label">START TIME:</label>
-              {{ event_form.start_time }}
-            </div>
-            <div class="form-group" style="flex: 1; min-width: 200px;">
-              <label class="modal-label">END TIME:</label>
-              {{ event_form.end_time }}
-            </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="modal-label">DESCRIPTION:</label>
+            {{ event_form.description }}
           </div>
 
+        
+          
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="button" class="btn-step-action" onclick="toggleEventStep(2)">NEXT</button>
+          </div>
+        </div>
+        
+        <div id="modal-step-2" style="display: none;">
+          
           <div class="form-group" style="margin-bottom: 1.5rem;">
             <label class="modal-label">SESSION CONFIGURATION</label>
             <div class="type-radio-group">
@@ -56,14 +54,52 @@
               {% endfor %}
             </div>
           </div>
+  
+          <!-- 1. Single Shared Date Picker -->
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="modal-label">EVENT DATE:</label>
+            <input type="date" id="shared_event_date" class="form-control" />
+          </div>
 
-          <div style="display: flex; justify-content: flex-end;">
-            <button type="button" class="btn-step-action" onclick="toggleEventStep(2)">NEXT</button>
+          <!-- Hidden original fields that Django expects -->
+          <div style="display: none;">
+            {{ event_form.start_time_1 }}
+            {{ event_form.end_time_1 }}
+            {{ event_form.start_time_2 }}
+            {{ event_form.end_time_2 }}
+          </div>
+
+          <!-- 2. Session 1 Times -->
+          <div id="time_1" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+              <label class="modal-label">START TIME (1):</label>
+              <input type="time" id="start_time_1_picker" class="form-control" />
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+              <label class="modal-label">END TIME (1):</label>
+              <input type="time" id="end_time_1_picker" class="form-control" />
+            </div>
+          </div>
+
+          <!-- 3. Session 2 Times -->
+          <div id="time_2" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+              <label class="modal-label">START TIME (2):</label>
+              <input type="time" id="start_time_2_picker" class="form-control" />
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+              <label class="modal-label">END TIME (2):</label>
+              <input type="time" id="end_time_2_picker" class="form-control" />
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="button" class="btn-step-back" onclick="toggleEventStep(1)">Back</button>
+            <button type="button" class="btn-step-action" onclick="toggleEventStep(3)">NEXT</button>
           </div>
         </div>
 
         <!-- STEP 2: ATTENDANCE REQUIREMENTS & ROSTER UPLOAD -->
-        <div id="modal-step-2" style="display: none;">
+        <div id="modal-step-3" style="display: none;">
           <div class="instructions-section">
             <h5 class="instructions-heading">ROSTER FORMAT INSTRUCTIONS</h5>
             <p class="instructions-text">
@@ -108,7 +144,7 @@
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
-            <button type="button" class="btn-step-back" onclick="toggleEventStep(1)">Back</button>
+            <button type="button" class="btn-step-back" onclick="toggleEventStep(2)">Back</button>
             <button type="submit" class="btn-step-submit">CREATE EVENT</button>
           </div>
         </div>
@@ -116,5 +152,70 @@
       </form>
 
     </div>
+  </div>
+</div>
+
+<div id="timePickerModal" class="time-picker-modal-overlay">
+  <div class="modal-content">
+    
+    <!-- Header with Subheader -->
+    <div class="tp-header-container">
+      <h5 class="tp-main-title">Select Time</h5>
+      <p id="timePickerTitle" class="tp-subtitle">Start Time (1)</p>
+    </div>
+    
+    <!-- Stepper Content -->
+    <div class="tp-stepper-container">
+      
+      <!-- Unified White Card for Hour & Minute Pickers -->
+      <div class="tp-picker-card">
+        
+        <!-- Hours Column -->
+        <div class="tp-stepper-col">
+          <button type="button" class="tp-step-btn" id="tpHourUp" aria-label="Increase hour">&#9650;</button>
+          <input 
+            type="text" 
+            id="tpInputHour" 
+            class="tp-time-input" 
+            value="09" 
+            maxlength="2" 
+            inputmode="numeric" 
+            pattern="[0-9]*" 
+            autocomplete="off"
+          />
+          <button type="button" class="tp-step-btn" id="tpHourDown" aria-label="Decrease hour">&#9660;</button>
+        </div>
+
+        <div class="tp-time-separator">:</div>
+
+        <!-- Minutes Column -->
+        <div class="tp-stepper-col">
+          <button type="button" class="tp-step-btn" id="tpMinuteUp" aria-label="Increase minute">&#9650;</button>
+          <input 
+            type="text" 
+            id="tpInputMinute" 
+            class="tp-time-input" 
+            value="00" 
+            maxlength="2" 
+            inputmode="numeric" 
+            pattern="[0-9]*" 
+            autocomplete="off"
+          />
+          <button type="button" class="tp-step-btn" id="tpMinuteDown" aria-label="Decrease minute">&#9660;</button>
+        </div>
+
+      </div>
+
+      <!-- AM/PM Toggle Button (Below the White Box) -->
+      <button type="button" id="tpAmpmToggle" class="tp-ampm-toggle-btn">AM</button>
+
+    </div>
+
+    <!-- Actions (Divider & Buttons Below) -->
+    <div class="tp-actions">
+      <button type="button" id="cancelTimePickerBtn" class="btn-step-back">Cancel</button>
+      <button type="button" id="confirmTimePickerBtn" class="btn-step-submit">Set Time</button>
+    </div>
+
   </div>
 </div>

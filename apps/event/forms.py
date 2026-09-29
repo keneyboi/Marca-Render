@@ -14,28 +14,45 @@ class EventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        fields = ['name', 'description', 'location', 'start_time', 'end_time', 'session_type']
+        fields = ['name', 'description', 'location', 'start_time_1', 'end_time_1', 'start_time_2', 'end_time_2','session_type']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Event Name'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Description'}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Location'}),
-            'start_time': forms.DateTimeInput(
-                format='%Y-%m-%dT%H:%M',
-                attrs={
-                    'class': 'form-control',
-                    'type': 'datetime-local',
-                    'id': 'id_start_time',
-                }
-            ),
-            'end_time': forms.DateTimeInput(
-                format='%Y-%m-%dT%H:%M',
-                attrs={
-                    'class': 'form-control',
-                    'type': 'datetime-local',
-                    'id': 'id_end_time',
-                }
-            ),
             'session_type': forms.RadioSelect(),
+            'start_time_1': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
+                attrs={
+                    'class': 'form-control',
+                    'type': 'datetime-local',
+                    'id': 'id_start_time_1',
+                }
+            ),
+            'end_time_1': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
+                attrs={
+                    'class': 'form-control',
+                    'type': 'datetime-local',
+                    'id': 'id_end_time_1',
+                }
+            ),
+            'start_time_2': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
+                attrs={
+                    'class': 'form-control',
+                    'type': 'datetime-local',
+                    'id': 'id_start_time_2',
+                }
+            ),
+            'end_time_2': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
+                attrs={
+                    'class': 'form-control',
+                    'type': 'datetime-local',
+                    'id': 'id_end_time_2',
+                }
+            ),
+            
         }
 
     def clean_roster_file(self):
@@ -52,10 +69,10 @@ class EventForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        start = cleaned_data.get('start_time')
-        end = cleaned_data.get('end_time')
+        start_1 = cleaned_data.get('start_time_1')
+        end_1 = cleaned_data.get('end_time_1')
 
-        if start and end and end <= start:
-            self.add_error('end_time', 'End time must be later than the start time.')
+        if start_1 and end_1 and end_1 <= start_1:
+            self.add_error('end_time_1', 'End time must be later than the start time.')
 
         return cleaned_data

@@ -84,32 +84,77 @@ function validateField(input, fieldName) {
 // REAL-TIME DATE VALIDATION & CALENDAR BOUNDS
 // -------------------------------------------------------------
 function syncAndValidateDates() {
-  const startInput = document.getElementById('id_start_time');
-  const endInput = document.getElementById('id_end_time');
-  if (!startInput || !endInput) return true;
+  const sharedDate = document.getElementById('shared_event_date');
+  const startInput1 = document.getElementById('id_start_time_1');
+  const endInput1 = document.getElementById('id_end_time_1');
+  const startTime1Picker = document.getElementById('start_time_1_picker');
+  const endTime1Picker = document.getElementById('end_time_1_picker');
+  const selectedRadio = document.querySelector('input[name="session_type"]:checked');
 
-  const startVal = startInput.value;
-  const endVal = endInput.value;
+  let isValid = true;
 
-  if (startVal) {
-    endInput.min = startVal;
-  } else {
-    endInput.removeAttribute('min');
-  }
-
-  if (startVal && endVal) {
-    if (new Date(endVal) <= new Date(startVal)) {
-      setFieldFeedback(endInput, false, 'End time must be after the start time.');
-      return false;
-    } else {
-      setFieldFeedback(endInput, true);
-      return true;
-    }
-  } else if (!startVal && endVal) {
-    setFieldFeedback(startInput, false, 'Start time is required.');
+  // Check if date is selected first
+  if (!sharedDate || !sharedDate.value) {
+    if (sharedDate) setFieldFeedback(sharedDate, false, 'Event date is required.');
     return false;
+  } else {
+    setFieldFeedback(sharedDate, true);
   }
-  return true;
+
+  // --- Validate Session 1 ---
+  if (startInput1 && endInput1) {
+    const startVal = startInput1.value;
+    const endVal = endInput1.value;
+
+    if (startTime1Picker && endTime1Picker && startTime1Picker.value) {
+      endTime1Picker.min = startTime1Picker.value;
+    }
+
+    if (startVal && endVal) {
+      if (new Date(endVal) <= new Date(startVal)) {
+        setFieldFeedback(endTime1Picker || endInput1, false, 'End time (1) must be after start time (1).');
+        isValid = false;
+      } else {
+        setFieldFeedback(endTime1Picker || endInput1, true);
+      }
+    } else if (!startVal && endVal) {
+      setFieldFeedback(startTime1Picker || startInput1, false, 'Start time (1) is required.');
+      isValid = false;
+    }
+  }
+
+  // --- Validate Session 2 (Only if Session 2 is enabled) ---
+  const isSession2Enabled = selectedRadio && selectedRadio.value !== '1' && selectedRadio.value !== '2';
+
+  if (isSession2Enabled) {
+    const startInput2 = document.getElementById('id_start_time_2');
+    const endInput2 = document.getElementById('id_end_time_2');
+    const startTime2Picker = document.getElementById('start_time_2_picker');
+    const endTime2Picker = document.getElementById('end_time_2_picker');
+
+    if (startInput2 && endInput2) {
+      const startVal2 = startInput2.value;
+      const endVal2 = endInput2.value;
+
+      if (startTime2Picker && endTime2Picker && startTime2Picker.value) {
+        endTime2Picker.min = startTime2Picker.value;
+      }
+
+      if (startVal2 && endVal2) {
+        if (new Date(endVal2) <= new Date(startVal2)) {
+          setFieldFeedback(endTime2Picker || endInput2, false, 'End time (2) must be after start time (2).');
+          isValid = false;
+        } else {
+          setFieldFeedback(endTime2Picker || endInput2, true);
+        }
+      } else if (!startVal2 && endVal2) {
+        setFieldFeedback(startTime2Picker || startInput2, false, 'Start time (2) is required.');
+        isValid = false;
+      }
+    }
+  }
+
+  return isValid;
 }
 
 // -------------------------------------------------------------
@@ -169,27 +214,64 @@ function validateSelectedFile(file) {
 function toggleEventStep(step) {
   const step1 = document.getElementById('modal-step-1');
   const step2 = document.getElementById('modal-step-2');
+  const step3 = document.getElementById('modal-step-3');
 
   if (step === 2) {
     const nameInput = document.getElementById('id_name');
     const locationInput = document.getElementById('id_location');
-    const startInput = document.getElementById('id_start_time');
-    const endInput = document.getElementById('id_end_time');
 
     const isNameValid = validateField(nameInput, 'Event name');
     const isLocValid = validateField(locationInput, 'Location');
-    const isStartValid = validateField(startInput, 'Start time');
-    const isEndValid = validateField(endInput, 'End time');
+
+    if (!isNameValid || !isLocValid) return;
+
+    if (step1) step1.style.display = 'none';
+    if (step2) step2.style.display = 'block';
+    if (step3) step3.style.display = 'none';
+
+  } else if (step === 3) {
+    const sharedDate = document.getElementById('shared_event_date');
+    const startTime1Picker = document.getElementById('start_time_1_picker');
+    const endTime1Picker = document.getElementById('end_time_1_picker');
+    const selectedRadio = document.querySelector('input[name="session_type"]:checked');
+
+    // 1. Validate Shared Date
+    const isDateValid = validateField(sharedDate, 'Event date');
+
+    // 2. Validate Session 1 Time Pickers
+    const isStart1Valid = validateField(startTime1Picker, 'Start time (1)');
+    const isEnd1Valid = validateField(endTime1Picker, 'End time (1)');
+
+    let isSession2Valid = true;
+
+    // 3. Validate Session 2 Pickers if active (Value is not single session '1' or '2')
+    if (selectedRadio && selectedRadio.value !== '1' && selectedRadio.value !== '2') {
+      const startTime2Picker = document.getElementById('start_time_2_picker');
+      const endTime2Picker = document.getElementById('end_time_2_picker');
+
+      const isStart2Valid = validateField(startTime2Picker, 'Start time (2)');
+      const isEnd2Valid = validateField(endTime2Picker, 'End time (2)');
+
+      if (!isStart2Valid || !isEnd2Valid) {
+        isSession2Valid = false;
+      }
+    }
+
+    // 4. Validate range logic across all time inputs
     const areDatesValid = syncAndValidateDates();
 
-    if (!isNameValid || !isLocValid || !isStartValid || !isEndValid || !areDatesValid) {
+    if (!isDateValid || !isStart1Valid || !isEnd1Valid || !isSession2Valid || !areDatesValid) {
       return;
     }
 
     if (step1) step1.style.display = 'none';
-    if (step2) step2.style.display = 'block';
-  } else {
     if (step2) step2.style.display = 'none';
+    if (step3) step3.style.display = 'block';
+
+  } else {
+    // Step 1 or back navigation
+    if (step2) step2.style.display = 'none';
+    if (step3) step3.style.display = 'none';
     if (step1) step1.style.display = 'block';
   }
 }
@@ -205,41 +287,285 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const nameInput = document.getElementById('id_name');
   const locationInput = document.getElementById('id_location');
-  const startInput = document.getElementById('id_start_time');
-  const endInput = document.getElementById('id_end_time');
 
-  // Inline input validation
-  if (nameInput) {
-    nameInput.addEventListener('blur', () => validateField(nameInput, 'Event name'));
-    nameInput.addEventListener('input', () => validateField(nameInput, 'Event name'));
-  }
-  if (locationInput) {
-    locationInput.addEventListener('blur', () => validateField(locationInput, 'Location'));
-    locationInput.addEventListener('input', () => validateField(locationInput, 'Location'));
-  }
-  if (startInput) {
-    startInput.addEventListener('input', syncAndValidateDates);
-    startInput.addEventListener('change', syncAndValidateDates);
-    startInput.addEventListener('blur', () => validateField(startInput, 'Start time'));
-  }
-  if (endInput) {
-    endInput.addEventListener('input', syncAndValidateDates);
-    endInput.addEventListener('change', syncAndValidateDates);
-    endInput.addEventListener('blur', () => validateField(endInput, 'End time'));
+  // Hidden Django Datetime Inputs
+  const startInput1 = document.getElementById('id_start_time_1');
+  const endInput1 = document.getElementById('id_end_time_1');
+  const startInput2 = document.getElementById('id_start_time_2');
+  const endInput2 = document.getElementById('id_end_time_2');
+
+  // Shared Date & Separate Time Pickers
+  const sharedDate = document.getElementById('shared_event_date');
+  const startTime1Picker = document.getElementById('start_time_1_picker');
+  const endTime1Picker = document.getElementById('end_time_1_picker');
+  const startTime2Picker = document.getElementById('start_time_2_picker');
+  const endTime2Picker = document.getElementById('end_time_2_picker');
+
+  const timePickers = [
+    { timeInput: startTime1Picker, target: startInput1 },
+    { timeInput: endTime1Picker, target: endInput1 },
+    { timeInput: startTime2Picker, target: startInput2 },
+    { timeInput: endTime2Picker, target: endInput2 }
+  ];
+
+  // ==========================================
+  // Custom Stepper Time Picker Controller
+  // ==========================================
+  const timePickerModal = document.getElementById('timePickerModal');
+  const closeTimePickerBtn = document.getElementById('closeTimePickerBtn');
+  const cancelTimePickerBtn = document.getElementById('cancelTimePickerBtn');
+  const confirmTimePickerBtn = document.getElementById('confirmTimePickerBtn');
+
+  const tpHourUp = document.getElementById('tpHourUp');
+  const tpHourDown = document.getElementById('tpHourDown');
+  const tpMinuteUp = document.getElementById('tpMinuteUp');
+  const tpMinuteDown = document.getElementById('tpMinuteDown');
+  const tpInputHour = document.getElementById('tpInputHour');
+  const tpInputMinute = document.getElementById('tpInputMinute');
+  const tpAmpmToggle = document.getElementById('tpAmpmToggle');
+
+  let activeTimeInput = null; // Target time input currently being edited
+
+  function padZero(num) {
+    return String(num).padStart(2, '0');
   }
 
-  // File Picker Change Event
-  if (fileInput) {
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files && fileInput.files.length > 0) {
-        validateSelectedFile(fileInput.files[0]);
-      } else {
-        validateSelectedFile(null);
+  // 1. Numeric-Only Enforcement & Input Formatting
+  [tpInputHour, tpInputMinute].forEach(input => {
+    if (!input) return;
+
+    // Sanitize typing (digits only)
+    input.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+
+    // Auto-select text on focus for easy typing
+    input.addEventListener('focus', (e) => {
+      e.target.select();
+    });
+  });
+
+  if (tpInputHour) {
+    tpInputHour.addEventListener('blur', () => {
+      let val = parseInt(tpInputHour.value, 10);
+      if (isNaN(val) || val < 1) val = 12;
+      if (val > 12) val = 12;
+      tpInputHour.value = padZero(val);
+    });
+  }
+
+  if (tpInputMinute) {
+    tpInputMinute.addEventListener('blur', () => {
+      let val = parseInt(tpInputMinute.value, 10);
+      if (isNaN(val) || val < 0) val = 0;
+      if (val > 59) val = 59;
+      tpInputMinute.value = padZero(val);
+    });
+  }
+
+  // 2. Stepper Buttons Logic
+  if (tpHourUp) {
+    tpHourUp.addEventListener('click', () => {
+      let val = parseInt(tpInputHour.value, 10) || 12;
+      val = val >= 12 ? 1 : val + 1;
+      tpInputHour.value = padZero(val);
+    });
+  }
+
+  if (tpHourDown) {
+    tpHourDown.addEventListener('click', () => {
+      let val = parseInt(tpInputHour.value, 10) || 1;
+      val = val <= 1 ? 12 : val - 1;
+      tpInputHour.value = padZero(val);
+    });
+  }
+
+  if (tpMinuteUp) {
+    tpMinuteUp.addEventListener('click', () => {
+      let val = parseInt(tpInputMinute.value, 10) || 0;
+      val = val >= 59 ? 0 : val + 1;
+      tpInputMinute.value = padZero(val);
+    });
+  }
+
+  if (tpMinuteDown) {
+    tpMinuteDown.addEventListener('click', () => {
+      let val = parseInt(tpInputMinute.value, 10) || 0;
+      val = val <= 0 ? 59 : val - 1;
+      tpInputMinute.value = padZero(val);
+    });
+  }
+
+  // 3. AM/PM Toggle Button
+  if (tpAmpmToggle) {
+    tpAmpmToggle.addEventListener('click', () => {
+      tpAmpmToggle.textContent = tpAmpmToggle.textContent === 'AM' ? 'PM' : 'AM';
+    });
+  }
+
+  // 4. Open & Close Modal Logic
+  function openTimePicker(targetInput, labelTitle) {
+    if (!timePickerModal) {
+      console.error('Time picker modal element (#timePickerModal) not found in DOM.');
+      return;
+    }
+
+    activeTimeInput = targetInput;
+    const titleEl = document.getElementById('timePickerTitle');
+    if (titleEl && labelTitle) {
+      titleEl.textContent = `${labelTitle}`;
+    }
+
+    // Pre-fill modal state from active target input (expects HH:MM)
+    if (targetInput && targetInput.value) {
+      const parts = targetInput.value.split(':');
+      if (parts.length === 2) {
+        let h = parseInt(parts[0], 10);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        if (tpInputHour) tpInputHour.value = padZero(h);
+        if (tpInputMinute) tpInputMinute.value = padZero(parseInt(parts[1], 10) || 0);
+        if (tpAmpmToggle) tpAmpmToggle.textContent = ampm;
+      }
+    } else {
+      // Default initial value
+      if (tpInputHour) tpInputHour.value = '09';
+      if (tpInputMinute) tpInputMinute.value = '00';
+      if (tpAmpmToggle) tpAmpmToggle.textContent = 'AM';
+    }
+
+    timePickerModal.style.display = 'flex';
+  }
+
+  function closeTimePicker() {
+    if (timePickerModal) {
+      timePickerModal.style.display = 'none';
+    }
+    activeTimeInput = null;
+  }
+
+  // 5. Confirm Time Selection & Store as 24-Hour (HH:MM)
+  if (confirmTimePickerBtn) {
+    confirmTimePickerBtn.addEventListener('click', () => {
+      if (activeTimeInput) {
+        let h = parseInt(tpInputHour ? tpInputHour.value : 12, 10) || 12;
+        let m = parseInt(tpInputMinute ? tpInputMinute.value : 0, 10) || 0;
+        const ampm = tpAmpmToggle ? tpAmpmToggle.textContent : 'AM';
+
+        if (h < 1) h = 12;
+        if (h > 12) h = 12;
+        if (m < 0) m = 0;
+        if (m > 59) m = 59;
+
+        // Convert 12-hour format to 24-hour format
+        if (ampm === 'PM' && h < 12) h += 12;
+        if (ampm === 'AM' && h === 12) h = 0;
+
+        activeTimeInput.value = `${padZero(h)}:${padZero(m)}`;
+
+        // Trigger change event to fire sync and validation routines
+        activeTimeInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      closeTimePicker();
+    });
+  }
+
+  // Close handlers
+  [closeTimePickerBtn, cancelTimePickerBtn].forEach(btn => {
+    if (btn) btn.addEventListener('click', closeTimePicker);
+  });
+
+  // Attach modal trigger listeners using click & focus prevention
+  const pickerConfig = [
+    { el: startTime1Picker, label: 'Start Time (1)' },
+    { el: endTime1Picker, label: 'End Time (1)' },
+    { el: startTime2Picker, label: 'Start Time (2)' },
+    { el: endTime2Picker, label: 'End Time (2)' }
+  ];
+
+  pickerConfig.forEach(({ el, label }) => {
+    if (el) {
+      // Set readOnly so native keyboard or picker doesn't block the custom modal
+      el.setAttribute('readonly', 'readonly');
+
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        openTimePicker(el, label);
+      });
+    }
+  });
+
+
+  // ==========================================
+  // 1. Sync Shared Date + Time Inputs
+  // ==========================================
+  function syncDateTime() {
+    const dateValue = sharedDate ? sharedDate.value : '';
+
+    timePickers.forEach(({ timeInput, target }) => {
+      if (dateValue && timeInput && timeInput.value && target) {
+        // Combines into "YYYY-MM-DDTHH:MM" format expected by Django
+        target.value = `${dateValue}T${timeInput.value}`;
+      } else if (target) {
+        target.value = '';
       }
     });
   }
 
-  // Drag and Drop Handling
+  // Wrapper function to sync first, then perform validation checks
+  function handleDateSyncAndValidate() {
+    syncDateTime();
+    if (typeof syncAndValidateDates === 'function') {
+      syncAndValidateDates();
+    }
+  }
+
+
+  // ==========================================
+  // 2. Event Listeners for Date and Time Pickers
+  // ==========================================
+  if (sharedDate) {
+    sharedDate.addEventListener('change', handleDateSyncAndValidate);
+    sharedDate.addEventListener('blur', handleDateSyncAndValidate);
+  }
+
+  [startTime1Picker, endTime1Picker, startTime2Picker, endTime2Picker].forEach(picker => {
+    if (picker) {
+      picker.addEventListener('input', handleDateSyncAndValidate);
+      picker.addEventListener('change', handleDateSyncAndValidate);
+      picker.addEventListener('blur', handleDateSyncAndValidate);
+    }
+  });
+
+
+  // ==========================================
+  // 3. Inline Input Validation (Name & Location)
+  // ==========================================
+  if (nameInput && typeof validateField === 'function') {
+    nameInput.addEventListener('blur', () => validateField(nameInput, 'Event name'));
+    nameInput.addEventListener('input', () => validateField(nameInput, 'Event name'));
+  }
+  if (locationInput && typeof validateField === 'function') {
+    locationInput.addEventListener('blur', () => validateField(locationInput, 'Location'));
+    locationInput.addEventListener('input', () => validateField(locationInput, 'Location'));
+  }
+
+
+  // ==========================================
+  // 4. File Picker & Drag-and-Drop Handling
+  // ==========================================
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      if (typeof validateSelectedFile === 'function') {
+        if (fileInput.files && fileInput.files.length > 0) {
+          validateSelectedFile(fileInput.files[0]);
+        } else {
+          validateSelectedFile(null);
+        }
+      }
+    });
+  }
+
   if (dropzone && fileInput) {
     ['dragenter', 'dragover'].forEach(eventName => {
       dropzone.addEventListener(eventName, (e) => {
@@ -259,27 +585,72 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0];
-        if (validateSelectedFile(file)) {
+        if (typeof validateSelectedFile !== 'function' || validateSelectedFile(file)) {
           fileInput.files = e.dataTransfer.files;
         }
       }
     });
   }
 
-  // Submission Guard Function
+
+  // ==========================================
+  // 5. Radio Buttons & Dynamic Time Fields Visibility
+  // ==========================================
+  const radioButtons = document.querySelectorAll('input[name="session_type"]');
+  const time2Container = document.getElementById('time_2');
+
+  function updateTimeFieldsVisibility() {
+    const selectedRadio = document.querySelector('input[name="session_type"]:checked');
+
+    if (!selectedRadio) return;
+
+    if (selectedRadio.value === '1' || selectedRadio.value === '2') {
+      if (time2Container) time2Container.style.display = 'none';
+
+      // Clear both UI pickers and hidden Django fields for Session 2
+      if (startTime2Picker) startTime2Picker.value = '';
+      if (endTime2Picker) endTime2Picker.value = '';
+      if (startInput2) startInput2.value = '';
+      if (endInput2) endInput2.value = '';
+    } else {
+      if (time2Container) time2Container.style.display = 'flex';
+    }
+
+    // Re-sync and re-validate after changing radio session structure
+    handleDateSyncAndValidate();
+  }
+
+  radioButtons.forEach(radio => {
+    radio.addEventListener('change', updateTimeFieldsVisibility);
+  });
+
+  // Initial check on load
+  updateTimeFieldsVisibility();
+
+
+  // ==========================================
+  // 6. Form Submission Guard Function
+  // ==========================================
   function handleFormSubmission(e) {
+    // Ensure datetime hidden fields are fully populated right before submitting
+    syncDateTime();
+
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
       e.preventDefault();
       e.stopPropagation();
-      setDropzoneFeedback(false, 'Please upload a attendance file (.csv or .xlsx) before creating the event.');
+      if (typeof setDropzoneFeedback === 'function') {
+        setDropzoneFeedback(false, 'Please upload an attendance file (.csv or .xlsx) before creating the event.');
+      }
       return false;
     }
 
-    const isValid = validateSelectedFile(fileInput.files[0]);
-    if (!isValid) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
+    if (typeof validateSelectedFile === 'function') {
+      const isValid = validateSelectedFile(fileInput.files[0]);
+      if (!isValid) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
     }
   }
 

@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
+    type = models.TextField(max_length=20)
 
     def __str__(self):
         return f"{self.username} ({self.email})"
@@ -50,8 +51,11 @@ class Event(models.Model):
         choices=Status.choices,
         default=Status.SCHEDULED
     )
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time_1 = models.DateTimeField()
+    end_time_1 = models.DateTimeField()
+    start_time_2 = models.DateTimeField(blank=True, null=True)
+    end_time_2 = models.DateTimeField(blank=True, null=True)
+    
 
     folder = models.ForeignKey(
         Folder,

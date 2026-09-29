@@ -32,7 +32,11 @@
       <h1 class="event-headline">{{ event.name }}</h1>
       <div class="event-meta-strip">
         <span><strong>Venue:</strong> {{ event.location }}</span>
-        <span><strong>Time:</strong> {{ event.start_time|date:"M d, Y H:i" }} &ndash; {{ event.end_time|date:"H:i" }}</span>
+        <span><strong>Date:</strong> {{ event.start_time_1|date:"M d"}}</span>
+        <span><strong>Time (1):</strong> {{ event.start_time_1|date:"H:i" }} &ndash; {{ event.end_time_1|date:"H:i" }}</span>
+        {% if event.session_type == '3' %} 
+        <span><strong>Time (2):</strong> {{ event.start_time_2|date:"H:i" }} &ndash; {{ event.end_time_2|date:"H:i" }}</span>
+        {% endif %}
       </div>
     </div>
     <div class="detail-header-right" style="display: flex; gap: 0.5rem; align-items: center;" class="add-attendee-button">

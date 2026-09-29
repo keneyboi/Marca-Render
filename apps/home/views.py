@@ -12,11 +12,11 @@ def show_home(request, folder_id=None):
 
     if folder_id:
         current_folder = get_object_or_404(Folder, id=folder_id, user=request.user)
-        events = request.user.organized_events.filter(folder=current_folder).order_by('-start_time')
+        events = request.user.organized_events.filter(folder=current_folder).order_by('-start_time_1')
         folders = []
     else:
         folders = all_folders
-        events = request.user.organized_events.filter(folder__isnull=True).order_by('-start_time')
+        events = request.user.organized_events.filter(folder__isnull=True).order_by('-start_time_1')
 
     form = EventForm()
 

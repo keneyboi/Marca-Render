@@ -9,7 +9,7 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'location', 'status', 'session_type', 'start_time', 'end_time'] 
+    list_display = ['name', 'location', 'status', 'session_type', 'start_time_1', 'end_time_1'] 
 
 @admin.register(AttendanceRecord)
 class AttendanceRecordAdmin(admin.ModelAdmin):
