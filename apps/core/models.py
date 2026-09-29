@@ -3,11 +3,46 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    class UserType(models.TextChoices):
+        ADMIN = 'ADMIN', 'Admin'
+        OFFICER = 'OFFICER', 'Officer'
+
     email = models.EmailField(unique=True)
-    type = models.TextField(max_length=20)
+    type = models.CharField(
+        max_length=20, 
+        choices=UserType.choices, 
+        default=UserType.OFFICER
+    )
 
     def __str__(self):
         return f"{self.username} ({self.email})"
+    
+    @property
+    def is_admin(self):
+        return self.type == self.UserType.ADMIN
+    
+class Officer(models.Model):
+    
+    officer = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='officer_profile'
+    )
+   
+    admin = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='managed_officers'
+    )
+
+    class Meta:
+        ordering = ['officer__username']
+
+    def __str__(self):
+        admin_str = self.admin.username if self.admin else "Unassigned"
+        return f"Officer: {self.officer.username} (Admin: {admin_str})"
 
 class Folder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders')
@@ -19,6 +54,8 @@ class Folder(models.Model):
 
     def __str__(self):
         return self.name
+    
+
 
 
 class Event(models.Model):

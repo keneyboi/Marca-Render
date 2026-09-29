@@ -95,21 +95,23 @@
     </h1>
 
     <div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
-    {% if not current_folder %}
-      <button type="button" class="btn-secondary" id="openFolderBtn">
-        + New Folder
-      </button>
-      <button type="button" class="btn-primary" onclick="openEventModal()">
-        + Create Event
-      </button>
-    {% else %}
+      {% if current_folder %}
         <a href="{% url 'home' %}" class="btn-navigation">
-        &larr; Back to Dashboard
+          &larr; Back to Dashboard
         </a>
+      {% else %}
+          <button type="button" class="btn-secondary" id="openFolderBtn">
+            + New Folder
+          </button>
       {% endif %}
 
+      {% if request.user.is_admin %}
+        <button type="button" class="btn-primary" onclick="openEventModal()">
+          + Create Event
+        </button>
+      {% endif %}
+    </div>
 
-  </div>
 </header>
 
 <!-- Breadcrumb Navigation & Root Drop Target -->
@@ -217,6 +219,7 @@
                   {{ event.get_status_display }}
                 </span>
 
+                {% if request.user.is_admin %}
                 <!-- Floating Kebab Action Menu -->
                 <div class="card-action-menu">
                   <button 
@@ -270,6 +273,7 @@
                     </button>
                   </div>
                 </div>
+                {% endif %}
               </div>
             </div>
 
@@ -309,9 +313,11 @@
           No ungrouped events found under your account.
         {% endif %}
       </p>
+      {% if request.user.is_admin %}
       <button type="button" class="btn-secondary" onclick="openEventModal()" style="cursor: pointer;">
         Create Event
       </button>
+      {% endif %}
     </div>
   {% endif %}
 </section>

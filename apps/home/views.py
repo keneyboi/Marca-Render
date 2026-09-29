@@ -7,16 +7,33 @@ from apps.event.forms import EventForm
 
 @login_required
 def show_home(request, folder_id=None):
-    current_folder = None
-    all_folders = Folder.objects.filter(user=request.user)
+    if hasattr(request.user, 'is_admin') and request.user.is_admin:
+        owner_user = request.user
+    elif hasattr(request.user, 'officer_profile') and request.user.officer_profile.admin:
+        owner_user = request.user.officer_profile.admin
+    else:
+        owner_user = None
 
+    if not owner_user:
+        return render(request, 'home/home.html', {
+            'events': [],
+            'folders': [],
+            'current_folder': None,
+            'all_folders': [],
+            'event_form': EventForm(),
+            'status_choices': Event.Status.choices,
+        })
+
+    all_folders = Folder.objects.filter(user=owner_user)
+
+    current_folder = None
     if folder_id:
-        current_folder = get_object_or_404(Folder, id=folder_id, user=request.user)
-        events = request.user.organized_events.filter(folder=current_folder).order_by('-start_time_1')
+        current_folder = get_object_or_404(Folder, id=folder_id, user=owner_user)
+        events = owner_user.organized_events.filter(folder=current_folder).order_by('-start_time_1')
         folders = []
     else:
         folders = all_folders
-        events = request.user.organized_events.filter(folder__isnull=True).order_by('-start_time_1')
+        events = owner_user.organized_events.filter(folder__isnull=True).order_by('-start_time_1')
 
     form = EventForm()
 
