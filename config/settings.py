@@ -98,21 +98,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database: Uses PostgreSQL if DATABASE_URL exists, otherwise falls back to local SQLite
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=not DEBUG
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is missing. Check your local .env or Render settings.")
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
 
 
 # Custom User Model
