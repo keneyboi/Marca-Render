@@ -12,16 +12,16 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Load environment variables
+# Load environment variables from .env if present
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-secret-key')
+# Secret Key (fallback for local dev)
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-local-development-key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
+# DEBUG: Defaults to True for local dev unless explicitly set to False/0 in environment
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-# ALLOWED_HOSTS for Render and local development
+# ALLOWED_HOSTS: Defaults to local hosts
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com').split(',')
 
 
@@ -65,7 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # REQUIRED FOR RENDER STATIC FILES
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Safe in both dev and production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -95,7 +95,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database Configuration (Falls back to SQLite if DATABASE_URL is not provided)
+# Database: Uses PostgreSQL if DATABASE_URL exists, otherwise falls back to local SQLite
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
@@ -148,6 +148,5 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Required for Render collectstatic and WhiteNoise serving
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
