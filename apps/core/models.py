@@ -22,27 +22,25 @@ class User(AbstractUser):
         return self.type == self.UserType.ADMIN
     
 class Officer(models.Model):
-    
-    officer = models.OneToOneField(
-        User, 
-        on_delete=models.CASCADE, 
-        related_name='officer_profile'
+    officer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='admin_links'
     )
-   
     admin = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
+        User,
+        on_delete=models.CASCADE,
         related_name='managed_officers'
     )
 
     class Meta:
         ordering = ['officer__username']
+        constraints = [
+            models.UniqueConstraint(fields=['officer', 'admin'], name='unique_officer_admin')
+        ]
 
     def __str__(self):
-        admin_str = self.admin.username if self.admin else "Unassigned"
-        return f"Officer: {self.officer.username} (Admin: {admin_str})"
+        return f"Officer: {self.officer.username} (Admin: {self.admin.username})"
 
 class Folder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders')

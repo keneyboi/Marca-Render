@@ -8,4 +8,5 @@ urlpatterns = [
     path('folder/<int:folder_id>/delete/', views.delete_folder, name='delete_folder'),
     path('event/<int:event_id>/move/', views.move_event_folder, name='move_event'),
     path('event/<int:event_id>/remove/', views.remove_event_from_folder, name='remove_from_folder'),
+    path('switch-admin/<int:admin_id>/', views.switch_admin, name='switch_admin'),
 ]
