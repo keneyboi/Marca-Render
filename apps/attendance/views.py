@@ -5,6 +5,15 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from apps.core.models import AttendanceRecord, Event
+from django.core.exceptions import PermissionDenied
+
+def get_data_owner(user):
+    """Returns the user who owns the data (either the Admin themselves or the Officer's Admin)."""
+    if hasattr(user, 'is_admin') and user.is_admin:
+        return user
+    if hasattr(user, 'officer_profile') and user.officer_profile.admin:
+        return user.officer_profile.admin
+    raise PermissionDenied("You do not have permission to access these records.")
 
 @login_required(login_url='landing')
 @require_POST
@@ -13,9 +22,10 @@ def set_attendance(request):
     if not str(event_id).isdigit():
         messages.error(request, "Invalid event ID.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
-    event = get_object_or_404(Event, id=event_id, user=request.user)
+    
+    owner_user = get_data_owner(request.user)
+    
+    event = get_object_or_404(Event, id=event_id, user=owner_user)
 
     # Reliable fallback redirect using event.id
     fallback_redirect = request.META.get('HTTP_REFERER') or redirect('event_detail', event_id=event.id).url
