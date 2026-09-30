@@ -19,6 +19,9 @@ def set_attendance(request):
     
     owner_user = get_data_owner(request.user)
     
+    if owner_user is None:
+        raise PermissionDenied("You do not have permission to edit these records.")
+    
     event = get_object_or_404(Event, id=event_id, user=owner_user)
 
     # Reliable fallback redirect using event.id
