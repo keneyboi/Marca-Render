@@ -4,15 +4,13 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from apps.core.models import Event, Folder
 from apps.event.forms import EventForm
+from django.contrib import messages
+from apps.core.access import get_data_owner, get_officer_admins
 
 @login_required
 def show_home(request, folder_id=None):
-    if hasattr(request.user, 'is_admin') and request.user.is_admin:
-        owner_user = request.user
-    elif hasattr(request.user, 'officer_profile') and request.user.officer_profile.admin:
-        owner_user = request.user.officer_profile.admin
-    else:
-        owner_user = None
+    owner_user = get_data_owner(request)
+    officer_admins = [] if request.user.is_admin else list(get_officer_admins(request.user))
 
     if not owner_user:
         return render(request, 'home/home.html', {
@@ -22,6 +20,8 @@ def show_home(request, folder_id=None):
             'all_folders': [],
             'event_form': EventForm(),
             'status_choices': Event.Status.choices,
+            'officer_admins': officer_admins,
+            'active_admin': owner_user,
         })
 
     all_folders = Folder.objects.filter(user=owner_user)
@@ -44,6 +44,8 @@ def show_home(request, folder_id=None):
         'all_folders': all_folders,
         'event_form': form,
         'status_choices': Event.Status.choices,
+        'officer_admins': officer_admins,
+        'active_admin': owner_user,
     })
 
 @login_required
@@ -97,4 +99,15 @@ def remove_event_from_folder(request, event_id):
 
     if folder:
         return redirect('folder_detail', folder_id=folder.id)
+    return redirect('home')
+
+
+@login_required
+@require_POST
+def switch_admin(request, admin_id):
+    admin = get_officer_admins(request.user).filter(pk=admin_id).first()
+    if admin is None:
+        messages.error(request, 'You are not an officer under that admin.')
+    else:
+        request.session['active_admin_id'] = admin.pk
     return redirect('home')

@@ -114,6 +114,28 @@
 
 </header>
 
+{% if officer_admins|length > 1 %}
+  <div class="admin-switcher">
+    <label for="adminSwitcher">Viewing:</label>
+    <select id="adminSwitcher" onchange="switchAdmin(this)">
+      {% for a in officer_admins %}
+        <option value="{% url 'switch_admin' a.id %}" {% if a.id == active_admin.id %}selected{% endif %}>
+          {{ a.get_full_name|default:a.username }}
+        </option>
+      {% endfor %}
+    </select>
+    <form id="switchAdminForm" method="POST" action="">{% csrf_token %}</form>
+  </div>
+
+  <script>
+    function switchAdmin(select) {
+      const form = document.getElementById('switchAdminForm');
+      form.action = select.value;
+      form.submit();
+    }
+  </script>
+{% endif %}
+
 <!-- Breadcrumb Navigation & Root Drop Target -->
 {% if current_folder %}
 <nav class="fm-breadcrumb-bar">

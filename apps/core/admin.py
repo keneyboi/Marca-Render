@@ -6,6 +6,14 @@ from .models import User, Event, AttendanceRecord, Officer
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'type']
+    fieldsets = UserAdmin.fieldsets + (
+        ('Custom Role', {'fields': ('type',)}),
+    )
+
+    # Include 'type' when creating a new user through admin
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Custom Role', {'fields': ('type',)}),
+    )
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):

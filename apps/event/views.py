@@ -13,15 +13,7 @@ from django.views.decorators.http import require_POST
 from apps.core.models import Event, AttendanceRecord
 from .forms import EventForm, EditEventForm
 from django.core.exceptions import PermissionDenied
-
-def get_data_owner(user):
-    """Returns the user who owns the data (either the Admin themselves or the Officer's Admin)."""
-    if hasattr(user, 'is_admin') and user.is_admin:
-        return user
-    if hasattr(user, 'officer_profile') and user.officer_profile.admin:
-        return user.officer_profile.admin
-    raise PermissionDenied("You do not have permission to access these records.")
-
+from apps.core.access import get_data_owner
 
 def _clean_cell_value(val):
     if val is None:
@@ -294,7 +286,9 @@ def download_attendance_template_xlsx(request):
 
 @login_required(login_url='landing')
 def event_detail(request, event_id):
-    owner_user = get_data_owner(request.user)
+    owner_user = get_data_owner(request)
+    if owner_user is None:
+        raise PermissionDenied("You do not have permission to access these records.")
 
     event = get_object_or_404(Event, id=event_id, user=owner_user)
     all_records = event.attendance_records.all().order_by('last_name', 'first_name')

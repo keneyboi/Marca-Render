@@ -106,7 +106,6 @@
           <th>Officer Name</th>
           <th>Username</th>
           <th>Email Address</th>
-          <th>User Type</th>
           <th class="align-right">Actions</th>
         </tr>
       </thead>
@@ -119,25 +118,8 @@
               </td>
               <td class="text-muted">@{{ officer.username }}</td>
               <td class="text-muted">{{ officer.email }}</td>
-              <td>
-                <span class="badge">{{ officer.type }}</span>
-              </td>
               <td class="align-right">
                 <div class="action-btn-group">
-                  <button 
-                    type="button" 
-                    class="btn-secondary btn-sm"
-                    onclick="openEditOfficerModal({
-                      id: '{{ officer.id }}',
-                      username: '{{ officer.username|escapejs }}',
-                      firstName: '{{ officer.first_name|escapejs }}',
-                      lastName: '{{ officer.last_name|escapejs }}',
-                      email: '{{ officer.email|escapejs }}',
-                      type: '{{ officer.type|escapejs }}'
-                    })"
-                  >
-                    Edit
-                  </button>
                   <button 
                     type="button" 
                     class="btn-danger-outline"
@@ -169,85 +151,17 @@
       <button type="button" class="modal-close-btn" onclick="closeCreateOfficerModal()" aria-label="Close">&times;</button>
     </div>
 
-    <form action="" method="POST">
+    <form action="{% url 'create_officer' %}" method="POST">
       {% csrf_token %}
-      <input type="hidden" name="type" value="officer">
-
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label class="form-label">FIRST NAME</label>
-          <input type="text" name="first_name" class="form-input">
-        </div>
-        <div class="form-group flex-1">
-          <label class="form-label">LAST NAME</label>
-          <input type="text" name="last_name" class="form-input">
-        </div>
-      </div>
 
       <div class="form-group">
-        <label class="form-label">USERNAME *</label>
-        <input type="text" name="username" required placeholder="e.g. officer_jdoe" class="form-input">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">EMAIL ADDRESS *</label>
+        <label class="form-label">OFFICER'S EMAIL *</label>
         <input type="email" name="email" required placeholder="e.g. officer@marca.org" class="form-input">
-      </div>
-
-      <div class="form-group last">
-        <label class="form-label">PASSWORD *</label>
-        <input type="password" name="password" required class="form-input">
       </div>
 
       <div class="modal-actions">
         <button type="button" onclick="closeCreateOfficerModal()" class="btn-secondary btn-full">Cancel</button>
-        <button type="submit" class="btn-primary btn-full">Create Officer</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Edit Officer Modal -->
-<div id="editOfficerModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 class="modal-title">Edit Officer Details</h3>
-      <button type="button" class="modal-close-btn" onclick="closeEditOfficerModal()" aria-label="Close">&times;</button>
-    </div>
-
-    <form id="editOfficerForm" method="POST" action="">
-      {% csrf_token %}
-      <input type="hidden" id="edit_officer_id" name="officer_id">
-
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label class="form-label">FIRST NAME</label>
-          <input type="text" id="edit_first_name" name="first_name" class="form-input">
-        </div>
-        <div class="form-group flex-1">
-          <label class="form-label">LAST NAME</label>
-          <input type="text" id="edit_last_name" name="last_name" class="form-input">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">USERNAME *</label>
-        <input type="text" id="edit_username" name="username" required class="form-input">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">EMAIL ADDRESS *</label>
-        <input type="email" id="edit_email" name="email" required class="form-input">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">USER TYPE</label>
-        <input type="text" id="edit_type" name="type" value="officer" required class="form-input">
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" onclick="closeEditOfficerModal()" class="btn-secondary btn-full">Cancel</button>
-        <button type="submit" class="btn-primary btn-full">Save Changes</button>
+        <button type="submit" class="btn-primary btn-full">Add Officer</button>
       </div>
     </form>
   </div>
@@ -258,7 +172,7 @@
   <div class="modal-card modal-card-sm">
     <h3 class="modal-title">Remove Officer</h3>
     <p class="modal-body-text">
-      Are you sure you want to remove <strong id="deleteOfficerUsername"></strong>? This account will lose all access rights immediately.
+      Are you sure you want to remove <strong id="deleteOfficerUsername"></strong>? They will lose access to your events, but their account and any other admins stay unchanged.
     </p>
 
     <form id="deleteOfficerForm" method="POST" action="" class="modal-actions">
