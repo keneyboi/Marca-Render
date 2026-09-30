@@ -6,14 +6,8 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from apps.core.models import AttendanceRecord, Event
 from django.core.exceptions import PermissionDenied
+from apps.core.access import get_data_owner
 
-def get_data_owner(user):
-    """Returns the user who owns the data (either the Admin themselves or the Officer's Admin)."""
-    if hasattr(user, 'is_admin') and user.is_admin:
-        return user
-    if hasattr(user, 'officer_profile') and user.officer_profile.admin:
-        return user.officer_profile.admin
-    raise PermissionDenied("You do not have permission to access these records.")
 
 @login_required(login_url='landing')
 @require_POST
