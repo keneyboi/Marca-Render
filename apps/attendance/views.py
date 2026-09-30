@@ -17,7 +17,7 @@ def set_attendance(request):
         messages.error(request, "Invalid event ID.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
     
-    owner_user = get_data_owner(request.user)
+    owner_user = get_data_owner(request)
     
     if owner_user is None:
         raise PermissionDenied("You do not have permission to edit these records.")
