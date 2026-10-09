@@ -81,6 +81,9 @@
 
     <!-- FORM BOTTOM SHEET -->
     <div class="scanner-modal-right">
+      <button type="button" class="sheet-handle" onclick="toggleSheet()" aria-label="Expand or collapse details">
+        <span></span>
+      </button>
       <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
         {% csrf_token %}
 

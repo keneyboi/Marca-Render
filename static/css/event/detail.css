@@ -432,3 +432,34 @@
     flex-direction: column;
     min-height: 0;
 }
+
+.scanner-modal-right {
+    --peek: 100px; /* how much of the sheet stays visible when collapsed */
+    transition: transform 0.3s ease;
+}
+
+.scanner-modal-right.collapsed {
+    transform: translateY(calc(100% - var(--peek)));
+    overflow: hidden; /* no inner scrolling while collapsed */
+}
+
+/* Drag-handle style toggle */
+.sheet-handle {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 0 6px;
+    background: #f7f4ed;
+    border: none;
+    cursor: pointer;
+}
+
+.sheet-handle span {
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: #c9bfae;
+}

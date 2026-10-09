@@ -38,6 +38,17 @@ async function startCamera(camera) {
     );
 }
 
+function toggleSheet(forceCollapsed) {
+    const sheet = document.querySelector('.scanner-modal-right');
+    if (!sheet) return;
+
+    const shouldCollapse = forceCollapsed !== undefined
+        ? forceCollapsed
+        : !sheet.classList.contains('collapsed');
+
+    sheet.classList.toggle('collapsed', shouldCollapse);
+}
+
 async function openScanner() {
     if (camIsOpen) return;
 
@@ -45,6 +56,7 @@ async function openScanner() {
     camIsOpen = true;
     isProcessingScan = false;
     if (modal) modal.showModal();
+    toggleSheet(true); 
 
     await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -134,6 +146,8 @@ function handleScannedData(rawJsonText) {
         if (emailInput) emailInput.value = data.em || "";
         if (phoneInput) phoneInput.value = data.ph || "";
         if (studentIdInput) studentIdInput.value = data.sid || "";
+
+        toggleSheet(false);  // slide the form up so they can verify the details
 
     } catch (e) {
         console.error("Scan error:", e);
