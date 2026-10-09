@@ -18,7 +18,7 @@
     <aside class="dashboard-sidebar" id="dashboard-sidebar">
       <div class="sidebar-brand">
         <a href="{% url 'landing' %}" class="logo" style="color: #ffffff;">marca</a>
-        <hr style='margin-bottom: -1rem'>
+
       </div>
 
       <!-- Hamburger Toggle (Mobile Only) -->
@@ -125,14 +125,23 @@
     function toggleMenu() {
       const sidebar = document.getElementById('dashboard-sidebar');
       const overlay = document.getElementById('sidebar-overlay');
-      
+      const navbar = document.getElementById('quick-navbar');
+
+
       sidebar.classList.toggle('menu-open');
       overlay.classList.toggle('active');
+      
+      if (sidebar.classList.contains('menu-open')) {
+        if (navbar) navbar.classList.add('hidden');
+      } else {
+        if (navbar) navbar.classList.remove('hidden');
+      }
     }
     
     // Example usage in your Edit Modal submit handler:
     document.addEventListener('DOMContentLoaded', function () {
       const editForm = document.getElementById('editEventForm');
+     
       if (!editForm) return;
 
       editForm.addEventListener('submit', function (e) {
@@ -202,5 +211,44 @@
       });
     });
   </script>
+
+ <div class="quick-navbar" id="quick-navbar"> 
+  <!-- Home Tab -->
+  <a class="elements {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'landing' %}">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </a>
+
+  <!-- Events Tab -->
+  <a class="elements {% if request.resolver_match.url_name == 'event_detail' %}active{% endif %}" href="{% url 'home' %}">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+    <span>Events</span>
+  </a>
+
+  <!-- Scan Button: ONLY renders on the 'event_detail' screen -->
+  {% if request.resolver_match.url_name == 'event_detail' %}
+    <a class="elements scan-btn" href="#" onclick="openScanner(); return false;">
+      <div class="scan-circle">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" x2="17" y1="12" y2="12"/></svg>
+      </div>
+      <span>Scan</span>
+    </a>
+  {% endif %}
+
+  <!-- Profile Tab -->
+  <a class="elements">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+
+  <!-- Logout Tab -->
+  <form method="POST" action="{% url 'logout' %}" style="display: flex; flex: 1; margin: 0;">
+    {% csrf_token %}
+    <button type="submit" class="elements">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+      <span>Logout</span>
+    </button>
+  </form>
+</div>
 </body>
 </html>

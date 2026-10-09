@@ -397,29 +397,66 @@
   opacity: 1;
 }
 
-/* Responsive fallback for mobile viewports */
-@media (max-width: 768px) {
+/* --- RESPONSIVE MOBILE ADJUSTMENTS FOR SCANNER MODAL --- */
+@media (max-width: 880px) {
+    /* Make the modal full width with comfortable margins on mobile */
+    .scanner-modal {
+        width: 100%;
+        height: 90vh;
+        overflow-y: auto;
+        border-radius: 18px;
+    }
+
+    /* Stack the two columns vertically on mobile */
     .scanner-modal-body {
         grid-template-columns: 1fr;
     }
-    
+
+    /* Right column border adjustment for stacked view */
     .scanner-modal-right {
         border-left: none;
         border-top: 1px solid rgba(209, 200, 184, 0.6);
-        height: 300px; /* or max-height: 300px */
-        overflow-y: auto;
     }
 
-    .scanner-modal-right h2 {
-      margin-bottom: -2rem;
-    }
-    .scanner-modal-right h2 {
-      margin-bottom: -2rem;
+    /* Make camera section padding tighter */
+    .scanner-modal-left {
+        padding: 1.25rem;
+        gap: 0.75rem;
     }
 
-    .btn-add {
-        margin-left: 0 !important;
-        margin-right: auto !important; /* Aligns button to the left on mobile */
+    /* Force the camera reader container to fit mobile screens */
+    #reader {
+        width: 100% !important;
+        max-width: 100% !important;
+        border: none;
+        background: transparent;
+    }
+
+    /* Force html5-qrcode's internal video element to be fully responsive */
+    #reader video {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 320px; /* Adjust height limit so it doesn't take up the whole screen */
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    /* Hide the default large scanning box border overlay if it causes overflow */
+    #reader__scan_region {
+        min-height: auto !important;
+    }
+
+    /* Make form headers and inputs more compact on mobile */
+    .scanner-modal-header {
+        padding: 1.25rem 1.25rem 1rem 1.25rem;
+    }
+
+    .scanner-modal-information {
+        padding: 0 1.25rem 1rem 1.25rem;
+    }
+
+    .scanner-modal-buttons {
+        padding: 1rem 1.25rem 1.25rem 1.25rem;
     }
 }
 

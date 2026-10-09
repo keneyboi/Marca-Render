@@ -24,7 +24,6 @@ def set_attendance(request):
     
     event = get_object_or_404(Event, id=event_id, user=owner_user)
 
-    # Reliable fallback redirect using event.id
     fallback_redirect = request.META.get('HTTP_REFERER') or redirect('event_detail', event_id=event.id).url
 
     email = request.POST.get('email')
@@ -33,12 +32,11 @@ def set_attendance(request):
     student_id = request.POST.get('student_id')
     option = request.POST.get('session_type')
 
-    # Catch missing student ID / Email inputs first
     if not student_id and not email:
         messages.error(request, "Either Student ID or Email is required.")
         return redirect(fallback_redirect)
 
-    # 3. Query records through the event relationship & catch MultipleObjectsReturned
+ 
     try:
         if student_id:
             record = event.attendance_records.get(

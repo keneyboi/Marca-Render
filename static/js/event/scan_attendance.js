@@ -21,8 +21,31 @@ async function openScanner() {
     if (modal) modal.showModal();
 
     try {
+        let cameraToUse = { facingMode: "environment" }; // Default fallback
+
+        // Step 1: Explicitly look for the rear camera ID using getCameras()
+        try {
+            const devices = await Html5Qrcode.getCameras();
+            if (devices && devices.length > 0) {
+                // Search for labels containing "back", "rear", or "environment"
+                const backCamera = devices.find(device => 
+                    /back|rear|environment/i.test(device.label)
+                );
+                
+                if (backCamera) {
+                    cameraToUse = { deviceId: { exact: backCamera.id } };
+                } else if (devices.length > 1) {
+                    // Fallback to the last camera in the list (usually the back camera on multi-lens phones)
+                    cameraToUse = { deviceId: { exact: devices[devices.length - 1].id } };
+                }
+            }
+        } catch (e) {
+            console.warn("Could not enumerate cameras, falling back to constraints.", e);
+        }
+
+        // Step 2: Start the scanner with the resolved camera target
         await html5QrCode.start(
-            { facingMode: "environment" },
+            cameraToUse,
             {
                 fps: 10,
                 qrbox: { width: 300, height: 300 },
@@ -40,9 +63,32 @@ async function openScanner() {
             (errorMessage) => {}
         );
     } catch (err) {
-        console.error("Camera initialization failed:", err);
-        await resetScanner();
-        alert("Could not access camera. Please check camera permissions.");
+        console.error("Primary camera initialization failed, trying strict exact constraint...", err);
+        
+        // Step 3: Ultimate fallback using strict exact constraint
+        try {
+            await html5QrCode.start(
+                { facingMode: { exact: "environment" } },
+                {
+                    fps: 10,
+                    qrbox: { width: 300, height: 300 },
+                    videoConstraints: {
+                        width: { ideal: 640 },
+                        height: { ideal: 640 }
+                    }
+                },
+                async (decodedText) => {
+                    if (isProcessingScan) return;
+                    isProcessingScan = true;
+                    handleScannedData(decodedText);
+                },
+                (errorMessage) => {}
+            );
+        } catch (fallbackErr) {
+            console.error("Camera initialization completely failed:", fallbackErr);
+            await resetScanner();
+            alert("Could not access the rear camera. Please check your camera permissions.");
+        }
     }
 }
 
