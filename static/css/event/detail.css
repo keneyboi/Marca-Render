@@ -398,11 +398,11 @@
 }
 
 /* --- RESPONSIVE MOBILE ADJUSTMENTS FOR SCANNER MODAL --- */
-@media (max-width: 880px) {
+@media (max-width: 768px) {
     /* Make the modal full width with comfortable margins on mobile */
     .scanner-modal {
-        width: 100%;
-        height: 90vh;
+        width: 95%;
+        max-height: 90vh;
         overflow-y: auto;
         border-radius: 18px;
     }

@@ -20,32 +20,57 @@ async function openScanner() {
 
     if (modal) modal.showModal();
 
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+    }
+
     try {
-        let cameraToUse = { facingMode: "environment" }; // Default fallback
+        // 1. Get all available cameras on the device
+        const devices = await Html5Qrcode.getCameras();
+        const cameraSelect = document.getElementById('camera-select');
+        cameraSelect.innerHTML = ''; // Clear loading text
 
-        // Step 1: Explicitly look for the rear camera ID using getCameras()
-        try {
-            const devices = await Html5Qrcode.getCameras();
-            if (devices && devices.length > 0) {
-                // Search for labels containing "back", "rear", or "environment"
-                const backCamera = devices.find(device => 
-                    /back|rear|environment/i.test(device.label)
-                );
-                
-                if (backCamera) {
-                    cameraToUse = { deviceId: { exact: backCamera.id } };
-                } else if (devices.length > 1) {
-                    // Fallback to the last camera in the list (usually the back camera on multi-lens phones)
-                    cameraToUse = { deviceId: { exact: devices[devices.length - 1].id } };
+        if (devices && devices.length > 0) {
+            devices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.id;
+                // Use the browser's device label, or fallback to a numbered name
+                option.text = device.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+
+            // 2. Intelligent Default: Try to select the back/rear camera if found, otherwise use the last one
+            const backCamera = devices.find(d => /back|rear|environment/i.test(d.label));
+            const defaultCameraId = backCamera ? backCamera.id : devices[devices.length - 1].id;
+            
+            cameraSelect.value = defaultCameraId;
+
+            // 3. Start scanning with the default camera
+            await startScannerWithId(defaultCameraId);
+
+            // 4. Handle manual switching when the user changes the dropdown selection
+            cameraSelect.onchange = async () => {
+                const selectedId = cameraSelect.value;
+                if (html5QrCode.isScanning) {
+                    await html5QrCode.stop();
                 }
-            }
-        } catch (e) {
-            console.warn("Could not enumerate cameras, falling back to constraints.", e);
-        }
+                await startScannerWithId(selectedId);
+            };
 
-        // Step 2: Start the scanner with the resolved camera target
+        } else {
+            alert("No cameras found on this device.");
+        }
+    } catch (err) {
+        console.error("Error initializing camera selector:", err);
+        alert("Could not access camera permissions. Please check your browser settings.");
+        await resetScanner();
+    }
+}
+
+async function startScannerWithId(deviceId) {
+    try {
         await html5QrCode.start(
-            cameraToUse,
+            { deviceId: { exact: deviceId } },
             {
                 fps: 10,
                 qrbox: { width: 300, height: 300 },
@@ -57,38 +82,12 @@ async function openScanner() {
             async (decodedText) => {
                 if (isProcessingScan) return;
                 isProcessingScan = true;
-
                 handleScannedData(decodedText);
             },
             (errorMessage) => {}
         );
     } catch (err) {
-        console.error("Primary camera initialization failed, trying strict exact constraint...", err);
-        
-        // Step 3: Ultimate fallback using strict exact constraint
-        try {
-            await html5QrCode.start(
-                { facingMode: { exact: "environment" } },
-                {
-                    fps: 10,
-                    qrbox: { width: 300, height: 300 },
-                    videoConstraints: {
-                        width: { ideal: 640 },
-                        height: { ideal: 640 }
-                    }
-                },
-                async (decodedText) => {
-                    if (isProcessingScan) return;
-                    isProcessingScan = true;
-                    handleScannedData(decodedText);
-                },
-                (errorMessage) => {}
-            );
-        } catch (fallbackErr) {
-            console.error("Camera initialization completely failed:", fallbackErr);
-            await resetScanner();
-            alert("Could not access the rear camera. Please check your camera permissions.");
-        }
+        console.error("Failed to start selected camera:", err);
     }
 }
 
