@@ -169,81 +169,176 @@
   background-color: #f1f3f4;
   color: #5f6368;
 }
-/* --- SCANNER MODAL DIALOG (LANDSCAPE) --- */
-
-/* Expanded Modal Container */
+/* --- FULLSCREEN SCANNER --- */
 .scanner-modal {
-    border: 1px solid rgba(209, 200, 184, 0.5);
-    border-radius: 24px;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
     padding: 0;
-    background-color: #fdfbf7;
-    box-shadow: 0 20px 50px rgba(51, 16, 16, 0.2),
-                0 4px 16px rgba(0, 0, 0, 0.06);
-    width: 90%;
-    max-width: 860px;
+    border: none;
+    border-radius: 0;
+    background: #000;
     overflow: hidden;
-    margin: auto;
 }
 
 .scanner-modal::backdrop {
-    background: rgba(51, 16, 16, 0.4);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: #000;
 }
 
-/* Two-Column Grid Body */
 .scanner-modal-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-/* LEFT COLUMN: Camera Feed */
+/* Camera layer fills the entire screen */
 .scanner-modal-left {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-    text-align: center;
-}
-
-.scanner-modal-left h3 {
-    font-family: 'Tiro Telugu', Georgia, serif;
-    font-size: 1.75rem;
-    font-weight: 400;
-    color: #4a0d0d;
-    margin: 0;
+    position: absolute;
+    inset: 0;
+    padding: 0;
 }
 
 #reader {
-    width: 100%;
-    max-width: 380px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1.5px solid #e2dacd;
-    background-color: #f7f4ed;
-    box-sizing: border-box;
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    border: none !important;
+    padding: 0 !important;
+    background: #000;
+    z-index: 0;
 }
 
-/* RIGHT COLUMN: Form & Information */
+#reader__scan_region {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+}
+
+#reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+/* Top bar floating over the camera */
+.modal-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 2rem;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.65), transparent);
+    color: #fff;
+}
+
+.modal-header h3 {
+    grid-column: 2;
+    margin: 0;
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.modal-header .close-modal-button {
+    grid-column: 3;
+    justify-self: end;
+    background: rgba(0,0,0,0.35);
+    border: none;
+    outline: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Camera dropdown floating under the title */
+.camera-select-wrap {
+    position: absolute;
+    top: calc(max(1rem, env(safe-area-inset-top)) + 3rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    width: min(260px, 70%);
+}
+
+.camera-select-wrap select {
+    width: 100%;
+    color: #fff;
+    background-color: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.35);
+    backdrop-filter: blur(6px);
+}
+
+/* Scan frame (bounding box) on top of the camera */
+.scan-frame {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    width: min(70vw, 280px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 20px;
+    /* dims everything outside the box */
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+}
+
+/* Corner brackets */
+.scan-frame::before,
+.scan-frame::after,
+.scan-frame i::before,
+.scan-frame i::after {
+    content: "";
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border: 4px solid #fff;
+}
+.scan-frame::before { top: 0; left: 0;  border-right: 0; border-bottom: 0; border-top-left-radius: 20px; }
+.scan-frame::after  { top: 0; right: 0; border-left: 0;  border-bottom: 0; border-top-right-radius: 20px; }
+.scan-frame i::before { bottom: 0; left: 0;  border-right: 0; border-top: 0; border-bottom-left-radius: 20px; }
+.scan-frame i::after  { bottom: 0; right: 0; border-left: 0;  border-top: 0; border-bottom-right-radius: 20px; }
+
+/* Form as a bottom sheet over the camera */
 .scanner-modal-right {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    max-width: 520px;
+    margin: 0 auto;
+    max-height: 58dvh;
+    overflow-y: auto;
     background-color: #f7f4ed;
-    border-left: 1px solid rgba(209, 200, 184, 0.6);
-    height: 100%;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.35);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    box-sizing: border-box;
 }
 
-/* Header Container for Title + Select Choice */
 .scanner-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem 2rem 3rem 2rem;
     gap: 1rem;
+    padding: 1.25rem 1.5rem 0.75rem;
 }
 
 .scanner-modal-right h2 {
@@ -252,12 +347,9 @@
     font-weight: 600;
     color: #4a0d0d;
     margin: 0;
-    text-align: left;
-    opacity: 0.6;
-    letter-spacing: 0.02em;
+    opacity: 0.7;
 }
 
-/* Inline Select Box styling matching form inputs */
 .session-select-inline {
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.85rem;
@@ -269,16 +361,10 @@
     padding: 0.4rem 0.75rem;
     outline: none;
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.session-select-inline:focus {
-    border-color: #4a0d0d;
-    box-shadow: 0 0 0 3px rgba(74, 13, 13, 0.1);
 }
 
 .scanner-modal-information {
-    padding: 0 2rem 1.5rem 2rem;
+    padding: 0 1.5rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -293,59 +379,43 @@
     border-radius: 10px;
     padding: 0.75rem 1rem;
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
     width: 100%;
     box-sizing: border-box;
 }
 
-.scanner-modal-information input::placeholder {
-    color: #a0958d;
-}
+.scanner-modal-information input::placeholder { color: #a0958d; }
 
 .scanner-modal-information input:focus {
     border-color: #4a0d0d;
     box-shadow: 0 0 0 3px rgba(74, 13, 13, 0.1);
 }
 
-.scanner-modal-information input[readonly] {
-    background-color: #f0ebe1;
-    color: #554a44;
-    cursor: default;
-}
-
-/* Buttons Container */
 .scanner-modal-buttons {
+    position: sticky;
+    bottom: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 1.25rem 2rem 2rem 2rem;
     gap: 0.75rem;
-    align-items: center;
-    border-top: 1px solid rgba(209, 200, 184, 0.4);
+    padding: 1rem 1.5rem max(1.25rem, env(safe-area-inset-bottom));
     background-color: #fdfbf7;
+    border-top: 1px solid rgba(209, 200, 184, 0.4);
 }
 
-.btn-confirm-modal {
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+.btn-confirm-modal,
+.btn-primary {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #fff;
     background-color: #4a0d0d;
     border: none;
     padding: 0.85rem 1rem;
     border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    box-shadow: 0 4px 12px rgba(74, 13, 13, 0.2);
     width: 100%;
 }
 
-.btn-confirm-modal:hover {
-    background-color: #330808;
-    transform: translateY(-1px);
-}
-
-.btn-close-modal {
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+.btn-close-modal,
+.btn-secondary {
     font-size: 0.9rem;
     font-weight: 600;
     color: #4a0d0d;
@@ -354,127 +424,11 @@
     padding: 0.85rem 1rem;
     border-radius: 12px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
     width: 100%;
 }
 
-.btn-close-modal:hover {
-    background-color: #ded7c8;
-}
-
-.modal-header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr; /* Empty space | Centered Title | Right-aligned Button */
-  align-items: center;
-  justify-content: center;
-  width: 100%; /* Ensures grid spans the full width of the modal */
-}
-
-.modal-header h3 {
-  grid-column: 2; /* Places title in column 2 */
-  margin: 0;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.modal-header .close-modal-button {
-  grid-column: 3; /* Places button in column 3 */
-  justify-self: end; /* Flushes the button to the far right */
-  margin-bottom: 4px;
- 
-  background: none;
-  border: none;
-  outline: none;
-  padding: 0;
-  font-size: 1.8rem;
-  line-height: 1;
-  color: inherit;
-  cursor: pointer;
-}
-
-/* Subtle hover effect */
-.close-modal-button:hover {
-  opacity: 1;
-}
-
-/* --- RESPONSIVE MOBILE ADJUSTMENTS FOR SCANNER MODAL --- */
-@media (max-width: 768px) {
-    /* Make the modal full width with comfortable margins on mobile */
-    .scanner-modal {
-        width: 95%;
-        max-height: 90vh;
-        overflow-y: auto;
-        border-radius: 18px;
-    }
-
-    /* Stack the two columns vertically on mobile */
-    .scanner-modal-body {
-        grid-template-columns: 1fr;
-    }
-
-    /* Right column border adjustment for stacked view */
-    .scanner-modal-right {
-        border-left: none;
-        border-top: 1px solid rgba(209, 200, 184, 0.6);
-    }
-
-    /* Make camera section padding tighter */
-    .scanner-modal-left {
-        padding: 1.25rem;
-        gap: 0.75rem;
-    }
-
-    /* Force the camera reader container to fit mobile screens */
-    #reader {
-        width: 100% !important;
-        max-width: 100% !important;
-        border: none;
-        background: transparent;
-    }
-
-    /* Force html5-qrcode's internal video element to be fully responsive */
-    #reader video {
-        width: 100% !important;
-        height: auto !important;
-        max-height: 320px; /* Adjust height limit so it doesn't take up the whole screen */
-        object-fit: cover;
-        border-radius: 12px;
-    }
-
-    /* Hide the default large scanning box border overlay if it causes overflow */
-    #reader__scan_region {
-        min-height: auto !important;
-    }
-
-    /* Make form headers and inputs more compact on mobile */
-    .scanner-modal-header {
-        padding: 1.25rem 1.25rem 1rem 1.25rem;
-    }
-
-    .scanner-modal-information {
-        padding: 0 1.25rem 1rem 1.25rem;
-    }
-
-    .scanner-modal-buttons {
-        padding: 1rem 1.25rem 1.25rem 1.25rem;
-    }
-}
-
-.btn-add {
-    margin-left: auto; /* Pushes button to the right on desktop */
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 0.5rem; 
-    padding: 0.6rem 1rem; 
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif; 
-    font-size: 0.9rem; 
-    font-weight: 500; 
-    color: #ffffff; 
-    background-color: #620808; 
-    border: 1px solid #aaaaaa; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-    white-space: nowrap;
+.scanner-modal-right form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }

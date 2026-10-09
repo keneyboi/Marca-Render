@@ -26,13 +26,11 @@ async function startCamera(camera) {
         camera,
         {
             fps: 10,
-            qrbox: { width: 300, height: 300 },
-            // The camera choice MUST be repeated here, because this
-            // object overrides the first argument.
+            // no qrbox: scans the full frame, so it matches the fullscreen video
             videoConstraints: {
                 ...camera,
-                width: { ideal: 640 },
-                height: { ideal: 640 }
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             }
         },
         onScanSuccess,
