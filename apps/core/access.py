@@ -18,7 +18,7 @@ def get_data_owner(request):
     if user.is_admin:
         return user
 
-    admins = list(get_officer_admins(user))        # 1 query, evaluated once
+    admins = list(get_officer_admins(user))    
     active_id = request.session.get('active_admin_id')
 
     owner = next((a for a in admins if a.pk == active_id), None) \

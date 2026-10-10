@@ -12,16 +12,10 @@ from apps.core.access import get_data_owner
 
 
 def _is_ajax(request):
-    """True when the page's JavaScript (fetch) made this request."""
     return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
-
+# the main optimization, returnm a json if request is an ajax if else do the same thing as before
 def _respond(request, ok, message, redirect_to, level=None, extra=None):
-    """
-    One exit for every outcome of set_attendance.
-      - fetch() call  -> small JSON answer (no redirect, no page render)
-      - normal form   -> flash message + redirect, exactly as before
-    """
     if _is_ajax(request):
         data = {'ok': ok, 'message': message}
         if extra:
@@ -32,14 +26,12 @@ def _respond(request, ok, message, redirect_to, level=None, extra=None):
     level(request, message)
     return redirect(redirect_to)
 
-
+# time formatter
 def _clock(dt):
-    """'09:05' in the project's local timezone, or an em dash when empty."""
     return timezone.localtime(dt).strftime('%H:%M') if dt else '\u2014'
 
-
+# one query of counts for status cards
 def _status_counts(event):
-    """Present/late/absent/total in ONE query (the page used four)."""
     raw = {
         row['status']: row['n']
         for row in event.attendance_records.values('status').annotate(n=Count('id'))
