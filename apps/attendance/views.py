@@ -36,7 +36,7 @@ def set_attendance(request):
         messages.error(request, "Either Student ID or Email is required.")
         return redirect(fallback_redirect)
 
- 
+
     try:
         if student_id:
             record = event.attendance_records.get(
@@ -89,6 +89,7 @@ def set_attendance(request):
         messages.warning(request, "Invalid option selected.")
         return redirect(fallback_redirect)
 
+    record.edited_by = request.user
     record.save()
     messages.success(request, "Attendance updated successfully.")
 

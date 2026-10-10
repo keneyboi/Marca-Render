@@ -291,7 +291,7 @@ def event_detail(request, event_id):
         raise PermissionDenied("You do not have permission to access these records.")
 
     event = get_object_or_404(Event, id=event_id, user=owner_user)
-    all_records = event.attendance_records.all().order_by('last_name', 'first_name')
+    all_records = event.attendance_records.select_related('edited_by').order_by('last_name', 'first_name')
 
     courses = sorted({
         r.course.strip() 
@@ -374,6 +374,7 @@ def add_attendance_record(request, event_id):
         course=course,
         year_level=year_level,
         status=status,
+        edited_by=request.user,
     )
 
     messages.success(request, f'Attendee "{first_name} {last_name}" added successfully.')

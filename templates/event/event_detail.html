@@ -237,6 +237,7 @@
 
           <th>Status</th>
           {% if request.user.is_admin %}
+          <th>Edited By</th>
           <th style="text-align: right;">Action</th>
           {% endif %}
         </tr>
@@ -289,6 +290,8 @@
             </td>
 
             {% if request.user.is_admin %}
+
+            <td>{% if record.edited_by %}{{ record.edited_by.get_full_name|default:record.edited_by.username }}{% else %}&mdash;{% endif %}</td>
 
             <td style="text-align: right;">
               <button 

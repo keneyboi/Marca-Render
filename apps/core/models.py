@@ -134,6 +134,14 @@ class AttendanceRecord(models.Model):
     timed_in_2 = models.DateTimeField(blank=True, null=True)
     timed_out_2 = models.DateTimeField(blank=True, null=True)
 
+    edited_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='edited_attendance_records'
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
