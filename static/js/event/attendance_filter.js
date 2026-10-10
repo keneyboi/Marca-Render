@@ -56,6 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearVisibility(hasActiveFilters);
   }
 
+  // Called by scan_attendance.js after it patches a row in place.
+  // The row element is the same, but the cached status/text copies are now
+  // out of date, so refresh them and re-apply the active filters.
+  window.refreshAttendanceRow = function (rowElement) {
+    const item = rows.find(r => r.element === rowElement);
+    if (item) {
+      item.status = (rowElement.dataset.status || '').trim();
+      item.text = rowElement.innerText.toLowerCase();
+    }
+    applyFilters();
+  };
+
   if (searchInput) searchInput.addEventListener('input', applyFilters);
   if (statusFilter) statusFilter.addEventListener('change', applyFilters);
   if (courseFilter) courseFilter.addEventListener('change', applyFilters);

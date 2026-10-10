@@ -50,7 +50,7 @@
       </button>
       {% endif %}
       
-
+      <!-- FIXED: Merged duplicate class attributes -->
       <button type="button" class="btn-primary scan-button" onclick="openScanner()">
           <span>Scan Attendance</span>
       </button> 
@@ -58,95 +58,79 @@
   </header>
 
   <!-- EXISTING ATTENDANCE SCANNER -->
-<dialog id="attendance-scanner" class="scanner-modal">
-  <div class="scanner-modal-body">
-
-    <!-- CAMERA LAYER -->
-    <div class="scanner-modal-left">
-      <div id="reader"></div>
-
-      <div class="scan-frame"><i></i></div>
-
-      <div class="modal-header">
-        <h3>Scan Attendance</h3>
-        <button type="button" class="close-modal-button" onclick="resetScanner()">&times;</button>
+  <dialog id="attendance-scanner" class="scanner-modal">
+    <div class="scanner-modal-body">
+      <div class="scanner-modal-left">
+        <div class="modal-header">
+          <h3>Scan Attendance</h3>
+          <button class="close-modal-button" onclick="resetScanner()">&times;</button>
+        </div>
+        <div id="reader" style="width: 100%; margin: 0 auto;"></div>
       </div>
 
-      <div class="camera-select-wrap">
-        <select id="camera-select" class="session-select-inline">
-          <option value="">Loading cameras...</option>
-        </select>
+      <div class="scanner-modal-right">
+        <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
+          {% csrf_token %}
+
+          <div class="scanner-modal-header">
+            <h2>Verify Details:</h2>
+
+            {% if event.session_type == '1' %}
+              <select name="session_type" id="session-select" class="session-select-inline">
+                <option value="1">Time In</option>
+              </select>
+
+            {% elif event.session_type == '2' %}
+              <select name="session_type" id="session-select" class="session-select-inline">
+                <option value="1">Time In</option>
+                <option value="2">Time Out</option>
+              </select>
+
+            {% elif event.session_type == '3' %}
+              <select name="session_type" id="session-select" class="session-select-inline">
+                <option value="1">Morning Time In</option>
+                <option value="2">Morning Time Out</option>
+                <option value="3">Afternoon Time In</option>
+                <option value="4">Afternoon Time Out</option>
+              </select>
+            {% endif %}
+          </div>
+
+          <div class="scanner-modal-information">
+            <input type="hidden" name="event_id" value="{{ event.id }}">
+            <input placeholder="Student ID" name="student_id" id="input-student-id">
+            <input placeholder="Email" name="email" id="input-email">
+            <input placeholder="First Name" name="first_name" id="input-first-name">
+            <input placeholder="Last Name" name="last_name" id="input-last-name">
+            <input placeholder="Phone Number" name="phone" id="input-phone">
+          </div>
+
+          <div class="scanner-modal-buttons">
+            <button type="submit" class="btn-primary">Confirm Attendance</button>
+            <button type="button" class="btn-secondary" onclick="resetScanner()">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
-
-    <!-- FORM BOTTOM SHEET -->
-    <div class="scanner-modal-right">
-      <button type="button" class="sheet-handle" onclick="toggleSheet()" aria-label="Expand or collapse details">
-        <span></span>
-      </button>
-      <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
-        {% csrf_token %}
-
-        <div class="scanner-modal-header">
-          <h2>Verify Details:</h2>
-
-          {% if event.session_type == '1' %}
-          <select name="session_type" id="session-select" class="session-select-inline">
-            <option value="1">Time In</option>
-          </select>
-
-          {% elif event.session_type == '2' %}
-          <select name="session_type" id="session-select" class="session-select-inline">
-            <option value="1">Time In</option>
-            <option value="2">Time Out</option>
-          </select>
-
-          {% elif event.session_type == '3' %}
-          <select name="session_type" id="session-select" class="session-select-inline">
-            <option value="1">Morning Time In</option>
-            <option value="2">Morning Time Out</option>
-            <option value="3">Afternoon Time In</option>
-            <option value="4">Afternoon Time Out</option>
-          </select>
-          {% endif %}
-        </div>
-
-        <div class="scanner-modal-information">
-          <input type="hidden" name="event_id" value="{{ event.id }}">
-          <input placeholder="Student ID" name="student_id" id="input-student-id">
-          <input placeholder="Email" name="email" id="input-email">
-          <input placeholder="First Name" name="first_name" id="input-first-name">
-          <input placeholder="Last Name" name="last_name" id="input-last-name">
-          <input placeholder="Phone Number" name="phone" id="input-phone">
-        </div>
-
-        <div class="scanner-modal-buttons">
-          <button type="submit" class="btn-primary">Confirm Attendance</button>
-          <button type="button" class="btn-secondary" onclick="resetScanner()">Cancel</button>
-        </div>
-      </form>
-    </div>
-
-  </div>
-</dialog>
+  </dialog>
 
   <!-- Metric Tiles -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Total Attendance</div>
-      <p class="stat-value">{{ total_attendance }}</p>
+      <p class="stat-value" id="stat-total">{{ total_attendance }}</p>
     </div>
     <div class="stat-card">
       <div class="stat-label">Present</div>
-      <p class="stat-value" style="color: #137333;">{{ present_count }}</p>
+      <p class="stat-value" id="stat-present" style="color: #137333;">{{ present_count }}</p>
     </div>
     <div class="stat-card">
       <div class="stat-label">Late</div>
-      <p class="stat-value" style="color: #b06000;">{{ late_count }}</p>
+      <p class="stat-value" id="stat-late" style="color: #b06000;">{{ late_count }}</p>
     </div>
     <div class="stat-card">
       <div class="stat-label">Absent</div>
-      <p class="stat-value" style="color: #c5221f;">{{ absent_count }}</p>
+      <p class="stat-value" id="stat-absent" style="color: #c5221f;">{{ absent_count }}</p>
     </div>
   </div>
 
@@ -246,6 +230,7 @@
         {% for record in records %}
           <tr 
             class="attendance-row" 
+            data-record-id="{{ record.id }}"
             data-status="{{ record.status }}" 
             data-course="{{ record.course|default:'' }}" 
             data-year="{{ record.year_level|default:'' }}"
@@ -268,30 +253,30 @@
             {% endif %}
 
             {% if show_session_1 %}
-              <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
             {% endif %}
 
             {% if show_session_2 %}
-              <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
             {% endif %}
 
             {% if show_session_3 %}
-              <td>{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td>{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td>{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
-              <td>{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_in_2">{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
+              <td data-field="timed_out_2">{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
             {% endif %}
 
             <td>
-              <span class="badge badge-{{ record.status|lower }}">
+              <span class="badge badge-{{ record.status|lower }}" data-field="status">
                 {{ record.get_status_display }}
               </span>
             </td>
 
             {% if request.user.is_admin %}
 
-            <td>{% if record.edited_by %}{{ record.edited_by.get_full_name|default:record.edited_by.username }}{% else %}&mdash;{% endif %}</td>
+            <td data-field="edited_by">{% if record.edited_by %}{{ record.edited_by.get_full_name|default:record.edited_by.username }}{% else %}&mdash;{% endif %}</td>
 
             <td style="text-align: right;">
               <button 

@@ -1,52 +1,120 @@
+let qrCodeInstance = null;
 let html5QrCode = null;
 let camIsOpen = false;
 let isProcessingScan = false;
-let isSwitchingCamera = false;
 
 document.addEventListener("DOMContentLoaded", () => {
+
     if (document.getElementById("reader")) {
         html5QrCode = new Html5Qrcode("reader");
     }
-});
 
-const onScanSuccess = (decodedText) => {
-    if (isProcessingScan) return;
-    isProcessingScan = true;
-    handleScannedData(decodedText);
-};
-
-// Single place that starts the camera. `camera` is either
-// { facingMode: ... } or { deviceId: { exact: "..." } }
-async function startCamera(camera) {
-    if (html5QrCode.isScanning) {
-        await html5QrCode.stop();
+    const attendanceForm = document.getElementById("attendance-form");
+    if (attendanceForm) {
+        attendanceForm.addEventListener("submit", (e) => {
+            e.preventDefault();              // stop the full-page POST + redirect
+            submitAttendance(attendanceForm);
+        });
     }
 
-    await html5QrCode.start(
-        camera,
-        {
-            fps: 10,
-            // no qrbox: scans the full frame, so it matches the fullscreen video
-            videoConstraints: {
-                ...camera,
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            }
-        },
-        onScanSuccess,
-        () => {}
-    );
+});
+
+// ---------------------------------------------------------------
+// INSTANT ATTENDANCE: send the form in the background (fetch),
+// then patch only the parts of the page that changed.
+// ---------------------------------------------------------------
+async function submitAttendance(form) {
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;           // block double-submits
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),             // includes the CSRF token
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            credentials: "same-origin",
+        });
+
+        // If the session expired Django redirects to the landing page, which
+        // is HTML, not JSON. Detect that instead of crashing on response.json().
+        const type = response.headers.get("content-type") || "";
+        if (!type.includes("application/json")) {
+            showToast("Your session may have expired. Please refresh the page and log in again.", "error");
+            isProcessingScan = false;
+            return;
+        }
+
+        const data = await response.json();
+        showToast(data.message, data.ok ? "success" : "error");
+
+        if (data.ok) {
+            updateRowFromServer(data);
+            updateCounters(data.counts);
+            form.reset();
+            await resetScanner();                 // same behaviour as before: close the scanner
+        } else {
+            isProcessingScan = false;             // keep the form, allow another scan
+        }
+    } catch (err) {
+        console.error("Attendance request failed:", err);
+        showToast("Network problem. Attendance was NOT saved. Please try again.", "error");
+        isProcessingScan = false;
+    } finally {
+        if (button) button.disabled = false;
+    }
 }
 
-function toggleSheet(forceCollapsed) {
-    const sheet = document.querySelector('.scanner-modal-right');
-    if (!sheet) return;
+function updateRowFromServer(data) {
+    const row = document.querySelector(`tr.attendance-row[data-record-id="${data.record_id}"]`);
+    if (!row) return;                             // the record is on another page of the table
 
-    const shouldCollapse = forceCollapsed !== undefined
-        ? forceCollapsed
-        : !sheet.classList.contains('collapsed');
+    const setText = (field, value) => {
+        const cell = row.querySelector(`[data-field="${field}"]`);
+        if (cell) cell.textContent = value;
+    };
 
-    sheet.classList.toggle('collapsed', shouldCollapse);
+    ["timed_in_1", "timed_out_1", "timed_in_2", "timed_out_2", "edited_by"]
+        .forEach((field) => setText(field, data[field]));
+
+    const badge = row.querySelector('[data-field="status"]');
+    if (badge) {
+        badge.className = `badge badge-${data.status.toLowerCase()}`;
+        badge.textContent = data.status_label;
+    }
+
+    row.dataset.status = data.status;             // the status filter reads this
+    if (window.refreshAttendanceRow) window.refreshAttendanceRow(row);
+}
+
+function updateCounters(counts) {
+    if (!counts) return;
+    ["total", "present", "late", "absent"].forEach((key) => {
+        const el = document.getElementById(`stat-${key}`);
+        if (el) el.textContent = counts[key];
+    });
+}
+
+function showToast(message, kind) {
+    // An open <dialog> sits in the browser's "top layer" above everything,
+    // even above z-index: 99999. So when the scanner is open, the toast must
+    // live INSIDE the dialog to be visible.
+    const host = document.querySelector("dialog[open]") || document.body;
+
+    const toast = document.createElement("div");
+    toast.textContent = message;
+    const colors = kind === "success"
+        ? "background: rgba(230,244,234,0.95); color: #137333;"
+        : "background: rgba(252,232,230,0.95); color: #c5221f;";
+    toast.style.cssText = `
+        position: fixed; top: 24px; right: 24px; z-index: 99999;
+        max-width: 450px; padding: 12px 16px; border-radius: 10px;
+        font-size: 13.5px; font-weight: 500; line-height: 1.4;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        transition: opacity 0.3s ease; ${colors}`;
+    host.appendChild(toast);
+
+    setTimeout(() => { toast.style.opacity = "0"; }, 3000);
+    setTimeout(() => { toast.remove(); }, 3400);
 }
 
 async function openScanner() {
@@ -55,79 +123,49 @@ async function openScanner() {
     const modal = document.getElementById('attendance-scanner');
     camIsOpen = true;
     isProcessingScan = false;
+
     if (modal) modal.showModal();
-    toggleSheet(true); 
-
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
     try {
-        // Try rear camera first, fall back to whatever camera exists
-        // (laptops/desktops only have a "user" camera)
-        try {
-            await startCamera({ facingMode: { exact: "environment" } });
-        } catch (exactErr) {
-            try {
-                await startCamera({ facingMode: "environment" });
-            } catch (envErr) {
-                await startCamera({ facingMode: "user" });
-            }
-        }
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: { width: 300, height: 300 },
+                videoConstraints: {
+                    width: { ideal: 640 },
+                    height: { ideal: 640 }
+                }
+            },
+            async (decodedText) => {
+                if (isProcessingScan) return;
+                isProcessingScan = true;
 
-        // Permission is granted now, so labels are available
-        const devices = await Html5Qrcode.getCameras();
-        const cameraSelect = document.getElementById('camera-select');
-        cameraSelect.innerHTML = '';
-
-        devices.forEach((device, index) => {
-            const option = document.createElement('option');
-            option.value = device.id;
-            option.text = device.label || `Camera ${index + 1}`;
-            cameraSelect.appendChild(option);
-        });
-
-        // Sync the dropdown with the camera that is ACTUALLY running
-        const activeId = html5QrCode.getRunningTrackSettings().deviceId;
-        if (activeId) cameraSelect.value = activeId;
-
-        cameraSelect.onchange = () => startScannerWithId(cameraSelect.value);
-
+                handleScannedData(decodedText);
+            },
+            (errorMessage) => {}
+        );
     } catch (err) {
         console.error("Camera initialization failed:", err);
-        alert("Could not access the camera. Please check camera permissions.");
         await resetScanner();
-    }
-}
-
-async function startScannerWithId(deviceId) {
-    if (isSwitchingCamera || !deviceId) return;
-    isSwitchingCamera = true;
-
-    try {
-        await startCamera({ deviceId: { exact: deviceId } });
-    } catch (err) {
-        console.error("Failed to start selected camera:", err);
-        alert("Could not switch to this camera. It might be in use by another app or tab.");
-    } finally {
-        isSwitchingCamera = false;
+        alert("Could not access camera. Please check camera permissions.");
     }
 }
 
 async function resetScanner() {
-    try {
-        if (html5QrCode && html5QrCode.isScanning) {
+    if (html5QrCode && html5QrCode.isScanning) {
+        try {
             await html5QrCode.stop();
+        } catch (err) {
+            console.warn("Scanner stop error:", err);
         }
-    } catch (err) {
-        console.error("Stop error:", err);
     }
-    
+
     camIsOpen = false;
-    isSwitchingCamera = false;
-    document.getElementById('attendance-form').reset();
     const modal = document.getElementById('attendance-scanner');
-    if (modal) modal.close();
+    if (modal && modal.open) {
+        modal.close();
+    }
 }
 
 function handleScannedData(rawJsonText) {
@@ -146,8 +184,6 @@ function handleScannedData(rawJsonText) {
         if (emailInput) emailInput.value = data.em || "";
         if (phoneInput) phoneInput.value = data.ph || "";
         if (studentIdInput) studentIdInput.value = data.sid || "";
-
-        toggleSheet(false);  // slide the form up so they can verify the details
 
     } catch (e) {
         console.error("Scan error:", e);
@@ -174,7 +210,7 @@ function closeAddRecordModal() {
 }
 
 // Optional: Close modal automatically when clicking backdrop area
-addRecordModal.addEventListener('click', (event) => {
+if (addRecordModal) addRecordModal.addEventListener('click', (event) => {
   const rect = addRecordModal.getBoundingClientRect();
   const isInDialog = (
     rect.top <= event.clientY &&

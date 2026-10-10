@@ -18,12 +18,11 @@ def get_data_owner(request):
     if user.is_admin:
         return user
 
-    admins = get_officer_admins(user)
+    admins = list(get_officer_admins(user))        # 1 query, evaluated once
     active_id = request.session.get('active_admin_id')
 
-    owner = admins.filter(pk=active_id).first() if active_id else None
-    if owner is None:
-        owner = admins.first()
-        if owner:
-            request.session['active_admin_id'] = owner.pk
+    owner = next((a for a in admins if a.pk == active_id), None) \
+            or (admins[0] if admins else None)
+    if owner and request.session.get('active_admin_id') != owner.pk:
+        request.session['active_admin_id'] = owner.pk
     return owner

@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import MultipleObjectsReturned
+from django.db.models import Count
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -9,13 +11,53 @@ from django.core.exceptions import PermissionDenied
 from apps.core.access import get_data_owner
 
 
+def _is_ajax(request):
+    """True when the page's JavaScript (fetch) made this request."""
+    return request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+
+def _respond(request, ok, message, redirect_to, level=None, extra=None):
+    """
+    One exit for every outcome of set_attendance.
+      - fetch() call  -> small JSON answer (no redirect, no page render)
+      - normal form   -> flash message + redirect, exactly as before
+    """
+    if _is_ajax(request):
+        data = {'ok': ok, 'message': message}
+        if extra:
+            data.update(extra)
+        return JsonResponse(data, status=200 if ok else 400)
+
+    level = level or (messages.success if ok else messages.error)
+    level(request, message)
+    return redirect(redirect_to)
+
+
+def _clock(dt):
+    """'09:05' in the project's local timezone, or an em dash when empty."""
+    return timezone.localtime(dt).strftime('%H:%M') if dt else '\u2014'
+
+
+def _status_counts(event):
+    """Present/late/absent/total in ONE query (the page used four)."""
+    raw = {
+        row['status']: row['n']
+        for row in event.attendance_records.values('status').annotate(n=Count('id'))
+    }
+    return {
+        'present': raw.get(AttendanceRecord.Status.PRESENT, 0),
+        'late': raw.get(AttendanceRecord.Status.LATE, 0),
+        'absent': raw.get(AttendanceRecord.Status.ABSENT, 0),
+        'total': sum(raw.values()),
+    }
+
+
 @login_required(login_url='landing')
 @require_POST
 def set_attendance(request):
     event_id = request.POST.get('event_id', '')
     if not str(event_id).isdigit():
-        messages.error(request, "Invalid event ID.")
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return _respond(request, False, "Invalid event ID.", request.META.get('HTTP_REFERER', '/'))
     
     owner_user = get_data_owner(request)
     
@@ -24,6 +66,7 @@ def set_attendance(request):
     
     event = get_object_or_404(Event, id=event_id, user=owner_user)
 
+    # Reliable fallback redirect using event.id
     fallback_redirect = request.META.get('HTTP_REFERER') or redirect('event_detail', event_id=event.id).url
 
     email = request.POST.get('email')
@@ -32,11 +75,11 @@ def set_attendance(request):
     student_id = request.POST.get('student_id')
     option = request.POST.get('session_type')
 
+    # Catch missing student ID / Email inputs first
     if not student_id and not email:
-        messages.error(request, "Either Student ID or Email is required.")
-        return redirect(fallback_redirect)
+        return _respond(request, False, "Either Student ID or Email is required.", fallback_redirect)
 
-
+    # 3. Query records through the event relationship & catch MultipleObjectsReturned
     try:
         if student_id:
             record = event.attendance_records.get(
@@ -51,11 +94,9 @@ def set_attendance(request):
                 last_name__iexact=last_name
             )
     except AttendanceRecord.DoesNotExist:
-        messages.error(request, "No matching attendance record found for this student.")
-        return redirect(fallback_redirect)
+        return _respond(request, False, "No matching attendance record found for this student.", fallback_redirect)
     except MultipleObjectsReturned:
-        messages.error(request, "Multiple matching records found — please contact support.")
-        return redirect(fallback_redirect)
+        return _respond(request, False, "Multiple matching records found \u2014 please contact support.", fallback_redirect)
 
     """Make this a derived state rather than a stored attribute to make 
     it more flexible when an event organizer wants to change the late time
@@ -86,12 +127,25 @@ def set_attendance(request):
         if record.status == AttendanceRecord.Status.ABSENT:
             record.status = AttendanceRecord.Status.LATE
     else:
-        messages.warning(request, "Invalid option selected.")
-        return redirect(fallback_redirect)
+        return _respond(request, False, "Invalid option selected.", fallback_redirect, level=messages.warning)
 
     record.edited_by = request.user
     record.save()
-    messages.success(request, "Attendance updated successfully.")
 
-    # 5. Return redirect with fallback
-    return redirect(fallback_redirect)
+    # Everything the page needs to patch ONE row + the counters, nothing more
+    return _respond(
+        request, True,
+        f"Attendance updated for {record.first_name} {record.last_name}.",
+        fallback_redirect,
+        extra={
+            'record_id': record.id,
+            'status': record.status,
+            'status_label': record.get_status_display(),
+            'timed_in_1': _clock(record.timed_in_1),
+            'timed_out_1': _clock(record.timed_out_1),
+            'timed_in_2': _clock(record.timed_in_2),
+            'timed_out_2': _clock(record.timed_out_2),
+            'edited_by': request.user.get_full_name() or request.user.username,
+            'counts': _status_counts(event),
+        },
+    )
