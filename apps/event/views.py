@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
+from django.utils.functional import cached_property
 from django.contrib.auth.decorators import login_required
 from openpyxl.utils import get_column_letter
 from django.views.decorators.http import require_POST
@@ -284,6 +285,18 @@ def download_attendance_template_xlsx(request):
     return response
 
 
+class _KnownCountPaginator(Paginator):
+    """Paginator that reuses a count we already computed (skips its COUNT query)."""
+
+    def __init__(self, *args, known_count, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._known_count = known_count
+
+    @cached_property
+    def count(self):
+        return self._known_count
+
+
 @login_required(login_url='landing')
 def event_detail(request, event_id):
     owner_user = get_data_owner(request)
@@ -291,38 +304,37 @@ def event_detail(request, event_id):
         raise PermissionDenied("You do not have permission to access these records.")
 
     event = get_object_or_404(Event, id=event_id, user=owner_user)
-    all_records = event.attendance_records.select_related('edited_by').order_by('last_name', 'first_name')
+    records_qs = event.attendance_records
+    all_records = records_qs.select_related('edited_by').order_by('last_name', 'first_name')
 
-    # --- Counts: ONE grouped query instead of four separate COUNT queries ---
-    raw_counts = {
-        row['status']: row['n']
-        for row in event.attendance_records.order_by().values('status').annotate(n=Count('id'))
-    }
-    total_attendance = sum(raw_counts.values())
-
-    # --- Filter dropdown values: ask the database for the DISTINCT pairs only,
-    #     instead of loading every attendee into Python just to collect them. ---
-    course_year_pairs = (
-        event.attendance_records.order_by()
-        .values_list('course', 'year_level')
-        .distinct()
-    )
+    # Distinct values only (a few rows) instead of loading the whole roster.
     courses = sorted({
         c.strip()
-        for c, _ in course_year_pairs
+        for c in records_qs.order_by().values_list('course', flat=True).distinct()
         if c and c.strip() and c.strip().lower() != 'nan'
     })
+
     year_levels = sorted({
         str(y).strip()
-        for _, y in course_year_pairs
+        for y in records_qs.order_by().values_list('year_level', flat=True).distinct()
         if y is not None and str(y).strip() and str(y).strip().lower() != 'nan'
-    }, key=lambda y: (0, int(y), '') if y.isdigit() else (1, 0, y))   # numbers first, then text (never compares int with str)
+    }, key=lambda y: int(y) if y.isdigit() else y)
 
-    has_student_id = all_records.exclude(student_id__isnull=True).exclude(student_id='').exclude(student_id='nan').exists()
+    # Totals, status counts and "has student IDs" in ONE query.
+    stats = records_qs.aggregate(
+        total=Count('id'),
+        present=Count('id', filter=Q(status=AttendanceRecord.Status.PRESENT)),
+        late=Count('id', filter=Q(status=AttendanceRecord.Status.LATE)),
+        absent=Count('id', filter=Q(status=AttendanceRecord.Status.ABSENT)),
+        with_student_id=Count(
+            'id',
+            filter=~Q(student_id__isnull=True) & ~Q(student_id='') & ~Q(student_id='nan'),
+        ),
+    )
+    has_student_id = stats['with_student_id'] > 0
     has_academic_info = bool(courses or year_levels)
 
-    paginator = Paginator(all_records, 50)
-    paginator.count = total_attendance   # we already know the total; skips Paginator's own COUNT query
+    paginator = _KnownCountPaginator(all_records, 50, known_count=stats['total'])
     page_number = request.GET.get('page')
     records = paginator.get_page(page_number)
 
@@ -342,10 +354,10 @@ def event_detail(request, event_id):
         'show_session_3': show_session_3,
         'has_student_id': has_student_id,
         'has_academic_info': has_academic_info,
-        'total_attendance': total_attendance,
-        'present_count': raw_counts.get(AttendanceRecord.Status.PRESENT, 0),
-        'late_count': raw_counts.get(AttendanceRecord.Status.LATE, 0),
-        'absent_count': raw_counts.get(AttendanceRecord.Status.ABSENT, 0),
+        'total_attendance': stats['total'],
+        'present_count': stats['present'],
+        'late_count': stats['late'],
+        'absent_count': stats['absent'],
     }
     return render(request, 'event/event_detail.html', context)
 
