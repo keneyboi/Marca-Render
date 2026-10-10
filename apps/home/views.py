@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from apps.core.models import Event, Folder
 from apps.event.forms import EventForm
 from django.contrib import messages
 from apps.core.access import get_data_owner, get_officer_admins
+from apps.core.cache_utils import bump_home_cache, get_events, get_folders
 
 @login_required
 def show_home(request, folder_id=None):
@@ -24,16 +25,19 @@ def show_home(request, folder_id=None):
             'active_admin': owner_user,
         })
 
-    all_folders = Folder.objects.filter(user=owner_user)
+    # Cached per owner; cleared automatically when events/folders change.
+    all_folders = get_folders(owner_user)
 
     current_folder = None
     if folder_id:
-        current_folder = get_object_or_404(Folder, id=folder_id, user=owner_user)
-        events = owner_user.organized_events.filter(folder=current_folder).order_by('-start_time_1')
+        current_folder = next((f for f in all_folders if f.id == folder_id), None)
+        if current_folder is None:
+            raise Http404("Folder not found.")
+        events = get_events(owner_user, folder_id)
         folders = []
     else:
         folders = all_folders
-        events = owner_user.organized_events.filter(folder__isnull=True).order_by('-start_time_1')
+        events = get_events(owner_user)
 
     form = EventForm()
 
@@ -60,6 +64,7 @@ def create_folder(request):
         if event_ids_str:
             ids = [int(i.strip()) for i in event_ids_str.split(',') if i.strip().isdigit()]
             request.user.organized_events.filter(id__in=ids).update(folder=folder)
+            bump_home_cache(request.user.pk)
     return redirect('home')
 
 @login_required
@@ -68,6 +73,7 @@ def delete_folder(request, folder_id):
     folder = get_object_or_404(Folder, id=folder_id, user=request.user)
     folder.events.update(folder=None)
     folder.delete()
+    bump_home_cache(request.user.pk)
     return redirect('home')
 
 @login_required

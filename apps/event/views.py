@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
+from django.utils.functional import cached_property
 from django.contrib.auth.decorators import login_required
 from openpyxl.utils import get_column_letter
 from django.views.decorators.http import require_POST
@@ -284,6 +285,18 @@ def download_attendance_template_xlsx(request):
     return response
 
 
+class _KnownCountPaginator(Paginator):
+    """Paginator that reuses a count we already computed (skips its COUNT query)."""
+
+    def __init__(self, *args, known_count, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._known_count = known_count
+
+    @cached_property
+    def count(self):
+        return self._known_count
+
+
 @login_required(login_url='landing')
 def event_detail(request, event_id):
     owner_user = get_data_owner(request)
@@ -291,24 +304,37 @@ def event_detail(request, event_id):
         raise PermissionDenied("You do not have permission to access these records.")
 
     event = get_object_or_404(Event, id=event_id, user=owner_user)
-    all_records = event.attendance_records.select_related('edited_by').order_by('last_name', 'first_name')
+    records_qs = event.attendance_records
+    all_records = records_qs.select_related('edited_by').order_by('last_name', 'first_name')
 
+    # Distinct values only (a few rows) instead of loading the whole roster.
     courses = sorted({
-        r.course.strip() 
-        for r in all_records 
-        if r.course and r.course.strip() and r.course.strip().lower() != 'nan'
+        c.strip()
+        for c in records_qs.order_by().values_list('course', flat=True).distinct()
+        if c and c.strip() and c.strip().lower() != 'nan'
     })
-    
+
     year_levels = sorted({
-        str(r.year_level).strip() 
-        for r in all_records 
-        if r.year_level is not None and str(r.year_level).strip() and str(r.year_level).strip().lower() != 'nan'
+        str(y).strip()
+        for y in records_qs.order_by().values_list('year_level', flat=True).distinct()
+        if y is not None and str(y).strip() and str(y).strip().lower() != 'nan'
     }, key=lambda y: int(y) if y.isdigit() else y)
 
-    has_student_id = all_records.exclude(student_id__isnull=True).exclude(student_id='').exclude(student_id='nan').exists()
+    # Totals, status counts and "has student IDs" in ONE query.
+    stats = records_qs.aggregate(
+        total=Count('id'),
+        present=Count('id', filter=Q(status=AttendanceRecord.Status.PRESENT)),
+        late=Count('id', filter=Q(status=AttendanceRecord.Status.LATE)),
+        absent=Count('id', filter=Q(status=AttendanceRecord.Status.ABSENT)),
+        with_student_id=Count(
+            'id',
+            filter=~Q(student_id__isnull=True) & ~Q(student_id='') & ~Q(student_id='nan'),
+        ),
+    )
+    has_student_id = stats['with_student_id'] > 0
     has_academic_info = bool(courses or year_levels)
 
-    paginator = Paginator(all_records, 50)
+    paginator = _KnownCountPaginator(all_records, 50, known_count=stats['total'])
     page_number = request.GET.get('page')
     records = paginator.get_page(page_number)
 
@@ -328,10 +354,10 @@ def event_detail(request, event_id):
         'show_session_3': show_session_3,
         'has_student_id': has_student_id,
         'has_academic_info': has_academic_info,
-        'total_attendance': all_records.count(),
-        'present_count': all_records.filter(status=AttendanceRecord.Status.PRESENT).count(),
-        'late_count': all_records.filter(status=AttendanceRecord.Status.LATE).count(),
-        'absent_count': all_records.filter(status=AttendanceRecord.Status.ABSENT).count(),
+        'total_attendance': stats['total'],
+        'present_count': stats['present'],
+        'late_count': stats['late'],
+        'absent_count': stats['absent'],
     }
     return render(request, 'event/event_detail.html', context)
 

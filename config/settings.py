@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'apps.login.middleware.LoginRequiredMiddleware',
 ]
 
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -144,4 +145,10 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
