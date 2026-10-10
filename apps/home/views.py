@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.db.models import Count
 from django.http import JsonResponse
 from apps.core.models import Event, Folder
 from apps.event.forms import EventForm
@@ -24,7 +25,7 @@ def show_home(request, folder_id=None):
             'active_admin': owner_user,
         })
 
-    all_folders = Folder.objects.filter(user=owner_user)
+    all_folders = Folder.objects.filter(user=owner_user).annotate(event_count=Count('events'))
 
     current_folder = None
     if folder_id:

@@ -26,5 +26,4 @@ urlpatterns = [
     path('event/', include('apps.event.urls')),
     path('officer/', include('apps.officer.urls')),
     path('attendance/', include('apps.attendance.urls')),
-    path('__debug__/', include('debug_toolbar.urls')),
 ]

@@ -293,22 +293,36 @@ def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id, user=owner_user)
     all_records = event.attendance_records.select_related('edited_by').order_by('last_name', 'first_name')
 
+    # --- Counts: ONE grouped query instead of four separate COUNT queries ---
+    raw_counts = {
+        row['status']: row['n']
+        for row in event.attendance_records.order_by().values('status').annotate(n=Count('id'))
+    }
+    total_attendance = sum(raw_counts.values())
+
+    # --- Filter dropdown values: ask the database for the DISTINCT pairs only,
+    #     instead of loading every attendee into Python just to collect them. ---
+    course_year_pairs = (
+        event.attendance_records.order_by()
+        .values_list('course', 'year_level')
+        .distinct()
+    )
     courses = sorted({
-        r.course.strip() 
-        for r in all_records 
-        if r.course and r.course.strip() and r.course.strip().lower() != 'nan'
+        c.strip()
+        for c, _ in course_year_pairs
+        if c and c.strip() and c.strip().lower() != 'nan'
     })
-    
     year_levels = sorted({
-        str(r.year_level).strip() 
-        for r in all_records 
-        if r.year_level is not None and str(r.year_level).strip() and str(r.year_level).strip().lower() != 'nan'
-    }, key=lambda y: int(y) if y.isdigit() else y)
+        str(y).strip()
+        for _, y in course_year_pairs
+        if y is not None and str(y).strip() and str(y).strip().lower() != 'nan'
+    }, key=lambda y: (0, int(y), '') if y.isdigit() else (1, 0, y))   # numbers first, then text (never compares int with str)
 
     has_student_id = all_records.exclude(student_id__isnull=True).exclude(student_id='').exclude(student_id='nan').exists()
     has_academic_info = bool(courses or year_levels)
 
     paginator = Paginator(all_records, 50)
+    paginator.count = total_attendance   # we already know the total; skips Paginator's own COUNT query
     page_number = request.GET.get('page')
     records = paginator.get_page(page_number)
 
@@ -328,10 +342,10 @@ def event_detail(request, event_id):
         'show_session_3': show_session_3,
         'has_student_id': has_student_id,
         'has_academic_info': has_academic_info,
-        'total_attendance': all_records.count(),
-        'present_count': all_records.filter(status=AttendanceRecord.Status.PRESENT).count(),
-        'late_count': all_records.filter(status=AttendanceRecord.Status.LATE).count(),
-        'absent_count': all_records.filter(status=AttendanceRecord.Status.ABSENT).count(),
+        'total_attendance': total_attendance,
+        'present_count': raw_counts.get(AttendanceRecord.Status.PRESENT, 0),
+        'late_count': raw_counts.get(AttendanceRecord.Status.LATE, 0),
+        'absent_count': raw_counts.get(AttendanceRecord.Status.ABSENT, 0),
     }
     return render(request, 'event/event_detail.html', context)
 

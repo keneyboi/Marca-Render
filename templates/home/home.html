@@ -97,7 +97,7 @@
           <div class="folder-icon">&#128193;</div>
           <div class="folder-info">
             <span class="folder-name">{{ folder.name }}</span>
-            <span class="folder-count">{{ folder.events.count }} item{{ folder.events.count|pluralize }}</span>
+            <span class="folder-count">{{ folder.event_count }} item{{ folder.event_count|pluralize }}</span>
           </div>
         </a>
         <form action="{% url 'delete_folder' folder.id %}" method="POST" class="delete-folder-form">
