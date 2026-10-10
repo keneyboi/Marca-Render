@@ -58,17 +58,22 @@
   </header>
 
   <!-- EXISTING ATTENDANCE SCANNER -->
-  <dialog id="attendance-scanner" class="scanner-modal">
+  <dialog id="attendance-scanner" class="scanner-modal" data-event-id="{{ event.id }}" data-batch-url="{% url 'batch_scan' %}">
     <div class="scanner-modal-body">
       <div class="scanner-modal-left">
         <div class="modal-header">
           <h3>Scan Attendance</h3>
           <button class="close-modal-button" onclick="resetScanner()">&times;</button>
         </div>
-        <div id="reader" style="width: 100%; margin: 0 auto;"></div>
+        <video id="scanner-video" playsinline muted></video>
       </div>
 
       <div class="scanner-modal-right">
+        <div class="scan-mode-toggle" role="tablist" aria-label="Scan mode">
+          <button type="button" id="scan-mode-single" class="active" role="tab" aria-selected="true">Single</button>
+          <button type="button" id="scan-mode-batch" role="tab" aria-selected="false">Batch</button>
+        </div>
+
         <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
           {% csrf_token %}
 
@@ -110,6 +115,21 @@
             <button type="button" class="btn-secondary" onclick="resetScanner()">Cancel</button>
           </div>
         </form>
+
+        <!-- Batch mode: the camera stays open and scans collect in a list -->
+        <div id="batch-panel" class="batch-panel" hidden>
+          <div class="scanner-modal-header">
+            <h2>Batch scan</h2>
+            <select id="batch-session-select" class="session-select-inline" aria-label="Scan type"></select>
+          </div>
+          <p id="batch-status" class="batch-status" aria-live="polite">Scan a code to add it to the list.</p>
+          <ul id="batch-list" class="batch-list"></ul>
+          <div class="scanner-modal-buttons">
+            <button type="button" id="batch-send" class="btn-primary" disabled>Send now</button>
+            <button type="button" id="batch-done" class="btn-secondary">Done</button>
+          </div>
+          <button type="button" id="batch-clear-failed" class="batch-clear-failed" hidden>Clear failed scans</button>
+        </div>
       </div>
     </div>
   </dialog>
@@ -187,11 +207,25 @@
     </a>
   </div>
 
+  <!-- Bulk actions (appears when rows are ticked) -->
+  <div id="bulk-bar" class="bulk-bar" hidden
+       data-url="{% url 'batch_set_status' %}" data-event-id="{{ event.id }}">
+    <span id="bulk-count">0 selected</span>
+    <select id="bulk-status" aria-label="New status">
+      {% for val, label in status_choices %}
+        <option value="{{ val }}">Mark as {{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="button" id="bulk-apply" class="btn-primary">Apply</button>
+    <button type="button" id="bulk-clear" class="btn-secondary">Clear</button>
+  </div>
+
   <!-- Attendance Table -->
   <div class="table-container">
     <table class="roster-table">
       <thead>
         <tr>
+          <th class="bulk-col"><input type="checkbox" id="bulk-select-all" aria-label="Select all rows"></th>
           <th>Name</th>
           <th>Email</th>
 
@@ -235,6 +269,7 @@
             data-course="{{ record.course|default:'' }}" 
             data-year="{{ record.year_level|default:'' }}"
           >
+            <td class="bulk-col"><input type="checkbox" class="bulk-check" value="{{ record.id }}" aria-label="Select {{ record.first_name }} {{ record.last_name }}"></td>
             <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
             <td>{{ record.email|default:"&mdash;" }}</td>
 
@@ -443,7 +478,9 @@
   });
 </script>
 
-<script src="{% static 'js/landing/html5-qrcode.min.js' %}"></script>
+<script src="{% static 'js/landing/qr-scanner.legacy.min.js' %}"></script>
 <script src="{% static 'js/event/scan_attendance.js' %}"></script>
+<script src="{% static 'js/event/batch_scan.js' %}"></script>
 <script src="{% static 'js/event/attendance_filter.js' %}"></script>
+<script src="{% static 'js/event/bulk_status.js' %}"></script>
 {% endblock %}
