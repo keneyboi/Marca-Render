@@ -1,36 +1,29 @@
 let qrCodeInstance = null;
-let html5QrCode = null;
+let qrScanner = null;
 let camIsOpen = false;
 let isProcessingScan = false;
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    if (document.getElementById("reader")) {
-        html5QrCode = new Html5Qrcode("reader");
-    }
-
     const attendanceForm = document.getElementById("attendance-form");
     if (attendanceForm) {
         attendanceForm.addEventListener("submit", (e) => {
-            e.preventDefault();              // stop the full-page POST + redirect
+            e.preventDefault();              
             submitAttendance(attendanceForm);
         });
     }
 
 });
 
-// ---------------------------------------------------------------
-// INSTANT ATTENDANCE: send the form in the background (fetch),
-// then patch only the parts of the page that changed.
-// ---------------------------------------------------------------
+// end the form in the background (fetch), then patch only the parts of the page that changed.
 async function submitAttendance(form) {
     const button = form.querySelector('button[type="submit"]');
-    if (button) button.disabled = true;           // block double-submits
+    if (button) button.disabled = true;      
 
     try {
         const response = await fetch(form.action, {
             method: "POST",
-            body: new FormData(form),             // includes the CSRF token
+            body: new FormData(form),           
             headers: { "X-Requested-With": "XMLHttpRequest" },
             credentials: "same-origin",
         });
@@ -51,9 +44,9 @@ async function submitAttendance(form) {
             updateRowFromServer(data);
             updateCounters(data.counts);
             form.reset();
-            await resetScanner();                 // same behaviour as before: close the scanner
+            await resetScanner();                
         } else {
-            isProcessingScan = false;             // keep the form, allow another scan
+            isProcessingScan = false;           
         }
     } catch (err) {
         console.error("Attendance request failed:", err);
@@ -66,7 +59,7 @@ async function submitAttendance(form) {
 
 function updateRowFromServer(data) {
     const row = document.querySelector(`tr.attendance-row[data-record-id="${data.record_id}"]`);
-    if (!row) return;                             // the record is on another page of the table
+    if (!row) return;                           
 
     const setText = (field, value) => {
         const cell = row.querySelector(`[data-field="${field}"]`);
@@ -82,7 +75,7 @@ function updateRowFromServer(data) {
         badge.textContent = data.status_label;
     }
 
-    row.dataset.status = data.status;             // the status filter reads this
+    row.dataset.status = data.status; 
     if (window.refreshAttendanceRow) window.refreshAttendanceRow(row);
 }
 
@@ -95,9 +88,6 @@ function updateCounters(counts) {
 }
 
 function showToast(message, kind) {
-    // An open <dialog> sits in the browser's "top layer" above everything,
-    // even above z-index: 99999. So when the scanner is open, the toast must
-    // live INSIDE the dialog to be visible.
     const host = document.querySelector("dialog[open]") || document.body;
 
     const toast = document.createElement("div");
@@ -117,45 +107,84 @@ function showToast(message, kind) {
     setTimeout(() => { toast.remove(); }, 3400);
 }
 
+function onQrDecoded(decodedText) {
+    if (window.BatchScan && window.BatchScan.isActive()) {
+        window.BatchScan.handleScan(decodedText);
+        return;
+    }
+    if (isProcessingScan) return;
+    isProcessingScan = true;
+    handleScannedData(decodedText);
+}
+
+function cameraErrorMessage(err) {
+    const name = (err && err.name) || "";
+    const text = typeof err === "string" ? err : ((err && err.message) || "");
+    if (!window.isSecureContext) {
+        return "The camera only works on a secure page. Open this site with https:// (or localhost).";
+    }
+    if (name === "NotAllowedError" || /permission|denied/i.test(text)) {
+        return "Camera permission was denied. Allow camera access for this site in your browser settings, then try again.";
+    }
+    if (name === "NotFoundError" || /not found/i.test(text)) {
+        return "No camera was found on this device.";
+    }
+    if (name === "NotReadableError") {
+        return "The camera is being used by another app or tab. Close it and try again.";
+    }
+    return "Could not start the camera." + (text ? " (" + text + ")" : "");
+}
+
 async function openScanner() {
     if (camIsOpen) return;
 
     const modal = document.getElementById('attendance-scanner');
+    const video = document.getElementById('scanner-video');
+    if (!modal || !video) return;
+
     camIsOpen = true;
     isProcessingScan = false;
-
-    if (modal) modal.showModal();
+    modal.showModal();
 
     try {
-        await html5QrCode.start(
-            { facingMode: "environment" },
-            {
-                fps: 10,
-                qrbox: { width: 300, height: 300 },
-                videoConstraints: {
-                    width: { ideal: 640 },
-                    height: { ideal: 640 }
+        if (!qrScanner) {
+            qrScanner = new QrScanner(
+                video,
+                (result) => onQrDecoded(result.data),
+                {
+                    preferredCamera: "environment",
+                    maxScansPerSecond: 25,
+                    returnDetailedScanResult: true,
+                    // Look at almost the whole picture, not just a small centre box:
+                    // dense QR codes need every pixel they can get.
+                    calculateScanRegion: (v) => {
+                        const size = Math.round(Math.min(v.videoWidth, v.videoHeight) * 0.9);
+                        return {
+                            x: Math.round((v.videoWidth - size) / 2),
+                            y: Math.round((v.videoHeight - size) / 2),
+                            width: size,
+                            height: size,
+                            downScaledWidth: Math.min(size, 800),
+                            downScaledHeight: Math.min(size, 800),
+                        };
+                    },
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
                 }
-            },
-            async (decodedText) => {
-                if (isProcessingScan) return;
-                isProcessingScan = true;
-
-                handleScannedData(decodedText);
-            },
-            (errorMessage) => {}
-        );
+            );
+        }
+        await qrScanner.start();
     } catch (err) {
         console.error("Camera initialization failed:", err);
         await resetScanner();
-        alert("Could not access camera. Please check camera permissions.");
+        alert(cameraErrorMessage(err));
     }
 }
 
 async function resetScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
+    if (qrScanner) {
         try {
-            await html5QrCode.stop();
+            qrScanner.stop();   
         } catch (err) {
             console.warn("Scanner stop error:", err);
         }
@@ -166,13 +195,15 @@ async function resetScanner() {
     if (modal && modal.open) {
         modal.close();
     }
+
+    // Closing the scanner sends any scans still waiting in the batch list.
+    if (window.BatchScan) window.BatchScan.onScannerClosed();
 }
 
 function handleScannedData(rawJsonText) {
     try {
         const data = JSON.parse(rawJsonText);
 
-        // Populate form fields directly from scanned JSON
         const firstNameInput = document.getElementById("input-first-name");
         const lastNameInput = document.getElementById("input-last-name");
         const emailInput = document.getElementById("input-email");
@@ -192,24 +223,21 @@ function handleScannedData(rawJsonText) {
 }
 
 
-// Grab the dialog element
 const addRecordModal = document.getElementById('addRecordModal');
 
-// Open as a modal overlay (Places element in the Browser's Top-Layer)
 function openAddRecordModal() {
   if (addRecordModal) {
     addRecordModal.showModal();
   }
 }
 
-// Close function
 function closeAddRecordModal() {
   if (addRecordModal) {
     addRecordModal.close();
   }
 }
 
-// Optional: Close modal automatically when clicking backdrop area
+// Close modal automatically when clicking backdrop area
 if (addRecordModal) addRecordModal.addEventListener('click', (event) => {
   const rect = addRecordModal.getBoundingClientRect();
   const isInDialog = (
