@@ -225,17 +225,43 @@ function handleScannedData(rawJsonText) {
 
 const addRecordModal = document.getElementById('addRecordModal');
 
-function openAddRecordModal() {
-  if (addRecordModal) {
-    addRecordModal.showModal();
-  }
-}
+window.openAddRecordModal = function(item) {
+    const modal = document.getElementById("addRecordModal");
+    if (!modal) return;
 
-function closeAddRecordModal() {
-  if (addRecordModal) {
-    addRecordModal.close();
-  }
-}
+    // If an item was passed from the batch list, populate the form fields
+    if (item) {
+        const studentIdInput = modal.querySelector('input[name="student_id"]');
+        const emailInput = modal.querySelector('input[name="email"]');
+        const firstNameInput = modal.querySelector('input[name="first_name"]');
+        const lastNameInput = modal.querySelector('input[name="last_name"]');
+
+        if (studentIdInput) studentIdInput.value = item.student_id || "";
+        if (emailInput) emailInput.value = item.email || "";
+        if (firstNameInput) firstNameInput.value = item.first_name || "";
+        if (lastNameInput) lastNameInput.value = item.last_name || "";
+    }
+
+    // Close the scanner dialog so it doesn't block the screen
+    const scannerDialog = document.getElementById("attendance-scanner");
+    if (scannerDialog && typeof scannerDialog.close === "function" && scannerDialog.open) {
+        scannerDialog.close();
+    }
+
+    // Display the modal
+    modal.style.display = "flex";
+};
+
+window.closeAddRecordModal = function() {
+    const modal = document.getElementById("addRecordModal");
+    if (modal) {
+        modal.style.display = "none";
+        
+        // Reset the form when closed
+        const form = document.getElementById("addAttendeeForm");
+        if (form) form.reset();
+    }
+};
 
 // Close modal automatically when clicking backdrop area
 if (addRecordModal) addRecordModal.addEventListener('click', (event) => {

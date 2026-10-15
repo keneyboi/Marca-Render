@@ -5,6 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from apps.core.models import Officer
+from apps.core.utils import notify_user
+
 
 from .forms import AddOfficerForm
 
@@ -39,6 +41,12 @@ def create_officer(request):
         return redirect('officer')
 
     officer = form.save()
+    notify_user(
+        request.user, 
+        title="Officer Added", 
+        message=f"New officer added, {officer.username}.", 
+        action_type="attendee_added"
+    )
     messages.success(request, f'"{officer.get_full_name() or officer.username}" was added as an officer.')
     return redirect('officer')
 
@@ -55,5 +63,11 @@ def delete_officer(request, officer_id):
     )
     name = link.officer.get_full_name() or link.officer.username
     link.delete()
+    notify_user(
+        request.user, 
+        title="Officer Removed", 
+        message=f"{name} was removed as Officer.", 
+        action_type="attendee_added"
+    )
     messages.success(request, f'"{name}" was removed from your officers.')
     return redirect('officer')

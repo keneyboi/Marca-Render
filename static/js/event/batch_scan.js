@@ -108,14 +108,80 @@
             sub.textContent = item.error ? item.error : (optionLabel(item.option) || "Queued");
             text.append(name, sub);
 
-            const remove = document.createElement("button");
-            remove.type = "button";
-            remove.className = "batch-item-remove";
-            remove.setAttribute("aria-label", `Remove ${item.first_name} ${item.last_name}`);
-            remove.textContent = "×";
-            remove.addEventListener("click", () => removeItem(item.id));
+            const actionsWrapper = document.createElement("div");
+            actionsWrapper.className = "batch-item-actions";
 
-            li.append(text, remove);
+            // Menu trigger button ("...")
+            const menuBtn = document.createElement("button");
+            menuBtn.type = "button";
+            menuBtn.className = "batch-item-menu-btn";
+            menuBtn.setAttribute("aria-label", `Options for ${item.first_name} ${item.last_name}`);
+            menuBtn.textContent = "⋯";
+
+            
+
+            // Dropdown menu container
+            const dropdown = document.createElement("div");
+            dropdown.className = "batch-item-dropdown";
+            dropdown.hidden = true;
+
+            // Option 1: Add to Event / Session
+            const addToEventBtn = document.createElement("button");
+            addToEventBtn.type = "button";
+            addToEventBtn.textContent = "Add to Event";
+            addToEventBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdown.hidden = true;
+                openAddRecordModal(item);
+            });
+
+            // Option 2: Remove from Scans
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "danger-option";
+            removeBtn.textContent = "Remove from Scans";
+            removeBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdown.hidden = true;
+                removeItem(item.id);
+            });
+
+            dropdown.append(addToEventBtn, removeBtn);
+
+
+            menuBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                
+                // Close any other open dropdowns first
+                document.querySelectorAll(".batch-item-dropdown").forEach((el) => {
+                    if (el !== dropdown) el.hidden = true;
+                });
+
+                if (dropdown.hidden) {
+                    // Show it first so we can measure its dimensions
+                    dropdown.hidden = false;
+                    
+                    const rect = menuBtn.getBoundingClientRect();
+                    const dropdownRect = dropdown.getBoundingClientRect();
+                    
+                    // Position it above the button by default, aligned to the right of the button
+                    let top = rect.top - dropdownRect.height - 6;
+                    let left = rect.right - dropdownRect.width;
+
+                    // If it goes off the top of the screen, flip it to open below the button instead
+                    if (top < 10) {
+                        top = rect.bottom + 6;
+                    }
+
+                    dropdown.style.top = `${top}px`;
+                    dropdown.style.left = `${left}px`;
+                } else {
+                    dropdown.hidden = true;
+                }
+            });
+
+            actionsWrapper.append(menuBtn, dropdown);
+            li.append(text, actionsWrapper);
             listEl.appendChild(li);
         });
         if (queue.length > MAX_RENDERED) {
@@ -266,6 +332,15 @@
         setStatus(`Offline — ${sendableCount()} scans are saved on this device. Retrying in ${seconds}s…`, "error");
         retryTimer = setTimeout(() => { retryTimer = null; flush(); }, backoffMs);
     }
+
+    document.addEventListener("click", (e) => {
+        // If the click wasn't inside a batch item actions wrapper, close all dropdowns
+        if (!e.target.closest(".batch-item-actions")) {
+            document.querySelectorAll(".batch-item-dropdown").forEach((el) => {
+                el.hidden = true;
+            });
+        }
+    });
 
     const single = document.getElementById("session-select");
     if (single) {

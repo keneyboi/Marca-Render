@@ -11,9 +11,15 @@
 <div class="event-detail-container">
   
   <!-- Header & Back Navigation -->
-  <a href="{% url 'home' %}" class="btn-navigation">
-    &larr; Back to Dashboard
+  {% if event.folder %}
+  <a href="{% url 'folder_detail' event.folder.id %}" class="btn-navigation folder-card-link">
+    Back to Folder
   </a>
+{% else %}
+  <a href="{% url 'home' %}" class="btn-navigation" style="line-height: 0.85;">
+    Back to Dashboard
+  </a>
+{% endif %}
 
   <header class="detail-header">
     <div class="detail-header-left">
@@ -30,7 +36,6 @@
     
     <!-- FIXED: Combined class attributes -->
     <div class="detail-header-right add-attendee-button" style="display: flex; gap: 0.5rem; align-items: center;">
-      {% if request.user.is_admin %}
       <button type="button" class="btn-secondary" onclick="openAddRecordModal()">
         <svg 
           width="18" 
@@ -46,12 +51,11 @@
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        <span style="line-height: 1;">Add Attendee</span>
+        <span style="line-height: 0.9;">Add Attendee</span>
       </button>
-      {% endif %}
-      
+
       <!-- FIXED: Merged duplicate class attributes -->
-      <button type="button" class="btn-primary scan-button" onclick="openScanner()">
+      <button type="button" class="btn-primary" onclick="openScanner()" >
           <span>Scan Attendance</span>
       </button> 
     </div>
@@ -70,8 +74,8 @@
 
       <div class="scanner-modal-right">
         <div class="scan-mode-toggle" role="tablist" aria-label="Scan mode">
-          <button type="button" id="scan-mode-single" class="active" role="tab" aria-selected="true">Single</button>
-          <button type="button" id="scan-mode-batch" role="tab" aria-selected="false">Batch</button>
+          <button type="button" id="scan-mode-single" class="active" role="tab" aria-selected="true">Manual Input</button>
+          <button type="button" id="scan-mode-batch" role="tab" aria-selected="false">Automatic Scan</button>
         </div>
 
         <form id="attendance-form" action="{% url 'set_attendance' %}" method="POST">
@@ -391,7 +395,7 @@
 <!-- Add Attendee Modal -->
 <div 
   id="addRecordModal" 
-  style="display: none; position: fixed; inset: 0; background: rgba(51, 16, 16, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center;"
+  style="display: none; position: fixed; inset: 0; background: rgba(51, 16, 16, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 9999; align-items: center; justify-content: center;"
 >
   <div style="background-color: #fdfbf7; border: 1px solid rgba(209, 200, 184, 0.5); border-radius: 24px; width: 90%; max-width: 520px; padding: 2.25rem 2rem 2rem; box-shadow: 0 20px 50px rgba(51, 16, 16, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08); box-sizing: border-box; max-height: 85vh; overflow-y: auto;">
     

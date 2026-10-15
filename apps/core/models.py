@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 
 class User(AbstractUser):
@@ -53,7 +54,6 @@ class Folder(models.Model):
     def __str__(self):
         return self.name
     
-
 
 
 class Event(models.Model):
@@ -159,3 +159,30 @@ class AttendanceRecord(models.Model):
     def __str__(self):
         ident = self.student_id or self.email or "No ID"
         return f"{self.last_name}, {self.first_name} ({ident}) - {self.status}"
+    
+class Notification(models.Model):
+    ACTION_CHOICES = [
+        ('event_created', 'Event Created'),
+        ('event_edited', 'Event Edited'),
+        ('officer_added', 'Officer Added'),
+        ('attendee_added', 'Attendee Added'),
+        ('folder_created', 'Folder Created'),
+    ]
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='notifications'
+    )
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    action_type = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    target_url = models.CharField(max_length=500, blank=True, null=True) # Link to event or folder
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at'] # Newest notifications first
+
+    def __str__(self):
+        return f"[{self.action_type}] {self.title} -> {self.recipient.username}"

@@ -30,18 +30,18 @@
 
     <div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
       {% if current_folder %}
-        <a href="{% url 'home' %}" class="btn-navigation">
-          &larr; Back to Dashboard
+        <a href="{% url 'home' %}" class="btn-secondary" style="text-align: center; line-height: 1.Z;">
+          Back to Dashboard
         </a>
       {% else %}
           <button type="button" class="btn-secondary" id="openFolderBtn">
-            + New Folder
+          New Folder
           </button>
       {% endif %}
 
       {% if request.user.is_admin %}
         <button type="button" class="btn-primary" onclick="openEventModal()">
-          + Create Event
+          Create Event
         </button>
       {% endif %}
     </div>

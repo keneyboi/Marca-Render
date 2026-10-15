@@ -48,7 +48,7 @@
 /* Metric Stats Row */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -584,4 +584,61 @@
     width: auto;
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+}
+
+/* Batch item actions menu */
+.batch-item-actions {
+  position: relative;
+}
+
+.batch-item-menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--text-color, #555);
+}
+
+.batch-item-menu-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.batch-item-dropdown {
+  position: fixed; /* Changed from absolute to fixed to escape overflow clipping */
+  z-index: 9999;
+  right: 0;
+  margin-right: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  overflow: hidden;
+}
+
+.batch-item-dropdown button {
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.batch-item-dropdown button:hover {
+  background-color: #f0f0f0;
+}
+
+.batch-item-dropdown button.danger-option {
+  color: #d9534f;
+}
+
+.batch-item-dropdown button.danger-option:hover {
+  background-color: #fdf2f2;
 }

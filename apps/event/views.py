@@ -15,6 +15,8 @@ from apps.core.models import Event, AttendanceRecord
 from .forms import EventForm, EditEventForm
 from django.core.exceptions import PermissionDenied
 from apps.core.access import get_data_owner
+from apps.core.utils import notify_user
+from django.urls import reverse
 
 def _clean_cell_value(val):
     if val is None:
@@ -240,6 +242,13 @@ def create_event(request):
             ]
             AttendanceRecord.objects.bulk_create(attendees)
 
+        notify_user(
+            request.user, 
+            title="Event Created", 
+            message=f"Successfully created event '{event.name}'.", 
+            action_type="event_created",
+            target_url=reverse('event_detail', args=[event.id]) 
+        )
         messages.success(request, f'Event "{event.name}" and {len(records_to_create)} attendee records created successfully!')
         return redirect('home')
 
@@ -307,6 +316,8 @@ def event_detail(request, event_id):
     records_qs = event.attendance_records
     all_records = records_qs.select_related('edited_by').order_by('last_name', 'first_name')
 
+    folder = event.folder
+    
     # Distinct values only (a few rows) instead of loading the whole roster.
     courses = sorted({
         c.strip()
@@ -314,11 +325,11 @@ def event_detail(request, event_id):
         if c and c.strip() and c.strip().lower() != 'nan'
     })
 
-    year_levels = sorted({
+    year_levels = sorted({  
         str(y).strip()
         for y in records_qs.order_by().values_list('year_level', flat=True).distinct()
         if y is not None and str(y).strip() and str(y).strip().lower() != 'nan'
-    }, key=lambda y: int(y) if y.isdigit() else y)
+    }, key=lambda y: (0, int(y)) if str(y).isdigit() else (1, str(y)))
 
     # Totals, status counts and "has student IDs" in ONE query.
     stats = records_qs.aggregate(
@@ -344,6 +355,7 @@ def event_detail(request, event_id):
     show_session_3 = st == '3'
 
     context = {
+        'folder': folder,
         'event': event,
         'records': records,
         'status_choices': AttendanceRecord.Status.choices,
@@ -402,6 +414,12 @@ def add_attendance_record(request, event_id):
         status=status,
         edited_by=request.user,
     )
+    notify_user(
+        request.user, 
+        title="Attendee Added", 
+        message=f"New attendee added to {event.name}.", 
+        action_type="attendee_added"
+    )
 
     messages.success(request, f'Attendee "{first_name} {last_name}" added successfully.')
     return redirect('event_detail', event_id=event.id)
@@ -445,6 +463,12 @@ def edit_event(request, event_id):
 
     try:
         updated_event = form.save()
+        notify_user(
+            request.user, 
+            title="Event Updated", 
+            message=f"Details for '{event.name}' were updated.", 
+            action_type="event_edited"
+        )
         messages.success(request, f'Event "{updated_event.name}" was successfully updated!')
     except Exception as e:
         messages.error(request, f'Failed to update event: {e}')

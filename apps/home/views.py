@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import Http404, JsonResponse
+from django.urls import reverse
+from apps.core.utils import notify_user
 from apps.core.models import Event, Folder
 from apps.event.forms import EventForm
 from django.contrib import messages
@@ -65,6 +67,13 @@ def create_folder(request):
             ids = [int(i.strip()) for i in event_ids_str.split(',') if i.strip().isdigit()]
             request.user.organized_events.filter(id__in=ids).update(folder=folder)
             bump_home_cache(request.user.pk)
+        notify_user(
+            request.user, 
+            title="Folder Created", 
+            message=f"New folder '{folder.name}' was created.", 
+            action_type="folder_created",
+            target_url=reverse('folder_detail', args=[folder.id])
+        )
     return redirect('home')
 
 @login_required
@@ -74,6 +83,13 @@ def delete_folder(request, folder_id):
     folder.events.update(folder=None)
     folder.delete()
     bump_home_cache(request.user.pk)
+    notify_user(
+        request.user, 
+        title="Folder Deleted", 
+        message=f"{folder.name} was deleted.", 
+        action_type="folder_created",
+        target_url=reverse('folder_detail', args=[folder.id])
+    )
     return redirect('home')
 
 @login_required
