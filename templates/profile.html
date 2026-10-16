@@ -1,0 +1,91 @@
+{% extends 'dashboard_base.html' %}
+
+{% load static %}
+
+{% block title %}Profile | Marca{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/profile.css" %}">
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-container">
+    
+    <!-- Header Card -->
+
+    
+    <h2 class="dashboard-title">Profile</h2>
+
+    <div class="profile-header">
+        <div class="profile-icon" id="profile-icon"></div>
+        <span class="profile-name">{{ user.first_name }} {{ user.last_name }}</span>
+        <span class="profile-email">{{ user.email }} </span>
+    </div>
+
+    
+
+
+
+    <div class="profile-sections">
+
+        <!-- CARD 1: PROFILE INFORMATION -->
+        <div class="profile-card">
+            <h3 class="card-section-title">Personal Information</h3>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <div class="form-group form-group-flex">
+                        <label class="modal-label">FIRST NAME</label>
+                        {{ profile_form.first_name }}
+                    </div>
+                    <div class="form-group form-group-flex">
+                        <label class="modal-label">LAST NAME</label>
+                        {{ profile_form.last_name }}
+                    </div>
+                </div>
+
+
+                <div class="form-actions">
+                    <button type="submit" name="update_profile" class="btn-primary">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- CARD 2: CHANGE PASSWORD -->
+        <div class="profile-card">
+            <h3 class="card-section-title">Change Password</h3>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% for field in password_form %}
+                    <div class="form-group">
+                        <label class="modal-label">
+                            {{ field.label|upper }}
+                        </label>
+                        <!-- Add form-control class to password widgets dynamically or ensure they render properly -->
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-help">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="form-actions form-actions-spaced">
+                    <button type="submit" name="change_password" class="btn-secondary">
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

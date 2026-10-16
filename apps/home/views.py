@@ -43,7 +43,7 @@ def show_home(request, folder_id=None):
 
     form = EventForm()
 
-    return render(request, 'home/home.html', {
+    return render(request, 'home.html', {
         'events': events,
         'folders': folders,
         'current_folder': current_folder,

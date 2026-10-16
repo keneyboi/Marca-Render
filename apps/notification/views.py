@@ -10,7 +10,7 @@ def notification_list_view(request):
     notifications.filter(is_read=False).update(is_read=True)
     
     context = {'notifications': notifications}
-    return render(request, 'notification/notification.html', context)
+    return render(request, 'notification.html', context)
 
 @login_required
 def clear_notifications(request):

@@ -26,7 +26,7 @@ def show_officer(request):
         .filter(admin_links__admin=request.user)
         .order_by('username')
     )
-    return render(request, "officer/officer.html", {'officers': officers})
+    return render(request, "officer.html", {'officers': officers})
 
 
 @login_required(login_url='login')

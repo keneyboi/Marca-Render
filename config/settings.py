@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'apps.core',
     'apps.landing',
     'apps.login',
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     'apps.home',
     'apps.event',
     'apps.attendance',
+    'apps.user_profile',
     'apps.notification',
 ]
 

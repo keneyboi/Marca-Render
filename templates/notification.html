@@ -1,0 +1,85 @@
+{% extends 'dashboard_base.html' %}
+
+{% load static %}
+
+{% block title %}Notifications | Marca{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/notification.css" %}">
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-container">
+    
+    <!-- Outer Header Flex Container -->
+    <div class="dashboard-header-card dashboard-header-flex">
+        
+        <!-- Inner Title & Subtitle Wrapper -->
+        <div class="header-text-group">
+            <h2 class="welcome-title">Notifications</h2>
+            <span class="header-subtitle">Review your recent activity and system logs</span>
+        </div>
+        
+        <!-- Upper Right Flush Button -->
+        {% if notifications %}
+        <form action="{% url 'clear_notifications' %}" method="POST" class="flush-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-secondary btn-flush" onclick="return confirm('Flush all notifications?');">
+                Flush
+            </button>
+        </form>
+        {% endif %}
+
+    </div>
+
+    <!-- Notifications Feed Container -->
+    <div class="notifications-section">
+        {% if notifications %}
+            <div class="notifications-feed">
+                {% for notif in notifications %}
+                    <div class="notification-item {% if not notif.is_read %}unread{% endif %}">
+                        
+                        <div class="notification-content-left">
+                            <!-- Centered Clean Icon Badge (No Border / Outer Lining) -->
+                            <div class="notif-icon-avatar">
+                                {% if notif.action_type == 'event_created' or notif.action_type == 'event_edited' %}📅
+                                {% elif notif.action_type == 'folder_created' %}📁
+                                {% else %}👤{% endif %}
+                            </div>
+                            
+                            <div class="notification-details">
+                                <div class="notification-title-row">
+                                    <h4 class="notification-title">
+                                        {{ notif.title }}
+                                    </h4>
+                                    {% if not notif.is_read %}
+                                        <span class="unread-dot" title="Unread"></span>
+                                    {% endif %}
+                                </div>
+                                <p class="notification-message">
+                                    {{ notif.message }}
+                                </p>
+                                <span class="notification-time">
+                                    {{ notif.created_at|timesince }} ago
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if notif.target_url %}
+                            <a href="{{ notif.target_url }}" class="btn-secondary btn-view">
+                                View
+                            </a>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-card">
+                <p class="empty-state-text">You have no notifications right now.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

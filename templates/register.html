@@ -4,7 +4,7 @@
 {% block title %}Register | Marca{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/register/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/register.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -14,61 +14,61 @@
     <p class="auth-subtitle">Ready to check attendance?</p>
     
     <form method="POST" class="auth-form">
-  {% csrf_token %}
+      {% csrf_token %}
 
-  <!-- Two-column grid row for First Name & Last Name -->
-    <div class="form-row">
+      <!-- Two-column grid row for First Name & Last Name -->
+      <div class="form-row">
         <div class="form-group">
-        <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-        {{ form.first_name }}
-        {% if form.first_name.errors %}
+          <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
             <div class="auth-error-container">
-            {% for error in form.first_name.errors %}
+              {% for error in form.first_name.errors %}
                 <span class="auth-error-text">{{ error }}</span>
-            {% endfor %}
+              {% endfor %}
             </div>
-        {% endif %}
+          {% endif %}
         </div>
 
         <div class="form-group">
-        <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-        {{ form.last_name }}
-        {% if form.last_name.errors %}
+          <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
             <div class="auth-error-container">
-            {% for error in form.last_name.errors %}
+              {% for error in form.last_name.errors %}
                 <span class="auth-error-text">{{ error }}</span>
-            {% endfor %}
+              {% endfor %}
             </div>
-        {% endif %}
+          {% endif %}
         </div>
-    </div>
+      </div>
 
-    <!-- Loop through remaining fields (Username, Email, Passwords, etc.) -->
-    {% for field in form %}
+      <!-- Loop through remaining fields (Username, Email, Passwords, etc.) -->
+      {% for field in form %}
         {% if field.name != 'first_name' and field.name != 'last_name' %}
         <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
             <div class="auth-error-container">
-                {% for error in field.errors %}
+              {% for error in field.errors %}
                 <span class="auth-error-text">{{ error }}</span>
-                {% endfor %}
+              {% endfor %}
             </div>
-            {% endif %}
+          {% endif %}
         </div>
         {% endif %}
-    {% endfor %}
+      {% endfor %}
 
-    {% if form.non_field_errors %}
+      {% if form.non_field_errors %}
         <div class="auth-error-container non-field-errors">
-        {% for error in form.non_field_errors %}
+          {% for error in form.non_field_errors %}
             <span class="auth-error-text">{{ error }}</span>
-        {% endfor %}
+          {% endfor %}
         </div>
-    {% endif %}
+      {% endif %}
 
-    <button type="submit" class="btn-primary" style="width: 100%; padding: 1.5rem; font-size: 1rem; margin-top: 12px">Register Account</button>
+      <button type="submit" class="btn-primary">Register Account</button>
     </form>
     
     <div class="auth-footer-container">

@@ -27,4 +27,6 @@ urlpatterns = [
     path('officer/', include('apps.officer.urls')),
     path('attendance/', include('apps.attendance.urls')),
     path('notification/', include('apps.notification.urls')),
+    path('profile/', include('apps.user_profile.urls')),
+        
 ]

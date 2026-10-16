@@ -6,7 +6,7 @@ from apps.core.forms import ContactForm
 
 # Create your views here.
 def landing_view(request):
-    return render(request, 'landing/landing.html')
+    return render(request, 'landing.html')
 
 
 
