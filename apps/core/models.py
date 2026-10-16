@@ -119,7 +119,7 @@ class AttendanceRecord(models.Model):
     email = models.EmailField(blank=True, null=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    student_id = models.CharField(max_length=50, blank=True, null=True)
+    student_id = models.CharField(max_length=50, blank=True, null=True, db_index=True)
     year_level = models.CharField(max_length=20, blank=True, null=True)
     course = models.CharField(max_length=50, blank=True, null=True)
 

@@ -30,7 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
             refresh();
         });
     }
-    allChecks().forEach((c) => c.addEventListener("change", refresh));
+    document.addEventListener("change", (e) => {
+        if (e.target && e.target.classList.contains("bulk-check")) {
+            refresh();
+        }
+    });
 
     clearBtn.addEventListener("click", () => {
         allChecks().forEach((c) => { c.checked = false; });

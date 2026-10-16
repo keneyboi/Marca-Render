@@ -1,10 +1,12 @@
 import csv
 import io
 import openpyxl
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
+from django.utils import timezone
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.utils.functional import cached_property
@@ -377,7 +379,18 @@ def event_detail(request, event_id):
 @login_required(login_url='landing')
 @require_POST
 def add_attendance_record(request, event_id):
-    event = get_object_or_404(Event, id=event_id, user=request.user)
+    owner_user = get_data_owner(request)
+    if owner_user is None:
+        raise PermissionDenied("You do not have permission to edit these records.")
+
+    event = get_object_or_404(Event, id=event_id, user=owner_user)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    def _err(msg):
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': msg}, status=400)
+        messages.error(request, msg)
+        return redirect('event_detail', event_id=event.id)
 
     student_id = request.POST.get('student_id', '').strip() or None
     email = request.POST.get('email', '').strip() or None
@@ -386,40 +399,87 @@ def add_attendance_record(request, event_id):
     course = request.POST.get('course', '').strip() or None
     year_level = request.POST.get('year_level', '').strip() or None
     status = request.POST.get('status', AttendanceRecord.Status.ABSENT)
+    session_option = request.POST.get('session_type', '').strip()
+    mark_attendance = request.POST.get('mark_attendance') in ('true', '1', 'on', True)
 
     if not first_name or not last_name:
-        messages.error(request, 'First name and Last name are required.')
-        return redirect('event_detail', event_id=event.id)
+        return _err('First name and Last name are required.')
 
     if not student_id and not email:
-        messages.error(request, 'Either Student ID or Email must be provided.')
-        return redirect('event_detail', event_id=event.id)
+        return _err('Either Student ID or Email must be provided.')
 
     if student_id and AttendanceRecord.objects.filter(event=event, student_id__iexact=student_id).exists():
-        messages.error(request, f'An attendee with Student ID "{student_id}" already exists for this event.')
-        return redirect('event_detail', event_id=event.id)
+        return _err(f'An attendee with Student ID "{student_id}" already exists for this event.')
 
     if email and AttendanceRecord.objects.filter(event=event, email__iexact=email).exists():
-        messages.error(request, f'An attendee with Email "{email}" already exists for this event.')
-        return redirect('event_detail', event_id=event.id)
+        return _err(f'An attendee with Email "{email}" already exists for this event.')
 
-    AttendanceRecord.objects.create(
-        event=event,
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
-        student_id=student_id,
-        course=course,
-        year_level=year_level,
-        status=status,
-        edited_by=request.user,
-    )
+    from apps.attendance.views import apply_scan, allowed_options, _row_payload, _status_counts
+
+    try:
+        with transaction.atomic():
+            record = AttendanceRecord.objects.create(
+                event=event,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                student_id=student_id,
+                course=course,
+                year_level=year_level,
+                status=status,
+                edited_by=request.user,
+            )
+
+            if mark_attendance and session_option in allowed_options(event):
+                apply_scan(record, event, session_option, timezone.now())
+                record.save()
+    except IntegrityError:
+        ident = student_id or email
+        return _err(f'An attendee with identifier "{ident}" already exists for this event.')
+
+    # Notify the admin (owner_user)
+    actor_name = request.user.get_full_name() or request.user.username
+    if request.user != owner_user:
+        notify_msg = f"Officer {actor_name} added unregistered attendee '{first_name} {last_name}' to {event.name}."
+    else:
+        notify_msg = f"Attendee '{first_name} {last_name}' added to {event.name}."
+
     notify_user(
-        request.user, 
-        title="Attendee Added", 
-        message=f"New attendee added to {event.name}.", 
-        action_type="attendee_added"
+        owner_user,
+        title="Attendee Added",
+        message=notify_msg,
+        action_type="attendee_added",
+        target_url=reverse('event_detail', args=[event.id])
     )
+
+    if is_ajax:
+        has_academic_filter = (Q(course__isnull=False) & ~Q(course='')) | (Q(year_level__isnull=False) & ~Q(year_level=''))
+        has_student_id = bool(record.student_id) or event.attendance_records.exclude(id=record.id).exclude(student_id__isnull=True).exclude(student_id='').exists()
+        has_academic_info = bool(record.course or record.year_level) or event.attendance_records.exclude(id=record.id).filter(has_academic_filter).exists()
+
+        row_html = render_to_string(
+            'event/attendance_row_snippet.html',
+            {
+                'record': record,
+                'event': event,
+                'has_student_id': has_student_id,
+                'has_academic_info': has_academic_info,
+                'show_session_1': str(event.session_type) == '1',
+                'show_session_2': str(event.session_type) == '2',
+                'show_session_3': str(event.session_type) == '3',
+                'request': request,
+            },
+            request=request
+        )
+        return JsonResponse({
+            'ok': True,
+            'message': f'Attendee "{first_name} {last_name}" added successfully.',
+            'record_id': record.id,
+            'row': _row_payload(record),
+            'row_html': row_html,
+            'counts': _status_counts(event),
+            **_row_payload(record),
+        })
 
     messages.success(request, f'Attendee "{first_name} {last_name}" added successfully.')
     return redirect('event_detail', event_id=event.id)
@@ -428,6 +488,9 @@ def add_attendance_record(request, event_id):
 @login_required(login_url='landing')
 @require_POST
 def delete_attendance_record(request, event_id, record_id):
+    if not request.user.is_admin:
+        raise PermissionDenied("Only administrators can delete attendance records.")
+
     event = get_object_or_404(Event, id=event_id, user=request.user)
     record = get_object_or_404(AttendanceRecord, id=record_id, event=event)
     

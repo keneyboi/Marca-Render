@@ -135,6 +135,77 @@
           <button type="button" id="batch-clear-failed" class="batch-clear-failed" hidden>Clear failed scans</button>
         </div>
       </div>
+
+      <!-- IN-SCANNER ADD ATTENDEE MODAL -->
+      <div id="scannerAddRecordModal" class="scanner-inner-modal" style="display: none;">
+        <div class="scanner-inner-modal-card">
+          <div class="scanner-inner-modal-header">
+            <h3>Add Attendee</h3>
+            <button type="button" class="close-inner-modal-btn" onclick="closeScannerAddRecordModal()" aria-label="Close modal">&times;</button>
+          </div>
+
+          <form id="scannerAddAttendeeForm" method="POST" action="{% url 'add_attendance_record' event.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="session_type" id="scanner_add_session_type" value="1">
+            <input type="hidden" name="batch_item_id" id="scanner_add_batch_item_id" value="">
+
+            <!-- Student ID & Email Row -->
+            <div class="scanner-form-row">
+              <div style="flex: 1;">
+                <label>STUDENT ID</label>
+                <input type="text" name="student_id" id="scanner_add_student_id" placeholder="e.g. 21-1234-567">
+              </div>
+              <div style="flex: 1;">
+                <label>EMAIL</label>
+                <input type="email" name="email" id="scanner_add_email" placeholder="e.g. student@example.com">
+              </div>
+            </div>
+            <p class="scanner-form-helper">* Either Student ID or Email is required.</p>
+
+            <!-- First Name & Last Name Row -->
+            <div class="scanner-form-row">
+              <div style="flex: 1;">
+                <label>FIRST NAME *</label>
+                <input type="text" name="first_name" id="scanner_add_first_name" required>
+              </div>
+              <div style="flex: 1;">
+                <label>LAST NAME *</label>
+                <input type="text" name="last_name" id="scanner_add_last_name" required>
+              </div>
+            </div>
+
+            <!-- Course & Year Level Row -->
+            <div class="scanner-form-row">
+              <div style="flex: 1;">
+                <label>COURSE</label>
+                <input type="text" name="course" id="scanner_add_course" placeholder="e.g. BSCS">
+              </div>
+              <div style="flex: 1;">
+                <label>YEAR LEVEL</label>
+                <input type="text" name="year_level" id="scanner_add_year_level" placeholder="e.g. 3">
+              </div>
+            </div>
+
+            <div id="scanner-cache-notice" class="scanner-cache-notice" style="display: none;">
+              <span>✦ Academic info retrieved from previous records</span>
+            </div>
+
+            <!-- Attendance check checkbox -->
+            <div class="scanner-form-checkbox-row">
+              <label class="scanner-checkbox-label">
+                <input type="checkbox" id="scanner_add_mark_attendance" name="mark_attendance" checked>
+                <span id="scanner_add_mark_attendance_label">Record attendance for this session immediately</span>
+              </label>
+            </div>
+
+            <!-- Actions -->
+            <div class="scanner-modal-buttons" style="border: none; padding: 1.25rem 0 0; background: transparent;">
+              <button type="button" onclick="closeScannerAddRecordModal()" class="btn-secondary">Cancel</button>
+              <button type="submit" id="scanner_add_submit_btn" class="btn-primary">Add Attendee</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </dialog>
 
@@ -266,69 +337,7 @@
       </thead>
       <tbody>
         {% for record in records %}
-          <tr 
-            class="attendance-row" 
-            data-record-id="{{ record.id }}"
-            data-status="{{ record.status }}" 
-            data-course="{{ record.course|default:'' }}" 
-            data-year="{{ record.year_level|default:'' }}"
-          >
-            <td class="bulk-col"><input type="checkbox" class="bulk-check" value="{{ record.id }}" aria-label="Select {{ record.first_name }} {{ record.last_name }}"></td>
-            <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
-            <td>{{ record.email|default:"&mdash;" }}</td>
-
-            {% if has_student_id %}
-              <td>{{ record.student_id|default:"&mdash;" }}</td>
-            {% endif %}
-
-            {% if has_academic_info %}
-              <td>
-                {% if record.course or record.year_level %}
-                  {{ record.course|default:"" }} {{ record.year_level|default:"" }}
-                {% else %}
-                  &mdash;
-                {% endif %}
-              </td>
-            {% endif %}
-
-            {% if show_session_1 %}
-              <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-            {% endif %}
-
-            {% if show_session_2 %}
-              <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
-            {% endif %}
-
-            {% if show_session_3 %}
-              <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
-              <td data-field="timed_in_2">{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
-              <td data-field="timed_out_2">{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
-            {% endif %}
-
-            <td>
-              <span class="badge badge-{{ record.status|lower }}" data-field="status">
-                {{ record.get_status_display }}
-              </span>
-            </td>
-
-            {% if request.user.is_admin %}
-
-            <td data-field="edited_by">{% if record.edited_by %}{{ record.edited_by.get_full_name|default:record.edited_by.username }}{% else %}&mdash;{% endif %}</td>
-
-            <td style="text-align: right;">
-              <button 
-                type="button" 
-                onclick="openDeleteRecordModal('{% url 'delete_attendance_record' event.id record.id %}', '{{ record.first_name|escapejs }} {{ record.last_name|escapejs }}')"
-                style="background: transparent; border: none; color: #c5221f; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px;"
-              >
-                Remove
-              </button>
-            </td>
-
-            {% endif %}
-          </tr>
+          {% include 'event/attendance_row_snippet.html' with record=record %}
         {% empty %}
           <tr>
             <td colspan="12" style="text-align: center; padding: 3rem; color: #8c7e75;">

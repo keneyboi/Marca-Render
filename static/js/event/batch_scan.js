@@ -132,7 +132,11 @@
             addToEventBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 dropdown.hidden = true;
-                openAddRecordModal(item);
+                if (typeof window.openScannerAddRecordModal === "function") {
+                    window.openScannerAddRecordModal(item);
+                } else if (typeof window.openAddRecordModal === "function") {
+                    window.openAddRecordModal(item);
+                }
             });
 
             // Option 2: Remove from Scans
@@ -158,7 +162,9 @@
                 });
 
                 if (dropdown.hidden) {
-                    // Show it first so we can measure its dimensions
+                    // Reset inline positioning before measuring to prevent cumulative width growth
+                    dropdown.style.left = "";
+                    dropdown.style.top = "";
                     dropdown.hidden = false;
                     
                     const rect = menuBtn.getBoundingClientRect();
@@ -172,9 +178,12 @@
                     if (top < 10) {
                         top = rect.bottom + 6;
                     }
+                    if (left < 10) {
+                        left = 10;
+                    }
 
-                    dropdown.style.top = `${top}px`;
-                    dropdown.style.left = `${left}px`;
+                    dropdown.style.top = `${Math.round(top)}px`;
+                    dropdown.style.left = `${Math.round(left)}px`;
                 } else {
                     dropdown.hidden = true;
                 }
@@ -367,6 +376,14 @@
         isActive: () => mode === "batch",
         handleScan,
         onScannerClosed: () => { if (sendableCount() > 0) flush(); },
+        removeOrResolve: (id, row) => {
+            queue = queue.filter((i) => i.id !== id);
+            saveQueue();
+            render();
+            if (row && typeof updateRowFromServer === "function") {
+                updateRowFromServer(row);
+            }
+        },
     };
 
     render();

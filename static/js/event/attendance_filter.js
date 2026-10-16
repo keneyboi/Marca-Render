@@ -56,13 +56,24 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClearVisibility(hasActiveFilters);
   }
 
-  // Called by scan_attendance.js after it patches a row in place.
-  // The row element is the same, but the cached status/text copies are now
-  // out of date, so refresh them and re-apply the active filters.
+  // Called by scan_attendance.js after it patches or adds a row in place.
+  // Updates the cached copy (or registers new dynamic rows) and re-applies active filters.
   window.refreshAttendanceRow = function (rowElement) {
-    const item = rows.find(r => r.element === rowElement);
-    if (item) {
+    if (!rowElement) return;
+    let item = rows.find(r => r.element === rowElement);
+    if (!item) {
+      item = {
+        element: rowElement,
+        status: (rowElement.dataset.status || '').trim(),
+        course: (rowElement.dataset.course || '').trim().toLowerCase(),
+        year: (rowElement.dataset.year || '').trim(),
+        text: rowElement.innerText.toLowerCase()
+      };
+      rows.push(item);
+    } else {
       item.status = (rowElement.dataset.status || '').trim();
+      item.course = (rowElement.dataset.course || '').trim().toLowerCase();
+      item.year = (rowElement.dataset.year || '').trim();
       item.text = rowElement.innerText.toLowerCase();
     }
     applyFilters();
@@ -151,18 +162,22 @@ function closeDeleteRecordModal() {
 }
 
 // Add Modal Handlers
-function openAddRecordModal() {
-  const modal = document.getElementById('addRecordModal');
-  if (modal) {
-    modal.style.display = 'flex';
-  }
+if (!window.openAddRecordModal) {
+  window.openAddRecordModal = function() {
+    const modal = document.getElementById('addRecordModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+  };
 }
 
-function closeAddRecordModal() {
-  const modal = document.getElementById('addRecordModal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
+if (!window.closeAddRecordModal) {
+  window.closeAddRecordModal = function() {
+    const modal = document.getElementById('addRecordModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  };
 }
 
 // Click outside detection for all detail modals

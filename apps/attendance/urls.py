@@ -7,4 +7,5 @@ urlpatterns = [
     path('clear/', views.set_attendance, name='clear_attendance'),
     path('batch/scan/', views.batch_scan, name='batch_scan'),
     path('batch/status/', views.batch_set_status, name='batch_set_status'),
+    path('lookup-student/', views.lookup_student, name='lookup_student'),
 ]

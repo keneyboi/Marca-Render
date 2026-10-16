@@ -38,7 +38,9 @@ def _respond(request, ok, message, redirect_to, level=None, extra=None):
         data = {'ok': ok, 'message': message}
         if extra:
             data.update(extra)
-        return JsonResponse(data, status=200 if ok else 400)
+        # Not-found is a valid scan outcome that prompts to add the attendee, not a malformed HTTP request
+        status_code = 200 if (ok or (extra and extra.get('not_found'))) else 400
+        return JsonResponse(data, status=status_code)
 
     level = level or (messages.success if ok else messages.error)
     level(request, message)
@@ -156,11 +158,11 @@ def set_attendance(request):
     # Reliable fallback redirect using event.id
     fallback_redirect = request.META.get('HTTP_REFERER') or redirect('event_detail', event_id=event.id).url
 
-    email = request.POST.get('email')
-    first_name = request.POST.get('first_name')
-    last_name = request.POST.get('last_name')
-    student_id = request.POST.get('student_id')
-    option = request.POST.get('session_type')
+    email = (request.POST.get('email') or '').strip() or None
+    first_name = (request.POST.get('first_name') or '').strip()
+    last_name = (request.POST.get('last_name') or '').strip()
+    student_id = (request.POST.get('student_id') or '').strip() or None
+    option = (request.POST.get('session_type') or '').strip()
 
     if not student_id and not email:
         return _respond(request, False, "Either Student ID or Email is required.", fallback_redirect)
@@ -168,18 +170,31 @@ def set_attendance(request):
     try:
         if student_id:
             record = event.attendance_records.get(
-                student_id=student_id,
+                student_id__iexact=student_id,
                 first_name__iexact=first_name,
                 last_name__iexact=last_name
             )
         else:
             record = event.attendance_records.get(
-                email=email,
+                email__iexact=email,
                 first_name__iexact=first_name,
                 last_name__iexact=last_name
             )
     except AttendanceRecord.DoesNotExist:
-        return _respond(request, False, "No matching attendance record found for this student.", fallback_redirect)
+        prev_info = lookup_previous_academic_info(owner_user, student_id=student_id, email=email)
+        extra = {
+            'not_found': True,
+            'student': {
+                'student_id': student_id or '',
+                'email': email or '',
+                'first_name': first_name or '',
+                'last_name': last_name or '',
+                'course': prev_info.get('course', '') if prev_info else '',
+                'year_level': prev_info.get('year_level', '') if prev_info else '',
+                'session_type': option,
+            }
+        }
+        return _respond(request, False, "No matching attendance record found for this student.", fallback_redirect, extra=extra)
     except MultipleObjectsReturned:
         return _respond(request, False, "Multiple matching records found — please contact support.", fallback_redirect)
 
@@ -331,15 +346,15 @@ def batch_scan(request):
             for rec in candidates:
                 names = (_text(rec.first_name).lower(), _text(rec.last_name).lower())
                 if rec.student_id:
-                    by_key.setdefault(('sid', rec.student_id) + names, []).append(rec)
+                    by_key.setdefault(('sid', rec.student_id.lower()) + names, []).append(rec)
                 if rec.email:
-                    by_key.setdefault(('em', rec.email) + names, []).append(rec)
+                    by_key.setdefault(('em', rec.email.lower()) + names, []).append(rec)
 
         # 3) Decide every outcome in memory.
         for when, index, item in work:
             names = (item['first_name'].lower(), item['last_name'].lower())
-            key = ('sid', item['student_id']) + names if item['student_id'] \
-                else ('em', item['email']) + names
+            key = ('sid', item['student_id'].lower()) + names if item['student_id'] \
+                else ('em', item['email'].lower()) + names
             matches = by_key.get(key, [])
 
             if not matches:
@@ -440,3 +455,61 @@ def batch_set_status(request):
         'results': results,
         'counts': _status_counts(event),
     })
+
+
+def lookup_previous_academic_info(owner_user, student_id=None, email=None):
+    """
+    Look up latest known academic info (course, year_level) for a student
+    across previous events under this data owner (direct DB query, no cache).
+    """
+    if not owner_user or (not student_id and not email):
+        return None
+
+    sid_clean = str(student_id).strip() if student_id else ''
+    em_clean = str(email).strip() if email else ''
+
+    q = Q()
+    if sid_clean:
+        q |= Q(student_id__iexact=sid_clean)
+    if em_clean:
+        q |= Q(email__iexact=em_clean)
+
+    has_academic = (
+        (Q(course__isnull=False) & ~Q(course='')) |
+        (Q(year_level__isnull=False) & ~Q(year_level=''))
+    )
+
+    rec = (
+        AttendanceRecord.objects
+        .filter(event__user=owner_user)
+        .filter(q)
+        .filter(has_academic)
+        .order_by('-event__start_time_1')
+        .values('course', 'year_level')
+        .first()
+    )
+    return rec
+
+
+@login_required(login_url='landing')
+@require_POST
+def lookup_student(request):
+    owner_user = get_data_owner(request)
+    if not owner_user:
+        return JsonResponse({'found': False}, status=403)
+
+    student_id = request.POST.get('student_id', '').strip()
+    email = request.POST.get('email', '').strip()
+
+    if not student_id and not email:
+        return JsonResponse({'found': False})
+
+    info = lookup_previous_academic_info(owner_user, student_id=student_id, email=email)
+    if info:
+        return JsonResponse({
+            'found': True,
+            'course': info.get('course') or '',
+            'year_level': info.get('year_level') or '',
+        })
+
+    return JsonResponse({'found': False})

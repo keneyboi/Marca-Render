@@ -1,0 +1,61 @@
+<tr 
+  class="attendance-row" 
+  data-record-id="{{ record.id }}"
+  data-status="{{ record.status }}" 
+  data-course="{{ record.course|default:'' }}" 
+  data-year="{{ record.year_level|default:'' }}"
+>
+  <td class="bulk-col"><input type="checkbox" class="bulk-check" value="{{ record.id }}" aria-label="Select {{ record.first_name }} {{ record.last_name }}"></td>
+  <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>
+  <td>{{ record.email|default:"&mdash;" }}</td>
+
+  {% if has_student_id %}
+    <td>{{ record.student_id|default:"&mdash;" }}</td>
+  {% endif %}
+
+  {% if has_academic_info %}
+    <td>
+      {% if record.course or record.year_level %}
+        {{ record.course|default:"" }} {{ record.year_level|default:"" }}
+      {% else %}
+        &mdash;
+      {% endif %}
+    </td>
+  {% endif %}
+
+  {% if show_session_1 %}
+    <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+  {% endif %}
+
+  {% if show_session_2 %}
+    <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+    <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
+  {% endif %}
+
+  {% if show_session_3 %}
+    <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
+    <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
+    <td data-field="timed_in_2">{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
+    <td data-field="timed_out_2">{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
+  {% endif %}
+
+  <td>
+    <span class="badge badge-{{ record.status|lower }}" data-field="status">
+      {{ record.get_status_display }}
+    </span>
+  </td>
+
+  {% if request.user.is_admin %}
+  <td data-field="edited_by">{% if record.edited_by %}{{ record.edited_by.get_full_name|default:record.edited_by.username }}{% else %}&mdash;{% endif %}</td>
+
+  <td style="text-align: right;">
+    <button 
+      type="button" 
+      onclick="openDeleteRecordModal('{% url 'delete_attendance_record' event.id record.id %}', '{{ record.first_name|escapejs }} {{ record.last_name|escapejs }}')"
+      style="background: transparent; border: none; color: #c5221f; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px;"
+    >
+      Remove
+    </button>
+  </td>
+  {% endif %}
+</tr>

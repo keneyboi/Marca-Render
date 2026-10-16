@@ -38,14 +38,21 @@ async function submitAttendance(form) {
         }
 
         const data = await response.json();
-        showToast(data.message, data.ok ? "success" : "error");
 
         if (data.ok) {
+            showToast(data.message, "success");
             updateRowFromServer(data);
             updateCounters(data.counts);
             form.reset();
             await resetScanner();                
+        } else if (data.not_found && data.student) {
+            showToast("Attendee not found in roster.", "error");
+            if (window.openScannerAddRecordModal) {
+                window.openScannerAddRecordModal(data.student);
+            }
+            isProcessingScan = false;
         } else {
+            showToast(data.message || "Attendance request failed.", "error");
             isProcessingScan = false;           
         }
     } catch (err) {
@@ -58,24 +65,43 @@ async function submitAttendance(form) {
 }
 
 function updateRowFromServer(data) {
-    const row = document.querySelector(`tr.attendance-row[data-record-id="${data.record_id}"]`);
+    if (!data) return;
+    const rowData = data.row || data;
+    const recordId = rowData.record_id || data.record_id;
+    if (!recordId) return;
+
+    let row = document.querySelector(`tr.attendance-row[data-record-id="${recordId}"]`);
+    if (!row && data.row_html) {
+        const tbody = document.querySelector(".roster-table tbody");
+        if (tbody) {
+            const emptyRow = tbody.querySelector("tr:not(.attendance-row)");
+            if (emptyRow && emptyRow.textContent.includes("No attendees found")) {
+                emptyRow.remove();
+            }
+            tbody.insertAdjacentHTML("afterbegin", data.row_html);
+            row = document.querySelector(`tr.attendance-row[data-record-id="${recordId}"]`);
+        }
+    }
     if (!row) return;                           
 
     const setText = (field, value) => {
-        const cell = row.querySelector(`[data-field="${field}"]`);
-        if (cell) cell.textContent = value;
+        if (value !== undefined && value !== null) {
+            const cell = row.querySelector(`[data-field="${field}"]`);
+            if (cell) cell.textContent = value;
+        }
     };
 
     ["timed_in_1", "timed_out_1", "timed_in_2", "timed_out_2", "edited_by"]
-        .forEach((field) => setText(field, data[field]));
+        .forEach((field) => setText(field, rowData[field]));
 
-    const badge = row.querySelector('[data-field="status"]');
-    if (badge) {
-        badge.className = `badge badge-${data.status.toLowerCase()}`;
-        badge.textContent = data.status_label;
+    if (rowData.status) {
+        const badge = row.querySelector('[data-field="status"]');
+        if (badge) {
+            badge.className = `badge badge-${rowData.status.toLowerCase()}`;
+            badge.textContent = rowData.status_label || rowData.status;
+        }
+        row.dataset.status = rowData.status;
     }
-
-    row.dataset.status = data.status; 
     if (window.refreshAttendanceRow) window.refreshAttendanceRow(row);
 }
 
@@ -218,18 +244,128 @@ function handleScannedData(rawJsonText) {
 
     } catch (e) {
         console.error("Scan error:", e);
-        alert("Invalid or unreadable Marca QR Code.");
+        showToast("Invalid or unreadable Marca QR Code.", "error");
+    } finally {
+        isProcessingScan = false;
     }
 }
 
 
 const addRecordModal = document.getElementById('addRecordModal');
+const scannerAddModal = document.getElementById('scannerAddRecordModal');
+
+window.openScannerAddRecordModal = function(item) {
+    const modal = document.getElementById("scannerAddRecordModal");
+    if (!modal) return;
+
+    // Pause camera scanning so it doesn't repeatedly decode the same QR card
+    if (qrScanner && typeof qrScanner.pause === "function") {
+        try { qrScanner.pause(); } catch(e) {}
+    }
+    isProcessingScan = true;
+
+    const studentIdInput = document.getElementById("scanner_add_student_id");
+    const emailInput = document.getElementById("scanner_add_email");
+    const firstNameInput = document.getElementById("scanner_add_first_name");
+    const lastNameInput = document.getElementById("scanner_add_last_name");
+    const courseInput = document.getElementById("scanner_add_course");
+    const yearLevelInput = document.getElementById("scanner_add_year_level");
+    const sessionTypeInput = document.getElementById("scanner_add_session_type");
+    const batchItemIdInput = document.getElementById("scanner_add_batch_item_id");
+    const cacheNotice = document.getElementById("scanner-cache-notice");
+
+    if (cacheNotice) cacheNotice.style.display = "none";
+
+    const isBatchActive = window.BatchScan && typeof window.BatchScan.isActive === "function" && window.BatchScan.isActive();
+    const activeSelect = isBatchActive
+        ? document.getElementById("batch-session-select")
+        : document.getElementById("session-select");
+    const activeSessionVal = activeSelect?.value || document.getElementById("session-select")?.value || "1";
+
+    const resolvedOption = (item && (item.session_type || item.option)) || activeSessionVal;
+    if (sessionTypeInput) sessionTypeInput.value = resolvedOption;
+    if (batchItemIdInput) batchItemIdInput.value = (item && item.id) || "";
+
+    if (item) {
+        if (studentIdInput) studentIdInput.value = item.student_id || "";
+        if (emailInput) emailInput.value = item.email || "";
+        if (firstNameInput) firstNameInput.value = item.first_name || "";
+        if (lastNameInput) lastNameInput.value = item.last_name || "";
+        if (courseInput) courseInput.value = item.course || "";
+        if (yearLevelInput) yearLevelInput.value = item.year_level || "";
+    }
+
+    // Direct DB lookup across past events of this organizer for Course & Year Level
+    const sid = studentIdInput ? studentIdInput.value.trim() : "";
+    const em = emailInput ? emailInput.value.trim() : "";
+    if ((!courseInput?.value || !yearLevelInput?.value) && (sid || em)) {
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || "";
+        const bodyData = new FormData();
+        if (sid) bodyData.append("student_id", sid);
+        if (em) bodyData.append("email", em);
+
+        fetch("/attendance/lookup-student/", {
+            method: "POST",
+            body: bodyData,
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: "same-origin"
+        })
+        .then((res) => res.json())
+        .then((lookup) => {
+            if (lookup && lookup.found) {
+                if (courseInput && !courseInput.value && lookup.course) {
+                    courseInput.value = lookup.course;
+                }
+                if (yearLevelInput && !yearLevelInput.value && lookup.year_level) {
+                    yearLevelInput.value = lookup.year_level;
+                }
+                if (cacheNotice && (lookup.course || lookup.year_level)) {
+                    cacheNotice.style.display = "flex";
+                }
+            }
+        })
+        .catch((err) => console.warn("Student lookup error:", err));
+    } else if (cacheNotice && item && (item.course || item.year_level)) {
+        cacheNotice.style.display = "flex";
+    }
+
+    modal.style.display = "flex";
+};
+
+window.closeScannerAddRecordModal = function() {
+    const modal = document.getElementById("scannerAddRecordModal");
+    if (modal) {
+        modal.style.display = "none";
+        const form = document.getElementById("scannerAddAttendeeForm");
+        if (form) form.reset();
+        const cacheNotice = document.getElementById("scanner-cache-notice");
+        if (cacheNotice) cacheNotice.style.display = "none";
+    }
+
+    // Resume camera scanning
+    if (qrScanner && typeof qrScanner.start === "function") {
+        try { qrScanner.start(); } catch(e) {}
+    }
+    isProcessingScan = false;
+};
 
 window.openAddRecordModal = function(item) {
+    const scannerDialog = document.getElementById("attendance-scanner");
+    const isScannerOpen = scannerDialog && (typeof scannerDialog.open === "boolean" ? scannerDialog.open : scannerDialog.hasAttribute("open"));
+
+    if (isScannerOpen) {
+        // Open INSIDE the scanner! Do NOT close the scanner dialog.
+        window.openScannerAddRecordModal(item);
+        return;
+    }
+
+    // Outside the scanner:
     const modal = document.getElementById("addRecordModal");
     if (!modal) return;
 
-    // If an item was passed from the batch list, populate the form fields
     if (item) {
         const studentIdInput = modal.querySelector('input[name="student_id"]');
         const emailInput = modal.querySelector('input[name="email"]');
@@ -242,13 +378,6 @@ window.openAddRecordModal = function(item) {
         if (lastNameInput) lastNameInput.value = item.last_name || "";
     }
 
-    // Close the scanner dialog so it doesn't block the screen
-    const scannerDialog = document.getElementById("attendance-scanner");
-    if (scannerDialog && typeof scannerDialog.close === "function" && scannerDialog.open) {
-        scannerDialog.close();
-    }
-
-    // Display the modal
     modal.style.display = "flex";
 };
 
@@ -256,23 +385,82 @@ window.closeAddRecordModal = function() {
     const modal = document.getElementById("addRecordModal");
     if (modal) {
         modal.style.display = "none";
-        
-        // Reset the form when closed
         const form = document.getElementById("addAttendeeForm");
         if (form) form.reset();
     }
 };
 
-// Close modal automatically when clicking backdrop area
-if (addRecordModal) addRecordModal.addEventListener('click', (event) => {
-  const rect = addRecordModal.getBoundingClientRect();
-  const isInDialog = (
-    rect.top <= event.clientY &&
-    event.clientY <= rect.top + rect.height &&
-    rect.left <= event.clientX &&
-    event.clientX <= rect.left + rect.width
-  );
-  if (!isInDialog) {
-    addRecordModal.close();
-  }
+// Close modals when clicking backdrop area
+if (addRecordModal) {
+    addRecordModal.addEventListener('click', (event) => {
+        if (event.target === addRecordModal) {
+            closeAddRecordModal();
+        }
+    });
+}
+
+if (scannerAddModal) {
+    scannerAddModal.addEventListener('click', (event) => {
+        if (event.target === scannerAddModal) {
+            closeScannerAddRecordModal();
+        }
+    });
+}
+
+// Attach listener for in-scanner add form submission
+document.addEventListener("DOMContentLoaded", () => {
+    const scannerAddForm = document.getElementById("scannerAddAttendeeForm");
+    if (scannerAddForm) {
+        scannerAddForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById("scanner_add_submit_btn");
+            if (submitBtn) submitBtn.disabled = true;
+
+            const studentId = document.getElementById("scanner_add_student_id")?.value.trim();
+            const email = document.getElementById("scanner_add_email")?.value.trim();
+
+            if (!studentId && !email) {
+                showToast("Please enter either a Student ID or an Email address.", "error");
+                if (submitBtn) submitBtn.disabled = false;
+                return;
+            }
+
+            try {
+                const response = await fetch(scannerAddForm.action, {
+                    method: "POST",
+                    body: new FormData(scannerAddForm),
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    credentials: "same-origin",
+                });
+
+                const type = response.headers.get("content-type") || "";
+                if (!type.includes("application/json")) {
+                    showToast("Your session may have expired. Please refresh the page.", "error");
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.ok) {
+                    showToast(data.message, "success");
+                    updateRowFromServer(data);
+                    updateCounters(data.counts);
+
+                    // If this was added from a batch scan item, remove or resolve it in batch_scan
+                    const batchItemId = document.getElementById("scanner_add_batch_item_id")?.value;
+                    if (batchItemId && window.BatchScan && typeof window.BatchScan.removeOrResolve === "function") {
+                        window.BatchScan.removeOrResolve(batchItemId, data.row);
+                    }
+
+                    closeScannerAddRecordModal();
+                } else {
+                    showToast(data.message || "Could not add attendee.", "error");
+                }
+            } catch (err) {
+                console.error("Add attendee error:", err);
+                showToast("Network error. Could not add attendee.", "error");
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
 });
