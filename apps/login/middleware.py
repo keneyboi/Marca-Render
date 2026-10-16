@@ -13,7 +13,8 @@ class LoginRequiredMiddleware:
         self.public_named_urls = [
             "login",
             "landing",
-            "register",  # Add any other public route names here
+            "register",
+            "ping",
         ]
 
     def __call__(self, request):

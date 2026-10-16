@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 
 urlpatterns = [
+    path('ping/', lambda r: HttpResponse('pong', content_type='text/plain'), name='ping'),
     path('admin/', admin.site.urls),
     path('', include('apps.landing.urls')),          
     path('login/', include('apps.login.urls')),        
