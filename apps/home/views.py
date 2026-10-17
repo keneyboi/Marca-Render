@@ -16,7 +16,7 @@ def show_home(request, folder_id=None):
     officer_admins = [] if request.user.is_admin else list(get_officer_admins(request.user))
 
     if not owner_user:
-        return render(request, 'home/home.html', {
+        return render(request, 'home.html', {
             'events': [],
             'folders': [],
             'current_folder': None,
