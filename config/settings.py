@@ -22,7 +22,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-local-development-key')
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
 # ALLOWED_HOSTS: Defaults to local hosts
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com', 'use-marca.site', 'www.use-marca.site', 'https://marca-qgrx.onrender.com').split(',')
 
 
 MAILERS = {
