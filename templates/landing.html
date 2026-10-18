@@ -168,7 +168,15 @@
         <div class="scanner-modal-content">
             <h3>Scan Marca QR Code</h3>
             <div id="reader"></div>
-            <button type="button" class="btn-secondary btn-scanner-cancel" onclick="resetScanner()">Cancel</button>
+            <div class="scanner-modal-actions">
+                <button type="button" class="btn-primary btn-scanner-flip" id="btn-flip-cam" onclick="toggleCamera()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 10c0-4.418-3.582-8-8-8-1.8 0-3.45.6-4.78 1.61L4 6m0 0v5h5M4 14c0 4.418 3.582 8 8 8 1.8 0 3.45-.6 4.78-1.61L20 18m0 0v-5h-5"/>
+                    </svg>
+                    <span>Flip Camera</span>
+                </button>
+                <button type="button" class="btn-secondary btn-scanner-cancel" onclick="resetScanner()">Cancel</button>
+            </div>
         </div>
     </dialog>
 

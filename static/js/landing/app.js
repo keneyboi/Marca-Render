@@ -2,6 +2,8 @@ let qrCodeInstance = null;
 let html5QrCode = null;
 let camIsOpen = false;
 let isProcessingScan = false;
+let currentFacingMode = "environment";
+let isTogglingCamera = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     // Initialize html5QrCode engine
@@ -19,6 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const downloadBtn = document.getElementById("download-btn");
     if (downloadBtn) {
         downloadBtn.addEventListener("click", downloadQRCode);
+    }
+
+    // Close scanner cleanly if dialog closes (e.g. via Escape key)
+    const scannerModal = document.getElementById("scanner-modal");
+    if (scannerModal) {
+        scannerModal.addEventListener("cancel", () => {
+            resetScanner();
+        });
     }
 });
 
@@ -84,22 +94,17 @@ function createMarcaIDQR() {
 /**
  * Scanner Functions
  */
-async function openScanner() {
-    if (camIsOpen) return;
-
-    const modal = document.getElementById('scanner-modal');
-    camIsOpen = true;
-    isProcessingScan = false;
-
-    if (modal) modal.showModal();
+async function startScannerCamera(facingMode = "environment") {
+    currentFacingMode = facingMode;
 
     try {
         await html5QrCode.start(
-            { facingMode: "environment" },
+            { facingMode: currentFacingMode },
             {
                 fps: 10,
                 qrbox: { width: 220, height: 220 },
                 videoConstraints: {
+                    facingMode: currentFacingMode,
                     width: { ideal: 640 },
                     height: { ideal: 480 }
                 }
@@ -114,9 +119,75 @@ async function openScanner() {
             (errorMessage) => {}
         );
     } catch (err) {
-        console.error("Camera initialization failed:", err);
+        console.error("Camera initialization failed for facingMode:", facingMode, err);
+        // Fallback: If back camera is unavailable (e.g. laptop/desktop with only front webcam)
+        if (facingMode === "environment") {
+            try {
+                console.log("Retrying with user/front camera fallback...");
+                await html5QrCode.start(
+                    { facingMode: "user" },
+                    {
+                        fps: 10,
+                        qrbox: { width: 220, height: 220 },
+                        videoConstraints: {
+                            facingMode: "user",
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        }
+                    },
+                    async (decodedText) => {
+                        if (isProcessingScan) return;
+                        isProcessingScan = true;
+
+                        await resetScanner();
+                        handleScannedData(decodedText);
+                    },
+                    (errorMessage) => {}
+                );
+                currentFacingMode = "user";
+                return;
+            } catch (fallbackErr) {
+                console.error("Fallback camera initialization failed:", fallbackErr);
+            }
+        }
         await resetScanner();
         alert("Could not access camera. Please check camera permissions.");
+    }
+}
+
+async function openScanner() {
+    if (camIsOpen) return;
+
+    const modal = document.getElementById('scanner-modal');
+    camIsOpen = true;
+    isProcessingScan = false;
+
+    if (modal) modal.showModal();
+
+    await startScannerCamera(currentFacingMode);
+}
+
+/**
+ * Toggles between back camera ("environment") and front camera ("user")
+ */
+async function toggleCamera() {
+    if (isTogglingCamera || !html5QrCode) return;
+    isTogglingCamera = true;
+
+    const flipBtn = document.getElementById("btn-flip-cam");
+    if (flipBtn) flipBtn.disabled = true;
+
+    try {
+        if (html5QrCode.isScanning) {
+            await html5QrCode.stop();
+        }
+        currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+        await startScannerCamera(currentFacingMode);
+    } catch (err) {
+        console.error("Failed to toggle camera:", err);
+    } finally {
+        isTogglingCamera = false;
+        if (flipBtn) flipBtn.disabled = false;
     }
 }
 
@@ -130,6 +201,8 @@ async function resetScanner() {
     }
 
     camIsOpen = false;
+    isProcessingScan = false;
+    currentFacingMode = "environment"; // Reset default back to back camera
     const modal = document.getElementById('scanner-modal');
     if (modal && modal.open) {
         modal.close();
