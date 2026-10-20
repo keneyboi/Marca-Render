@@ -342,6 +342,7 @@ html {
     margin-top: auto; /* Pushes footer to the bottom boundary */
     padding-top: 1.5rem;
     width: 100%;
+    margin-bottom: 2rem;
 }
 
 .logout-btn-sidebar {

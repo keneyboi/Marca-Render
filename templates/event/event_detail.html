@@ -314,21 +314,28 @@
 
           {% if show_session_1 %}
             <th>Time In</th>
+            <th>Status</th>
           {% endif %}
 
           {% if show_session_2 %}
             <th>Time In</th>
+            <th>Status</th>
             <th>Time Out</th>
+            <th>Status</th>
           {% endif %}
 
           {% if show_session_3 %}
             <th>Time In 1</th>
+            <th>Status</th>
             <th>Time Out 1</th>
+            <th>Status</th>
             <th>Time In 2</th>
+            <th>Status</th>
             <th>Time Out 2</th>
+            <th>Status</th>
           {% endif %}
 
-          <th>Status</th>
+          
           {% if request.user.is_admin %}
           <th>Edited By</th>
           <th style="text-align: right;">Action</th>
