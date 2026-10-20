@@ -338,6 +338,7 @@ def event_detail(request, event_id):
         total=Count('id'),
         present=Count('id', filter=Q(status=AttendanceRecord.Status.PRESENT)),
         late=Count('id', filter=Q(status=AttendanceRecord.Status.LATE)),
+        incomplete=Count('id', filter=Q(status=AttendanceRecord.Status.INCOMPLETE)),
         absent=Count('id', filter=Q(status=AttendanceRecord.Status.ABSENT)),
         with_student_id=Count(
             'id',
@@ -371,6 +372,7 @@ def event_detail(request, event_id):
         'total_attendance': stats['total'],
         'present_count': stats['present'],
         'late_count': stats['late'],
+        'incomplete_count': stats['incomplete'],
         'absent_count': stats['absent'],
     }
     return render(request, 'event/event_detail.html', context)

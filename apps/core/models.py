@@ -109,6 +109,7 @@ class AttendanceRecord(models.Model):
         ABSENT = 'ABSENT', 'Absent'
         PRESENT = 'PRESENT', 'Present'
         LATE = 'LATE', 'Late'
+        INCOMPLETE = 'INCOMPLETE', 'Incomplete'
 
     event = models.ForeignKey(
         Event,

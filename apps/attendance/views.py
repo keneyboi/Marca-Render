@@ -104,10 +104,28 @@ def apply_scan(record, event, option, when):
       note    - a short message when nothing changed ("already timed in ...")
 
     Rules:
-      * Time-in  (1, 3): FIRST scan wins. A repeat scan changes nothing, so
-        re-sending a batch is always safe and nobody can refresh their time.
-      * Time-out (2, 4): the latest scan wins.
-      * "Late" is derived by comparing the scan time with the event's start.
+      wa nay rules2 oi buot, buot. 
+      ang idea kay everyone starts as absent!
+      
+      if they have an attendance throughtout the time, they become incomplete
+      and only become either present or late on the time out of the event.
+      
+      initial status -> absent
+      
+      Attendee 1: attends all four attendance checking:
+      time_in_1 = yes -> incomplete
+      time_out_1 = yes -> incomplete
+      time_in_2 = yes -> incomplete
+      time_out_2 = yes -> present or late
+      
+      Attendee 1: attends all some attendance checking:
+      time_in_1 = no -> absent
+      time_out_1 = yes -> incomplete
+      time_in_2 = no -> incomplete
+      time_out_2 = yes -> present or late
+      
+      
+      
     """
     Status = AttendanceRecord.Status
 
@@ -115,25 +133,37 @@ def apply_scan(record, event, option, when):
         if record.timed_in_1:
             return False, f"already timed in at {_clock(record.timed_in_1)}"
         record.timed_in_1 = when
-        record.status = Status.LATE if when > event.start_time_1 else Status.PRESENT
+        if event.session_type == 1:
+            record.status = Status.LATE if when > event.start_time_1 else Status.PRESENT
+        else:
+            record.status = Status.INCOMPLETE 
 
     elif option == '2':
+        if record.timed_out_1:
+            return False, f"already timed out at {_clock(record.timed_out_1)}"
         record.timed_out_1 = when
         if record.status == Status.ABSENT:
-            record.status = Status.LATE
+            record.status = Status.INCOMPLETE
+        elif record.status == Status.INCOMPLETE:
+            if event.session_type == 2:
+                record.status = Status.LATE if when > event.end_time_1 else Status.PRESENT
+            else: 
+                record.status = Status.INCOMPLETE 
 
     elif option == '3':
         if record.timed_in_2:
-            return False, f"already timed in (afternoon) at {_clock(record.timed_in_2)}"
+            return False, f"already timed in (2) at {_clock(record.timed_in_2)}"
         record.timed_in_2 = when
-        # An event without a second start time can't make anyone late for it.
-        late = event.start_time_2 is not None and when > event.start_time_2
-        record.status = Status.LATE if late else Status.PRESENT
+        if record.status == Status.ABSENT:
+            record.status = Status.TO_REVIEW
+
 
     elif option == '4':
         record.timed_out_2 = when
         if record.status == Status.ABSENT:
-            record.status = Status.LATE
+            record.status = Status.INCOMPLETE
+        elif record.status == Status.INCOMPLETE:
+            record.status = Status.LATE if when > event.end_time_2 else Status.PRESENT
 
     else:
         raise ValueError('Invalid option selected.')
