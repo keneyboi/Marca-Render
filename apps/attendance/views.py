@@ -53,14 +53,21 @@ def _clock(dt):
 
 
 def _status_counts(event):
-    """Present/late/absent/total in ONE query (the page used four)."""
+    """Present/late/incomplete/absent/total in ONE query."""
     raw = {
         row['status']: row['n']
         for row in event.attendance_records.values('status').annotate(n=Count('id'))
     }
+    incomplete_count = (
+        raw.get(AttendanceRecord.Status.INCOMPLETE, 0) +
+        raw.get(AttendanceRecord.Status.INCOMPLETE_PRESENT, 0) +
+        raw.get(AttendanceRecord.Status.INCOMPLETE_LATE, 0) +
+        raw.get(AttendanceRecord.Status.INCOMPLETE_ABSENT, 0)
+    )
     return {
         'present': raw.get(AttendanceRecord.Status.PRESENT, 0),
         'late': raw.get(AttendanceRecord.Status.LATE, 0),
+        'incomplete': incomplete_count,
         'absent': raw.get(AttendanceRecord.Status.ABSENT, 0),
         'total': sum(raw.values()),
     }
@@ -76,7 +83,8 @@ def _row_payload(record):
     return {
         'record_id': record.id,
         'status': record.status,
-        'status_label': record.get_status_display(),
+        'status_label': record.display_status_label,
+        'status_class': record.display_status_class,
         'timed_in_1': _clock(record.timed_in_1),
         'timed_out_1': _clock(record.timed_out_1),
         'timed_in_2': _clock(record.timed_in_2),
@@ -97,7 +105,7 @@ def allowed_options(event):
 
 def apply_scan(record, event, option, when):
     """
-    Apply one scan to an in-memory record. Does NOT save.
+    Apply one scan to an in-memory record using a finite state machine. Does NOT save.
 
     Returns (changed, note):
       changed - True if the record was modified (caller must save it)
@@ -112,58 +120,63 @@ def apply_scan(record, event, option, when):
       
       initial status -> absent
       
-      Attendee 1: attends all four attendance checking:
-      time_in_1 = yes -> incomplete
-      time_out_1 = yes -> incomplete
-      time_in_2 = yes -> incomplete
-      time_out_2 = yes -> present or late
-      
-      Attendee 1: attends all some attendance checking:
-      time_in_1 = no -> absent
-      time_out_1 = yes -> incomplete
-      time_in_2 = no -> incomplete
-      time_out_2 = yes -> present or late
-      
-      
-      
+      ok boss eto na yung flow:
+      initial for all is absent
+      if di nakascan during the whole event then incomplete absent but if after the last time out di paren naka scan so absent final status 
+      if mixed, like may time na naka scan then merong missing then incomplete ang final status, example session 3 di umattend morning so if mag scan sya afternoon
+      automatic incomplete na sya, then yung iba same lang if present then incomplete present then if late sa next then incomplete late then sa final incomplete late
     """
     Status = AttendanceRecord.Status
+    session = str(event.session_type).strip()
 
     if option == '1':
         if record.timed_in_1:
             return False, f"already timed in at {_clock(record.timed_in_1)}"
         record.timed_in_1 = when
-        if event.session_type == 1:
-            record.status = Status.LATE if when > event.start_time_1 else Status.PRESENT
+        is_late = when > event.start_time_1
+        if session == '1':
+            record.status = Status.LATE if is_late else Status.PRESENT
         else:
-            record.status = Status.INCOMPLETE 
+            record.status = Status.INCOMPLETE_LATE if is_late else Status.INCOMPLETE_PRESENT
 
     elif option == '2':
         if record.timed_out_1:
             return False, f"already timed out at {_clock(record.timed_out_1)}"
         record.timed_out_1 = when
-        if record.status == Status.ABSENT:
+        is_late = when > event.end_time_1
+
+        if not record.timed_in_1 or record.status == Status.INCOMPLETE:
             record.status = Status.INCOMPLETE
-        elif record.status == Status.INCOMPLETE:
-            if event.session_type == 2:
-                record.status = Status.LATE if when > event.end_time_1 else Status.PRESENT
-            else: 
-                record.status = Status.INCOMPLETE 
+        elif session == '2':
+            record.status = Status.LATE if (is_late or record.status == Status.INCOMPLETE_LATE) else Status.PRESENT
+        else:
+            record.status = Status.INCOMPLETE_LATE if (is_late or record.status == Status.INCOMPLETE_LATE) else Status.INCOMPLETE_PRESENT
 
     elif option == '3':
         if record.timed_in_2:
             return False, f"already timed in (2) at {_clock(record.timed_in_2)}"
         record.timed_in_2 = when
-        if record.status == Status.ABSENT:
-            record.status = Status.TO_REVIEW
+        is_late = bool(event.start_time_2 and when > event.start_time_2)
 
+        if not record.timed_out_1 or record.status == Status.INCOMPLETE:
+            record.status = Status.INCOMPLETE
+        elif record.status == Status.INCOMPLETE_LATE or is_late:
+            record.status = Status.INCOMPLETE_LATE
+        else:
+            record.status = Status.INCOMPLETE_PRESENT
 
     elif option == '4':
+        if record.timed_out_2:
+            return False, f"already timed out (2) at {_clock(record.timed_out_2)}"
         record.timed_out_2 = when
-        if record.status == Status.ABSENT:
+        is_late = bool(event.end_time_2 and when > event.end_time_2)
+
+        if not record.timed_in_2 or record.status == Status.INCOMPLETE:
             record.status = Status.INCOMPLETE
-        elif record.status == Status.INCOMPLETE:
-            record.status = Status.LATE if when > event.end_time_2 else Status.PRESENT
+        elif record.status == Status.INCOMPLETE_LATE or is_late:
+            record.status = Status.LATE
+        else:
+            record.status = Status.PRESENT
 
     else:
         raise ValueError('Invalid option selected.')

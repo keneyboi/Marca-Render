@@ -110,6 +110,9 @@ class AttendanceRecord(models.Model):
         PRESENT = 'PRESENT', 'Present'
         LATE = 'LATE', 'Late'
         INCOMPLETE = 'INCOMPLETE', 'Incomplete'
+        INCOMPLETE_PRESENT = 'INCOMPLETE_PRESENT', 'Incomplete (Present)'
+        INCOMPLETE_LATE = 'INCOMPLETE_LATE', 'Incomplete (Late)'
+        INCOMPLETE_ABSENT = 'INCOMPLETE_ABSENT', 'Incomplete (Absent)'
 
     event = models.ForeignKey(
         Event,
@@ -160,6 +163,32 @@ class AttendanceRecord(models.Model):
     def __str__(self):
         ident = self.student_id or self.email or "No ID"
         return f"{self.last_name}, {self.first_name} ({ident}) - {self.status}"
+
+    @property
+    def display_status_label(self):
+        mapping = {
+            self.Status.INCOMPLETE_PRESENT: 'Present',
+            self.Status.INCOMPLETE_LATE: 'Late',
+            self.Status.INCOMPLETE_ABSENT: 'Absent',
+            self.Status.INCOMPLETE: 'Incomplete',
+            self.Status.PRESENT: 'Present',
+            self.Status.LATE: 'Late',
+            self.Status.ABSENT: 'Absent',
+        }
+        return mapping.get(self.status, 'Absent')
+
+    @property
+    def display_status_class(self):
+        mapping = {
+            self.Status.INCOMPLETE_PRESENT: 'present',
+            self.Status.INCOMPLETE_LATE: 'late',
+            self.Status.INCOMPLETE_ABSENT: 'absent',
+            self.Status.INCOMPLETE: 'incomplete',
+            self.Status.PRESENT: 'present',
+            self.Status.LATE: 'late',
+            self.Status.ABSENT: 'absent',
+        }
+        return mapping.get(self.status, 'absent')
     
 class Notification(models.Model):
     ACTION_CHOICES = [

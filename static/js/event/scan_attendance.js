@@ -97,7 +97,8 @@ function updateRowFromServer(data) {
     if (rowData.status) {
         const badge = row.querySelector('[data-field="status"]');
         if (badge) {
-            badge.className = `badge badge-${rowData.status.toLowerCase()}`;
+            const badgeClass = rowData.status_class || rowData.status.toLowerCase();
+            badge.className = `badge badge-${badgeClass}`;
             badge.textContent = rowData.status_label || rowData.status;
         }
         row.dataset.status = rowData.status;
@@ -107,7 +108,7 @@ function updateRowFromServer(data) {
 
 function updateCounters(counts) {
     if (!counts) return;
-    ["total", "present", "late", "absent"].forEach((key) => {
+    ["total", "present", "late", "incomplete", "absent"].forEach((key) => {
         const el = document.getElementById(`stat-${key}`);
         if (el) el.textContent = counts[key];
     });

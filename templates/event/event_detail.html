@@ -248,9 +248,10 @@
       style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;"
     >
       <option value="">All Statuses</option>
-      {% for val, label in status_choices %}
-        <option value="{{ val }}">{{ label }}</option>
-      {% endfor %}
+      <option value="PRESENT">Present</option>
+      <option value="LATE">Late</option>
+      <option value="INCOMPLETE">Incomplete</option>
+      <option value="ABSENT">Absent</option>
     </select>
 
     {% if unique_courses %}
@@ -291,9 +292,10 @@
        data-url="{% url 'batch_set_status' %}" data-event-id="{{ event.id }}">
     <span id="bulk-count">0 selected</span>
     <select id="bulk-status" aria-label="New status">
-      {% for val, label in status_choices %}
-        <option value="{{ val }}">Mark as {{ label }}</option>
-      {% endfor %}
+      <option value="PRESENT">Mark as Present</option>
+      <option value="LATE">Mark as Late</option>
+      <option value="INCOMPLETE">Mark as Incomplete</option>
+      <option value="ABSENT">Mark as Absent</option>
     </select>
     <button type="button" id="bulk-apply" class="btn-primary">Apply</button>
     <button type="button" id="bulk-clear" class="btn-secondary">Clear</button>
@@ -323,18 +325,14 @@
 
           {% if show_session_2 %}
             <th>Time In</th>
-            <th>Status</th>
             <th>Time Out</th>
             <th>Status</th>
           {% endif %}
 
           {% if show_session_3 %}
             <th>Time In 1</th>
-            <th>Status</th>
             <th>Time Out 1</th>
-            <th>Status</th>
             <th>Time In 2</th>
-            <th>Status</th>
             <th>Time Out 2</th>
             <th>Status</th>
           {% endif %}
@@ -469,9 +467,10 @@
       <div style="margin-bottom: 1.25rem;">
         <label style="display: block; font-family: 'SF Pro', -apple-system, sans-serif; font-size: 0.75rem; font-weight: 600; color: #4a0d0d; margin-bottom: 0.35rem; letter-spacing: 0.05em; opacity: 0.8;">INITIAL STATUS</label>
         <select name="status" style="width: 100%; box-sizing: border-box; font-family: 'SF Pro', -apple-system, sans-serif; font-size: 0.9rem; color: #331010; background-color: #f7f4ed; border: 1px solid #d1c8b8; border-radius: 10px; padding: 0.65rem 0.85rem; outline: none; cursor: pointer;">
-          {% for val, label in status_choices %}
-            <option value="{{ val }}" {% if val == 'ABSENT' %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
+          <option value="ABSENT" selected>Absent</option>
+          <option value="PRESENT">Present</option>
+          <option value="LATE">Late</option>
+          <option value="INCOMPLETE">Incomplete</option>
         </select>
       </div>
 

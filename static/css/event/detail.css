@@ -155,9 +155,34 @@
   color: #137333;
 }
 
+.badge-late {
+  background-color: #fef7e0;
+  color: #b06000;
+}
+
 .badge-absent {
   background-color: #fce8e6;
   color: #c5221f;
+}
+
+.badge-incomplete {
+  background-color: #fbe9e7;
+  color: #c5431f;
+}
+
+.badge-incomplete_present {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-incomplete_late {
+  background-color: #fff8e1;
+  color: #b78103;
+}
+
+.badge-incomplete_absent {
+  background-color: #f5ebeb;
+  color: #9e3a38;
 }
 
 .badge-excused {

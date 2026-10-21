@@ -239,7 +239,7 @@ def create_event(request):
             event.save()
 
             attendees = [
-                AttendanceRecord(event=event, **data)
+                AttendanceRecord(event=event, status=AttendanceRecord.Status.ABSENT, **data)
                 for data in records_to_create
             ]
             AttendanceRecord.objects.bulk_create(attendees)
@@ -333,12 +333,17 @@ def event_detail(request, event_id):
         if y is not None and str(y).strip() and str(y).strip().lower() != 'nan'
     }, key=lambda y: (0, int(y)) if str(y).isdigit() else (1, str(y)))
 
-    # Totals, status counts and "has student IDs" in ONE query.
+    incomplete_filter = Q(status__in=[
+        AttendanceRecord.Status.INCOMPLETE,
+        AttendanceRecord.Status.INCOMPLETE_PRESENT,
+        AttendanceRecord.Status.INCOMPLETE_LATE,
+        AttendanceRecord.Status.INCOMPLETE_ABSENT,
+    ])
     stats = records_qs.aggregate(
         total=Count('id'),
         present=Count('id', filter=Q(status=AttendanceRecord.Status.PRESENT)),
         late=Count('id', filter=Q(status=AttendanceRecord.Status.LATE)),
-        incomplete=Count('id', filter=Q(status=AttendanceRecord.Status.INCOMPLETE)),
+        incomplete=Count('id', filter=incomplete_filter),
         absent=Count('id', filter=Q(status=AttendanceRecord.Status.ABSENT)),
         with_student_id=Count(
             'id',

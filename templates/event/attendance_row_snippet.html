@@ -25,136 +25,32 @@
 
   {% if show_session_1 %}
     <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-        <td>
-          {% if record.timed_in_1 %}
-            {% if record.timed_in_1 < event.start_time_1 %}
-            <span class="badge" data-field="status">
-                Present
-            </span>
-            {% else %}
-            <span class="badge" data-field="status">
-                Late
-            </span>
-            {% endif %}
-          {% else %}
-          <span class="badge" data-field="status">
-              Absent
-          </span>
-          {% endif %}
-        </td>
+    <td>
+      <span class="badge badge-{{ record.display_status_class }}" data-field="status">
+        {{ record.display_status_label }}
+      </span>
+    </td>
   {% endif %}
 
   {% if show_session_2 %}
     <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-        <td>
-          {% if record.timed_in_1 %}
-            {% if record.timed_in_1 < event.start_time_1 %}
-            <span class="badge" data-field="status">
-                Present
-            </span>
-            {% else %}
-            <span class="badge" data-field="status">
-                Late
-            </span>
-            {% endif %}
-          {% else %}
-          <span class="badge" data-field="status">
-              Absent
-          </span>
-          {% endif %}
-        </td>
     <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
     <td>
-      {% if record.timed_out_1 %}
-        {% if record.timed_out_1 < event.end_time_1 %}
-        <span class="badge" data-field="status">
-            Present
-        </span>
-        {% else %}
-        <span class="badge" data-field="status">
-            Late
-        </span>
-        {% endif %}
-      {% else %}
-      <span class="badge" data-field="status">
-          Absent
+      <span class="badge badge-{{ record.display_status_class }}" data-field="status">
+        {{ record.display_status_label }}
       </span>
-      {% endif %}
     </td>
   {% endif %}
 
-{% if show_session_3 %}
+  {% if show_session_3 %}
     <td data-field="timed_in_1">{{ record.timed_in_1|date:"H:i"|default:"&mdash;" }}</td>
-    <td>
-      {% if record.timed_in_1 %}
-        {% if record.timed_in_1 < event.start_time_1 %}
-        <span class="badge" data-field="status">
-            Present
-        </span>
-        {% else %}
-        <span class="badge" data-field="status">
-            Late
-        </span>
-        {% endif %}
-      {% else %}
-      <span class="badge" data-field="status">
-          Absent
-      </span>
-      {% endif %}
-    </td>
     <td data-field="timed_out_1">{{ record.timed_out_1|date:"H:i"|default:"&mdash;" }}</td>
-    <td>
-      {% if record.timed_out_1 %}
-        {% if record.timed_out_1 < event.end_time_1 %}
-        <span class="badge" data-field="status">
-            Present
-        </span>
-        {% else %}
-        <span class="badge" data-field="status">
-            Late
-        </span>
-        {% endif %}
-      {% else %}
-      <span class="badge" data-field="status">
-          Absent
-      </span>
-      {% endif %}
-    </td>
     <td data-field="timed_in_2">{{ record.timed_in_2|date:"H:i"|default:"&mdash;" }}</td>
-    <td>
-      {% if record.timed_in_2 %}
-        {% if record.timed_in_2 < event.start_time_2 %}
-        <span class="badge" data-field="status">
-            Present
-        </span>
-        {% else %}
-        <span class="badge" data-field="status">
-            Late
-        </span>
-        {% endif %}
-      {% else %}
-      <span class="badge" data-field="status">
-          Absent
-      </span>
-      {% endif %}
-    </td>
     <td data-field="timed_out_2">{{ record.timed_out_2|date:"H:i"|default:"&mdash;" }}</td>
     <td>
-      {% if record.timed_out_2 %}
-        {% if record.timed_out_2 < event.end_time_2 %}
-        <span class="badge" data-field="status">
-            Present
-        </span>
-        {% else %}
-        <span class="badge" data-field="status">
-            Late
-        </span>
-        {% endif %}
-      {% else %}
-      <span class="badge" data-field="status">
-          Absent
+      <span class="badge badge-{{ record.display_status_class }}" data-field="status">
+        {{ record.display_status_label }}
       </span>
-      {% endif %}
     </td>
   {% endif %}
 

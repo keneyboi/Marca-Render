@@ -31,7 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     rows.forEach(item => {
       const matchesSearch = !searchTerm || item.text.includes(searchTerm);
-      const matchesStatus = !selectedStatus || item.status === selectedStatus;
+      let matchesStatus = true;
+      if (selectedStatus === 'PRESENT') {
+        matchesStatus = (item.status === 'PRESENT' || item.status === 'INCOMPLETE_PRESENT');
+      } else if (selectedStatus === 'LATE') {
+        matchesStatus = (item.status === 'LATE' || item.status === 'INCOMPLETE_LATE');
+      } else if (selectedStatus === 'ABSENT') {
+        matchesStatus = (item.status === 'ABSENT' || item.status === 'INCOMPLETE_ABSENT');
+      } else if (selectedStatus === 'INCOMPLETE') {
+        matchesStatus = (item.status === 'INCOMPLETE');
+      } else if (selectedStatus) {
+        matchesStatus = (item.status === selectedStatus);
+      }
       const matchesCourse = !selectedCourse || item.course === selectedCourse;
       const matchesYear = !selectedYear || item.year === selectedYear;
 
