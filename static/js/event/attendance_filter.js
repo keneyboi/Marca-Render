@@ -71,4 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     load(new URL(a.href).searchParams.get('page'));
   });
+
+  const exportBtn = document.getElementById('exportEventXlsxBtn');
+  if (exportBtn) {
+    const baseUrl = exportBtn.getAttribute('href').split('?')[0];
+    exportBtn.addEventListener('click', () => {
+      const p = new URLSearchParams(location.search);
+      p.delete('page');
+      const qs = p.toString();
+      exportBtn.href = `${baseUrl}${qs ? '?' + qs : ''}`;
+    });
+  }
 });

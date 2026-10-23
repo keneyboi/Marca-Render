@@ -219,6 +219,15 @@
                       Edit Event
                     </button>
 
+                    <a 
+                      href="{% url 'export_event_xlsx' event.id %}" 
+                      onclick="event.stopPropagation(); closeAllCardMenus();"
+                      class="dropdown-item"
+                      style="text-decoration: none;"
+                    >
+                      Export XLSX
+                    </a>
+
                     <button 
                       type="button" 
                       onclick="event.preventDefault(); event.stopPropagation(); openDeleteModal('{{ event.id }}', '{{ event.name|escapejs }}'); closeAllCardMenus();"

@@ -1,6 +1,10 @@
 import csv
 import io
+import re
+from urllib.parse import quote
 import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 from django.db import transaction, IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -11,7 +15,6 @@ from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.utils.functional import cached_property
 from django.contrib.auth.decorators import login_required
-from openpyxl.utils import get_column_letter
 from django.views.decorators.http import require_POST
 from apps.core.models import Event, AttendanceRecord
 from .forms import EventForm, EditEventForm
@@ -438,6 +441,139 @@ def _apply_filters(qs, params):
         qs = qs.filter(year_level=year)
 
     return qs
+
+
+@login_required(login_url='landing')
+def export_event_xlsx(request, event_id):
+    owner_user = get_data_owner(request)
+    if owner_user is None:
+        raise PermissionDenied("You do not have permission to access these records.")
+
+    event = get_object_or_404(Event, id=event_id, user=owner_user)
+    records_qs = event.attendance_records.select_related('edited_by').order_by('last_name', 'first_name')
+    records_qs = _apply_filters(records_qs, request.GET)
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Attendance Roster"
+    ws.views.sheetView[0].showGridLines = True
+
+    # Build Header Columns based on Session Type
+    headers = ["#", "Student ID", "First Name", "Last Name", "Email", "Course", "Year Level"]
+    if event.session_type == Event.SessionType.SESSION_1:
+        headers += ["Time In", "Status"]
+    elif event.session_type == Event.SessionType.SESSION_2:
+        headers += ["Time In", "Time Out", "Status"]
+    elif event.session_type == Event.SessionType.SESSION_3:
+        headers += ["Time In 1", "Time Out 1", "Time In 2", "Time Out 2", "Status"]
+    else:
+        headers += ["Time In", "Status"]
+
+    if request.user.is_admin:
+        headers.append("Edited By")
+
+    ws.append(headers)
+
+    # Header styling
+    header_fill = PatternFill(start_color="2B2320", end_color="2B2320", fill_type="solid")
+    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    thin_border = Border(
+        left=Side(style="thin", color="DCD4CC"),
+        right=Side(style="thin", color="DCD4CC"),
+        top=Side(style="thin", color="DCD4CC"),
+        bottom=Side(style="thin", color="DCD4CC"),
+    )
+
+    for cell in ws[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = thin_border
+    ws.row_dimensions[1].height = 28
+
+    # Status badge styles matching theme colors
+    status_styles = {
+        'Present': (PatternFill(start_color="E6F4EA", end_color="E6F4EA", fill_type="solid"), Font(name="Calibri", size=10, bold=True, color="137333")),
+        'Late': (PatternFill(start_color="FEF7E0", end_color="FEF7E0", fill_type="solid"), Font(name="Calibri", size=10, bold=True, color="B06000")),
+        'Incomplete': (PatternFill(start_color="FFF0EB", end_color="FFF0EB", fill_type="solid"), Font(name="Calibri", size=10, bold=True, color="C5431F")),
+        'Absent': (PatternFill(start_color="FCE8E6", end_color="FCE8E6", fill_type="solid"), Font(name="Calibri", size=10, bold=True, color="C5221F")),
+    }
+
+    def _fmt_time(dt):
+        if not dt:
+            return "—"
+        return timezone.localtime(dt).strftime('%I:%M %p')
+
+    data_font = Font(name="Calibri", size=10, color="2B2320")
+    status_col_idx = headers.index("Status") + 1
+
+    for idx, r in enumerate(records_qs, start=1):
+        row_data = [
+            idx,
+            r.student_id or "—",
+            r.last_name or "",
+            r.first_name or "",
+            r.email or "—",
+            r.course or "—",
+            str(r.year_level) if r.year_level else "—",
+        ]
+        status_label = r.display_status_label
+
+        if event.session_type == Event.SessionType.SESSION_1:
+            row_data += [_fmt_time(r.timed_in_1), status_label]
+        elif event.session_type == Event.SessionType.SESSION_2:
+            row_data += [_fmt_time(r.timed_in_1), _fmt_time(r.timed_out_1), status_label]
+        elif event.session_type == Event.SessionType.SESSION_3:
+            row_data += [
+                _fmt_time(r.timed_in_1),
+                _fmt_time(r.timed_out_1),
+                _fmt_time(r.timed_in_2),
+                _fmt_time(r.timed_out_2),
+                status_label,
+            ]
+        else:
+            row_data += [_fmt_time(r.timed_in_1), status_label]
+
+        if request.user.is_admin:
+            edited_str = (r.edited_by.get_full_name() or r.edited_by.username) if r.edited_by else "—"
+            row_data.append(edited_str)
+
+        ws.append(row_data)
+        current_row = ws.max_row
+        ws.row_dimensions[current_row].height = 22
+
+        for col_idx, cell in enumerate(ws[current_row], start=1):
+            cell.font = data_font
+            cell.border = thin_border
+            header_name = headers[col_idx - 1]
+            if col_idx == status_col_idx:
+                fill, font = status_styles.get(status_label, (None, data_font))
+                if fill:
+                    cell.fill = fill
+                cell.font = font
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+            elif header_name in ["#", "Student ID", "Year Level"] or "Time" in header_name:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+            else:
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+
+    # Auto-adjust column widths
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        col_letter = get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
+
+    ws.auto_filter.ref = ws.dimensions
+
+    safe_title = re.sub(r'[\/:*?"<>|]', '_', event.name).strip() or "Event"
+    filename = f"{safe_title}_Attendance.xlsx"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"; filename*=UTF-8\'\'{quote(filename)}'
+    wb.save(response)
+    return response
 
 
 
