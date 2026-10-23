@@ -133,7 +133,7 @@ def apply_scan(record, event, option, when):
         if record.timed_in_1:
             return False, f"already timed in at {_clock(record.timed_in_1)}"
         record.timed_in_1 = when
-        is_late = when > event.start_time_1
+        is_late = bool(event.start_time_1 and when > event.start_time_1)
         if session == '1':
             record.status = Status.LATE if is_late else Status.PRESENT
         else:
@@ -143,7 +143,7 @@ def apply_scan(record, event, option, when):
         if record.timed_out_1:
             return False, f"already timed out at {_clock(record.timed_out_1)}"
         record.timed_out_1 = when
-        is_late = when > event.end_time_1
+        is_late = bool(event.end_time_1 and when > event.end_time_1)
 
         if not record.timed_in_1 or record.status == Status.INCOMPLETE:
             record.status = Status.INCOMPLETE
@@ -211,16 +211,24 @@ def set_attendance(request):
         return _respond(request, False, "Either Student ID or Email is required.", fallback_redirect)
 
     try:
+        record = None
         if student_id:
-            record = event.attendance_records.get(
-                student_id__iexact=student_id,
-                first_name__iexact=first_name,
-                last_name__iexact=last_name
-            )
+            try:
+                record = event.attendance_records.get(
+                    student_id__iexact=student_id,
+                    last_name__iexact=last_name
+                )
+            except AttendanceRecord.DoesNotExist:
+                if email:
+                    record = event.attendance_records.get(
+                        email__iexact=email,
+                        last_name__iexact=last_name
+                    )
+                else:
+                    raise
         else:
             record = event.attendance_records.get(
                 email__iexact=email,
-                first_name__iexact=first_name,
                 last_name__iexact=last_name
             )
     except AttendanceRecord.DoesNotExist:
@@ -376,7 +384,7 @@ def batch_scan(request):
         #    locked until we finish, so a second officer's batch waits instead
         #    of overwriting ours.
         student_ids = {i['student_id'] for _, _, i in work if i['student_id']}
-        emails = {i['email'] for _, _, i in work if not i['student_id'] and i['email']}
+        emails = {i['email'] for _, _, i in work if i['email']}
 
         by_key = {}
         if student_ids or emails:
@@ -387,18 +395,23 @@ def batch_scan(request):
                 .select_for_update(of=('self',))
             )
             for rec in candidates:
-                names = (_text(rec.first_name).lower(), _text(rec.last_name).lower())
+                lname = _text(rec.last_name).lower()
                 if rec.student_id:
-                    by_key.setdefault(('sid', rec.student_id.lower()) + names, []).append(rec)
+                    by_key.setdefault(('sid', rec.student_id.lower(), lname), []).append(rec)
                 if rec.email:
-                    by_key.setdefault(('em', rec.email.lower()) + names, []).append(rec)
+                    by_key.setdefault(('em', rec.email.lower(), lname), []).append(rec)
 
         # 3) Decide every outcome in memory.
         for when, index, item in work:
-            names = (item['first_name'].lower(), item['last_name'].lower())
-            key = ('sid', item['student_id'].lower()) + names if item['student_id'] \
-                else ('em', item['email'].lower()) + names
-            matches = by_key.get(key, [])
+            lname = item['last_name'].lower()
+            sid_key = ('sid', item['student_id'].lower(), lname) if item['student_id'] else None
+            em_key = ('em', item['email'].lower(), lname) if item['email'] else None
+
+            matches = []
+            if sid_key:
+                matches = by_key.get(sid_key, [])
+            if not matches and em_key:
+                matches = by_key.get(em_key, [])
 
             if not matches:
                 results[index] = {'index': index, 'ok': False,

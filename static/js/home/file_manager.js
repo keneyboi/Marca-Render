@@ -255,6 +255,19 @@ function openEditEventModal(data) {
   }
   if (data.endTime1 && data.endTime1.includes('T')) {
     document.getElementById('edit_end_time_1_picker').value = data.endTime1.split('T')[1];
+  } else {
+    document.getElementById('edit_end_time_1_picker').value = '';
+  }
+
+  // Handle Session 1 Time Out visibility (Hide if sessionType == '1')
+  const time1bContainer = document.getElementById('edit_time_1_b');
+  if (time1bContainer) {
+    if (String(data.sessionType) === '1') {
+      time1bContainer.style.display = 'none';
+      document.getElementById('edit_end_time_1_picker').value = '';
+    } else {
+      time1bContainer.style.display = '';
+    }
   }
 
   // 4. Handle Session 2 visibility (Display ONLY when sessionType == '3')
@@ -349,15 +362,17 @@ document.addEventListener('DOMContentLoaded', function () {
       hasError = true;
     }
 
-    if (!et1) {
-      showFieldError('edit_end_time_1_picker', 'error_edit_end_time_1', 'End time (1) is required.');
-      hasError = true;
-    }
+    const isSession1 = String(sessionType) === '1';
 
-    // 2. Session 1 Validation: Start time must be before End time
-    if (st1 && et1 && st1 >= et1) {
-      showFieldError('edit_end_time_1_picker', 'error_edit_end_time_1', 'End time (1) must be after start time (1).');
-      hasError = true;
+    // 2. Session 1 Validation: Start time must be before End time (only if End time exists)
+    if (!isSession1) {
+      if (!et1) {
+        showFieldError('edit_end_time_1_picker', 'error_edit_end_time_1', 'End time (1) is required.');
+        hasError = true;
+      } else if (st1 && st1 >= et1) {
+        showFieldError('edit_end_time_1_picker', 'error_edit_end_time_1', 'End time (1) must be after start time (1).');
+        hasError = true;
+      }
     }
 
     // 3. Session 2 Validation (For two-part session configurations)
@@ -392,8 +407,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==========================================
     // HIDDEN INPUT SYNCHRONIZATION
     // ==========================================
-    document.getElementById('edit_start_time_1').value = `${dateVal}T${st1}`;
-    document.getElementById('edit_end_time_1').value = `${dateVal}T${et1}`;
+    document.getElementById('edit_start_time_1').value = st1 ? `${dateVal}T${st1}` : '';
+    document.getElementById('edit_end_time_1').value = (!isSession1 && et1) ? `${dateVal}T${et1}` : '';
 
     if (String(sessionType) === '3' && st2 && et2) {
       document.getElementById('edit_start_time_2').value = `${dateVal}T${st2}`;

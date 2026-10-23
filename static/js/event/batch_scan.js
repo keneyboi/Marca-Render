@@ -233,15 +233,16 @@
             first_name: str(data.fn),
             last_name: str(data.ln),
         };
-        if (!item || (!item.student_id && !item.email) || !item.first_name || !item.last_name) {
+        if (!item || (!item.student_id && !item.email) || !item.last_name) {
             showToast("Invalid or unreadable Marca QR Code.", "error");
             return;
         }
 
-        item.key = [item.option, item.student_id || item.email, item.first_name, item.last_name]
+        item.key = [item.option, item.student_id || item.email, item.last_name]
             .join("|").toLowerCase();
+        const displayName = item.first_name ? `${item.first_name} ${item.last_name}` : item.last_name;
         if (queue.some((q) => q.key === item.key && sendable(q))) {
-            showToast(`${item.first_name} ${item.last_name} is already in the list.`, "error");
+            showToast(`${displayName} is already in the list.`, "error");
             return;
         }
 
