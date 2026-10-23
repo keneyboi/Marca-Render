@@ -27,7 +27,7 @@
       <div class="event-meta-strip">
         <span><strong>Venue:</strong> {{ event.location }}</span>
         <span><strong>Date:</strong> {{ event.start_time_1|date:"M d"}}</span>
-        <span><strong>Time (1):</strong> {{ event.start_time_1|date:"H:i" }} &ndash; {{ event.end_time_1|date:"H:i" }}</span>
+        <span><strong>Time (1):</strong> {{ event.start_time_1|date:"H:i" }}{% if event.end_time_1 %} &ndash; {{ event.end_time_1|date:"H:i" }}{% endif %}</span>
         {% if event.session_type == '3' %} 
         <span><strong>Time (2):</strong> {{ event.start_time_2|date:"H:i" }} &ndash; {{ event.end_time_2|date:"H:i" }}</span>
         {% endif %}

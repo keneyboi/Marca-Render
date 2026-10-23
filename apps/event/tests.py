@@ -4,6 +4,7 @@ import openpyxl
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from apps.core.models import Event, AttendanceRecord
+from apps.event.forms import EditEventForm, EventForm
 
 
 class ExportXLSXUnitTests(unittest.TestCase):
@@ -36,3 +37,25 @@ class ExportXLSXUnitTests(unittest.TestCase):
         self.assertIn("Time Out", s2_headers)
         self.assertIn("Time In 2", s3_headers)
         self.assertIn("Time Out 2", s3_headers)
+
+    def test_forms_allow_optional_end_time(self):
+        edit_form = EditEventForm()
+        self.assertFalse(edit_form.fields['end_time_1'].required)
+        self.assertFalse(edit_form.fields['start_time_2'].required)
+        self.assertFalse(edit_form.fields['end_time_2'].required)
+
+        create_form = EventForm()
+        self.assertFalse(create_form.fields['end_time_1'].required)
+        self.assertFalse(create_form.fields['start_time_2'].required)
+        self.assertFalse(create_form.fields['end_time_2'].required)
+
+    def test_parse_roster_file_naming_variations(self):
+        from apps.event.views import parse_roster_file
+        # Tests Surname / Given Name / Gmail
+        csv_data = "Surname,Given Name,Gmail,ID Number\nSantos,Maria,maria@gmail.com,21-999\n"
+        f = io.BytesIO(csv_data.encode())
+        f.name = "attendees.csv"
+        records = parse_roster_file(f)
+        self.assertEqual(records[0]['first_name'], 'Maria')
+        self.assertEqual(records[0]['last_name'], 'Santos')
+        self.assertEqual(records[0]['email'], 'maria@gmail.com')

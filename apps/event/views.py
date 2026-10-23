@@ -33,15 +33,40 @@ def _clean_cell_value(val):
     return str(val).strip()
 
 
+def _clean_header(val):
+    """Normalizes header keys: strips punctuation/symbols, replaces - and _ with spaces."""
+    s = str(val or '').strip().lower()
+    s = s.replace('_', ' ').replace('-', ' ')
+    s = re.sub(r'[^\w\s]', '', s)
+    return ' '.join(s.split())
+
+
+FIRST_NAME_KEYS = {'first name', 'firstname', 'given name', 'givenname', 'fname', 'first'}
+LAST_NAME_KEYS = {'last name', 'lastname', 'surname', 'family name', 'familyname', 'lname', 'last'}
+FULL_NAME_KEYS = {'full name', 'fullname', 'name', 'student name', 'complete name', 'attendee name'}
+STUDENT_ID_KEYS = {'student id', 'studentid', 'id number', 'id no', 'idno', 'id', 'sid', 'school id', 'student number'}
+EMAIL_KEYS = {'email', 'email address', 'e mail', 'e mail address', 'mail', 'gmail', 'gmail address'}
+COURSE_KEYS = {'course', 'program', 'degree', 'track', 'strand'}
+YEAR_LEVEL_KEYS = {'year level', 'yearlevel', 'year', 'level', 'yr level', 'grade level'}
+
+
+def _get_field_by_keys(row_dict, key_set):
+    for k in key_set:
+        val = row_dict.get(k)
+        if val:
+            return val
+    return ''
+
+
 def _normalize_attendee(row_dict, row_number):
     """
     Sanitizes row keys/values and handles both:
-    1. Separate 'first_name' and 'last_name' columns
-    2. A single 'full name' / 'name' column (e.g. 'LASTNAME, FIRSTNAME')
-    Accepts aliases: 'id number' -> student_id, 'email address' -> email.
+    1. Separate first name and last name columns (with any alias: first_name, surname, etc.)
+    2. A single 'full name' / 'name' column (e.g. 'LASTNAME, FIRSTNAME' or 'Firstname Lastname')
+    Accepts aliases for all fields (id number -> student_id, gmail -> email, etc.).
     """
     clean_row = {
-        str(k).strip().lower(): _clean_cell_value(v)
+        _clean_header(k): _clean_cell_value(v)
         for k, v in row_dict.items() if k is not None
     }
 
@@ -50,12 +75,12 @@ def _normalize_attendee(row_dict, row_number):
         return None
 
     # Handle First and Last Name resolution
-    first_name = clean_row.get('first_name', '')
-    last_name = clean_row.get('last_name', '')
+    first_name = _get_field_by_keys(clean_row, FIRST_NAME_KEYS)
+    last_name = _get_field_by_keys(clean_row, LAST_NAME_KEYS)
 
     if not first_name or not last_name:
-        # Check for unified "full name" or "name" column
-        full_name = clean_row.get('full name') or clean_row.get('name') or ''
+        # Check for unified "full name" / "name" / "student name" column
+        full_name = _get_field_by_keys(clean_row, FULL_NAME_KEYS)
         if full_name:
             if ',' in full_name:
                 parts = full_name.split(',', 1)
@@ -71,21 +96,10 @@ def _normalize_attendee(row_dict, row_number):
                     last_name = ''
 
     # Handle Student ID aliases
-    student_id = (
-        clean_row.get('student_id') or 
-        clean_row.get('id number') or 
-        clean_row.get('id_number') or 
-        clean_row.get('student id') or 
-        None
-    )
+    student_id = _get_field_by_keys(clean_row, STUDENT_ID_KEYS) or None
 
     # Handle Email aliases
-    email = (
-        clean_row.get('email') or 
-        clean_row.get('email address') or 
-        clean_row.get('email_address') or 
-        None
-    )
+    email = _get_field_by_keys(clean_row, EMAIL_KEYS) or None
 
     # Validation guards
     if not first_name:
@@ -100,8 +114,8 @@ def _normalize_attendee(row_dict, row_number):
         'last_name': last_name,
         'student_id': student_id,
         'email': email,
-        'course': clean_row.get('course') or None,
-        'year_level': clean_row.get('year_level') or None,
+        'course': _get_field_by_keys(clean_row, COURSE_KEYS) or None,
+        'year_level': _get_field_by_keys(clean_row, YEAR_LEVEL_KEYS) or None,
     }
 
 
@@ -112,10 +126,11 @@ def parse_roster_file(uploaded_file):
     filename = uploaded_file.name.lower()
 
     def is_header_row(cleaned_cells):
-        has_separate_names = 'first_name' in cleaned_cells and 'last_name' in cleaned_cells
-        has_full_name = 'full name' in cleaned_cells or 'name' in cleaned_cells
-        has_id = any(h in cleaned_cells for h in ('student_id', 'id number', 'id_number', 'student id'))
-        has_email = any(h in cleaned_cells for h in ('email', 'email address', 'email_address'))
+        norm_cells = {_clean_header(c) for c in cleaned_cells if c is not None}
+        has_separate_names = bool(norm_cells & FIRST_NAME_KEYS) and bool(norm_cells & LAST_NAME_KEYS)
+        has_full_name = bool(norm_cells & FULL_NAME_KEYS)
+        has_id = bool(norm_cells & STUDENT_ID_KEYS)
+        has_email = bool(norm_cells & EMAIL_KEYS)
         return (has_separate_names or has_full_name) and (has_id or has_email)
 
     if filename.endswith('.csv'):

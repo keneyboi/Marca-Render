@@ -16,9 +16,8 @@ class EditEventForm(forms.ModelForm):
             'end_time_2'
         ]
 
-def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
         self.fields['end_time_1'].required = False
         self.fields['start_time_2'].required = False
         self.fields['end_time_2'].required = False
