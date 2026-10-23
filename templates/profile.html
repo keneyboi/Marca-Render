@@ -14,7 +14,7 @@
     <!-- Header Card -->
 
     
-    <h2 class="dashboard-title">Profile</h2>
+    <h2 class="dashboard-title">Settings</h2>
 
     <div class="profile-header">
         <div class="profile-icon" id="profile-icon"></div>
@@ -85,6 +85,11 @@
                 </div>
             </form>
         </div>
+
+            <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-secondary" style="width: 100%; padding: 1.5em 2rem; font-size: 1rem;">Logout</button>
+          </form>
 
     </div>
 </div>
