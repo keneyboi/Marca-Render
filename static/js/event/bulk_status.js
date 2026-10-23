@@ -8,45 +8,77 @@ document.addEventListener("DOMContentLoaded", () => {
     const applyBtn = document.getElementById("bulk-apply");
     const clearBtn = document.getElementById("bulk-clear");
 
-    const allChecks = () => Array.from(document.querySelectorAll(".bulk-check"));
-    const visibleChecks = () => allChecks().filter((c) => c.closest("tr").style.display !== "none");
-    const selected = () => allChecks().filter((c) => c.checked);
+    // The source of truth: record IDs (as strings) selected across all pages/searches
+    const selectedIds = new Set();
+
+    const pageChecks = () => Array.from(document.querySelectorAll(".bulk-check"));
+
+    // Re-tick the boxes on screen that belong to the remembered selection
+    function syncCheckboxes() {
+        pageChecks().forEach((c) => { c.checked = selectedIds.has(c.value); });
+    }
 
     function refresh() {
-        const n = selected().length;
+        const n = selectedIds.size;
         bar.hidden = n === 0;
         countEl.textContent = `${n} selected`;
-        const visible = visibleChecks();
-        const visibleOn = visible.filter((c) => c.checked).length;
+
+        const checks = pageChecks();
+        const on = checks.filter((c) => c.checked).length;
         if (selectAll) {
-            selectAll.checked = visible.length > 0 && visibleOn === visible.length;
-            selectAll.indeterminate = visibleOn > 0 && visibleOn < visible.length;
+            selectAll.checked = checks.length > 0 && on === checks.length;
+            selectAll.indeterminate = on > 0 && on < checks.length;
         }
     }
 
+    // Tick/untick a single row
+    const MAX_SELECTED = 500;
+
+    document.addEventListener("change", (e) => {
+        if (!e.target || !e.target.classList.contains("bulk-check")) return;
+        if (e.target.checked) {
+            if (selectedIds.size >= MAX_SELECTED) {
+                e.target.checked = false;
+                showToast(`You can select up to ${MAX_SELECTED} attendees at a time.`, "error");
+                return;
+            }
+            selectedIds.add(e.target.value);
+        } else {
+            selectedIds.delete(e.target.value);
+        }
+        refresh();
+    });
+
+    // "Select all" affects only the rows currently shown
     if (selectAll) {
         selectAll.addEventListener("change", () => {
-            visibleChecks().forEach((c) => { c.checked = selectAll.checked; });
+            pageChecks().forEach((c) => {
+                c.checked = selectAll.checked;
+                if (selectAll.checked) selectedIds.add(c.value);
+                else selectedIds.delete(c.value);
+            });
             refresh();
         });
     }
-    document.addEventListener("change", (e) => {
-        if (e.target && e.target.classList.contains("bulk-check")) {
-            refresh();
-        }
-    });
 
     clearBtn.addEventListener("click", () => {
-        allChecks().forEach((c) => { c.checked = false; });
+        selectedIds.clear();
+        syncCheckboxes();
+        refresh();
+    });
+
+    // Rows were replaced by a search/filter/page fetch: restore ticks from the Set
+    document.addEventListener("roster:updated", () => {
+        syncCheckboxes();
         refresh();
     });
 
     applyBtn.addEventListener("click", async () => {
-        const boxes = selected();
-        if (!boxes.length) return;
+        const ids = Array.from(selectedIds).map(Number);
+        if (!ids.length) return;
 
         const label = statusSelect.options[statusSelect.selectedIndex].textContent.replace(/^Mark as /, "");
-        if (!confirm(`Mark ${boxes.length} attendee(s) as ${label}?`)) return;
+        if (!confirm(`Mark ${ids.length} attendee(s) as ${label}?`)) return;
 
         const token = document.querySelector('input[name="csrfmiddlewaretoken"]');
         applyBtn.disabled = true;
@@ -62,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({
                     event_id: Number(bar.dataset.eventId),
                     status: statusSelect.value,
-                    record_ids: boxes.map((c) => Number(c.value)),
+                    record_ids: ids,
                 }),
             });
 
@@ -79,12 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             data.results.forEach((res) => {
                 if (!res.ok) return;
-                if (res.row) updateRowFromServer(res.row);
-                const box = boxes[res.index];
-                if (box) box.checked = false;    
+                if (res.row) updateRowFromServer(res.row);   // skipped if row isn't on this page
+                const id = ids[res.index];
+                if (id !== undefined) selectedIds.delete(String(id));
             });
             updateCounters(data.counts);
             showToast(data.message, data.results.some((r) => !r.ok) ? "error" : "success");
+            syncCheckboxes();
             refresh();
         } catch (err) {
             console.error("Bulk update failed:", err);

@@ -72,15 +72,8 @@ function updateRowFromServer(data) {
 
     let row = document.querySelector(`tr.attendance-row[data-record-id="${recordId}"]`);
     if (!row && data.row_html) {
-        const tbody = document.querySelector(".roster-table tbody");
-        if (tbody) {
-            const emptyRow = tbody.querySelector("tr:not(.attendance-row)");
-            if (emptyRow && emptyRow.textContent.includes("No attendees found")) {
-                emptyRow.remove();
-            }
-            tbody.insertAdjacentHTML("afterbegin", data.row_html);
-            row = document.querySelector(`tr.attendance-row[data-record-id="${recordId}"]`);
-        }
+        if (window.reloadRoster) window.reloadRoster();
+        return;
     }
     if (!row) return;                           
 

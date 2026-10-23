@@ -19,6 +19,8 @@ from django.core.exceptions import PermissionDenied
 from apps.core.access import get_data_owner
 from apps.core.utils import notify_user
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
+from django.views.decorators.vary import vary_on_headers
 
 def _clean_cell_value(val):
     if val is None:
@@ -208,6 +210,8 @@ def parse_roster_file(uploaded_file):
 
 
 @login_required(login_url='landing')
+@never_cache
+@vary_on_headers('X-Requested-With')
 def create_event(request):
     if request.method != 'POST':
         return redirect('home')
@@ -353,9 +357,18 @@ def event_detail(request, event_id):
     has_student_id = stats['with_student_id'] > 0
     has_academic_info = bool(courses or year_levels)
 
-    paginator = _KnownCountPaginator(all_records, 50, known_count=stats['total'])
-    page_number = request.GET.get('page')
-    records = paginator.get_page(page_number)
+    filtered = _apply_filters(all_records, request.GET)
+    is_filtered = any(request.GET.get(k, '').strip() for k in ('q', 'status', 'course', 'year'))
+
+    if is_filtered:
+        paginator = Paginator(filtered, 50)
+    else:
+        paginator = _KnownCountPaginator(filtered, 50, known_count=stats['total'])
+    records = paginator.get_page(request.GET.get('page'))
+
+    qs_params = request.GET.copy()
+    qs_params.pop('page', None)
+    extra_qs = qs_params.urlencode()
 
     st = str(event.session_type).strip()
     show_session_1 = st == '1'
@@ -379,8 +392,53 @@ def event_detail(request, event_id):
         'late_count': stats['late'],
         'incomplete_count': stats['incomplete'],
         'absent_count': stats['absent'],
+        'request': request,
+        'is_filtered': is_filtered,
+        'extra_qs': qs_params.urlencode(),
+        'q': request.GET.get('q', ''),
+        'sel_status': request.GET.get('status', '').upper(),
+        'sel_course': request.GET.get('course', ''),
+        'sel_year': request.GET.get('year', ''),
     }
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'rows_html': render_to_string('event/_roster_rows.html', context, request=request),
+            'pagination_html': render_to_string('event/_pagination.html', context, request=request),
+            'count': paginator.count,
+        })
     return render(request, 'event/event_detail.html', context)
+
+INCOMPLETE_STATUSES = [
+    AttendanceRecord.Status.INCOMPLETE,
+    AttendanceRecord.Status.INCOMPLETE_PRESENT,
+    AttendanceRecord.Status.INCOMPLETE_LATE,
+    AttendanceRecord.Status.INCOMPLETE_ABSENT,
+]
+
+def _apply_filters(qs, params):
+    q = params.get('q', '').strip()
+    for term in q.split():  # every word must match, so "john doe" works
+        qs = qs.filter(
+            Q(first_name__icontains=term) | Q(last_name__icontains=term) |
+            Q(email__icontains=term) | Q(student_id__icontains=term)
+        )
+
+    status = params.get('status', '').strip().upper()
+    if status == 'INCOMPLETE':
+        qs = qs.filter(status__in=INCOMPLETE_STATUSES)
+    elif status:
+        qs = qs.filter(status=status)
+
+    course = params.get('course', '').strip()
+    if course:
+        qs = qs.filter(course=course)
+
+    year = params.get('year', '').strip()
+    if year:
+        qs = qs.filter(year_level=year)
+
+    return qs
+
 
 
 @login_required(login_url='landing')

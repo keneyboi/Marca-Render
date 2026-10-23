@@ -234,58 +234,46 @@
   </div>
 
   <!-- Search & Filter Toolbar -->
+
   <div class="attendance-toolbar" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
-    <input 
-      type="text" 
-      id="attendanceSearchInput"
-      placeholder="Search name, ID, or email..." 
-      style="padding: 7px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; min-width: 240px;"
-      autocomplete="off"
-    >
+  <input type="text" id="attendanceSearchInput" value="{{ q }}"
+    placeholder="Search name, ID, or email..." autocomplete="off"
+    style="padding: 7px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; min-width: 240px;">
 
-    <select 
-      id="attendanceStatusFilter"
-      style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;"
-    >
-      <option value="">All Statuses</option>
-      <option value="PRESENT">Present</option>
-      <option value="LATE">Late</option>
-      <option value="INCOMPLETE">Incomplete</option>
-      <option value="ABSENT">Absent</option>
+  <select id="attendanceStatusFilter"
+    style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;">
+    <option value="">All Statuses</option>
+    <option value="PRESENT" {% if sel_status == 'PRESENT' %}selected{% endif %}>Present</option>
+    <option value="LATE" {% if sel_status == 'LATE' %}selected{% endif %}>Late</option>
+    <option value="INCOMPLETE" {% if sel_status == 'INCOMPLETE' %}selected{% endif %}>Incomplete</option>
+    <option value="ABSENT" {% if sel_status == 'ABSENT' %}selected{% endif %}>Absent</option>
+  </select>
+
+  {% if unique_courses %}
+    <select id="attendanceCourseFilter"
+      style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; color: #2b2320; cursor: pointer;">
+      <option value="">All Courses</option>
+      {% for course in unique_courses %}
+        <option value="{{ course }}" {% if sel_course == course %}selected{% endif %}>{{ course }}</option>
+      {% endfor %}
     </select>
+  {% endif %}
 
-    {% if unique_courses %}
-      <select 
-        id="attendanceCourseFilter"
-        style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #ffffff; color: #2b2320; cursor: pointer;"
-      >
-        <option value="">All Courses</option>
-        {% for course in unique_courses %}
-          <option value="{{ course }}">{{ course }}</option>
-        {% endfor %}
-      </select>
-    {% endif %}
+  {% if unique_year_levels %}
+    <select id="attendanceYearFilter"
+      style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; color: #2b2320; cursor: pointer;">
+      <option value="">All Years</option>
+      {% for year in unique_year_levels %}
+        <option value="{{ year }}" {% if sel_year == year %}selected{% endif %}>Year {{ year }}</option>
+      {% endfor %}
+    </select>
+  {% endif %}
 
-    {% if unique_year_levels %}
-      <select 
-        id="attendanceYearFilter"
-        style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #ffffff; color: #2b2320; cursor: pointer;"
-      >
-        <option value="">All Years</option>
-        {% for year in unique_year_levels %}
-          <option value="{{ year }}">Year {{ year }}</option>
-        {% endfor %}
-      </select>
-    {% endif %}
-
-    <a 
-      href="#" 
-      id="clearAttendanceFiltersBtn" 
-      style="display: none; font-size: 12.5px; color: #8c7e75; text-decoration: none; padding-left: 4px;"
-    >
-      Clear
-    </a>
-  </div>
+  <a href="#" id="clearAttendanceFiltersBtn"
+    style="{% if not is_filtered %}display: none; {% endif %}font-size: 12.5px; color: #8c7e75; text-decoration: none; padding-left: 4px;">
+    Clear
+  </a>
+</div>
 
   <!-- Bulk actions (appears when rows are ticked) -->
   <div id="bulk-bar" class="bulk-bar" hidden
@@ -344,39 +332,15 @@
           {% endif %}
         </tr>
       </thead>
-      <tbody>
-        {% for record in records %}
-          {% include 'event/attendance_row_snippet.html' with record=record %}
-        {% empty %}
-          <tr>
-            <td colspan="12" style="text-align: center; padding: 3rem; color: #8c7e75;">
-              No attendees found for this event.
-            </td>
-          </tr>
-        {% endfor %}
-
-        <tr id="noAttendanceMatchRow" style="display: none;">
-          <td colspan="12" style="text-align: center; padding: 2.5rem; color: #8c7e75;">
-            No attendees match your search or filter criteria.
-          </td>
-        </tr>
+      <tbody id="rosterBody">
+        {% include 'event/_roster_rows.html' %}
       </tbody>
     </table>
   </div>
 
-  {% if records.has_other_pages %}
-    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
-      {% if records.has_previous %}
-        <a href="?page={{ records.previous_page_number }}" class="btn-step-back" style="text-decoration: none;">Previous</a>
-      {% endif %}
-      <span style="display: flex; align-items: center; font-size: 13px; color: #665b55;">
-        Page {{ records.number }} of {{ records.paginator.num_pages }}
-      </span>
-      {% if records.has_next %}
-        <a href="?page={{ records.next_page_number }}" class="btn-step-back" style="text-decoration: none;">Next</a>
-      {% endif %}
-    </div>
-  {% endif %}
+  <div id="paginationWrap">
+    {% include 'event/_pagination.html' %}
+  </div>
 
 </div>
 

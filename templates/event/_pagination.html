@@ -1,0 +1,13 @@
+{% if records.has_other_pages %}
+  <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+    {% if records.has_previous %}
+      <a href="?page={{ records.previous_page_number }}&{{ extra_qs }}" class="btn-step-back js-page-link" style="text-decoration: none;">Previous</a>
+    {% endif %}
+    <span style="display: flex; align-items: center; font-size: 13px; color: #665b55;">
+      Page {{ records.number }} of {{ records.paginator.num_pages }}
+    </span>
+    {% if records.has_next %}
+      <a href="?page={{ records.next_page_number }}&{{ extra_qs }}" class="btn-step-back js-page-link" style="text-decoration: none;">Next</a>
+    {% endif %}
+  </div>
+{% endif %}

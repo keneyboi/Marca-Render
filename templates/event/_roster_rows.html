@@ -1,0 +1,9 @@
+{% for record in records %}
+  {% include 'event/attendance_row_snippet.html' with record=record %}
+{% empty %}
+  <tr>
+    <td colspan="12" style="text-align: center; padding: 3rem; color: #8c7e75;">
+      {% if is_filtered %}No attendees match your search or filter criteria.{% else %}No attendees found for this event.{% endif %}
+    </td>
+  </tr>
+{% endfor %}

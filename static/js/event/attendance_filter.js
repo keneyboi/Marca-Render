@@ -1,204 +1,74 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const searchInput = document.getElementById('attendanceSearchInput');
-  const statusFilter = document.getElementById('attendanceStatusFilter');
-  const courseFilter = document.getElementById('attendanceCourseFilter');
-  const yearFilter = document.getElementById('attendanceYearFilter');
+  const search = document.getElementById('attendanceSearchInput');
+  const statusSel = document.getElementById('attendanceStatusFilter');
+  const courseSel = document.getElementById('attendanceCourseFilter');
+  const yearSel = document.getElementById('attendanceYearFilter');
   const clearBtn = document.getElementById('clearAttendanceFiltersBtn');
-  const emptyRow = document.getElementById('noAttendanceMatchRow');
+  const body = document.getElementById('rosterBody');
+  const pager = document.getElementById('paginationWrap');
+  if (!search || !body) return;
 
-  // Cache table rows with their individual data attributes
-  const rows = Array.from(document.querySelectorAll('.attendance-row')).map(row => ({
-    element: row,
-    status: (row.dataset.status || '').trim(),
-    course: (row.dataset.course || '').trim().toLowerCase(),
-    year: (row.dataset.year || '').trim(),
-    text: row.innerText.toLowerCase()
-  }));
+  let timer, controller;
+  let currentPage = new URLSearchParams(location.search).get('page');
 
-  function updateClearVisibility(hasFilters) {
-    if (clearBtn) {
-      clearBtn.style.display = hasFilters ? 'inline-flex' : 'none';
+  function params(page) {
+    const p = new URLSearchParams();
+    if (search.value.trim()) p.set('q', search.value.trim());
+    if (statusSel?.value) p.set('status', statusSel.value);
+    if (courseSel?.value) p.set('course', courseSel.value);
+    if (yearSel?.value) p.set('year', yearSel.value);
+    if (page) p.set('page', page);
+    return p;
+  }
+
+  async function load(page) {
+    currentPage = page || null;
+    const p = params(page);
+    const hasFilter = [...p.keys()].some(k => k !== 'page');
+    clearBtn.style.display = hasFilter ? '' : 'none';
+
+    controller?.abort();
+    controller = new AbortController();
+
+    try {
+      const res = await fetch(`${location.pathname}?${p}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal: controller.signal,
+        credentials: 'same-origin',
+      });
+      const data = await res.json();
+      body.innerHTML = data.rows_html;
+      pager.innerHTML = data.pagination_html;
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `${location.pathname}?${qs}` : location.pathname);
+      document.dispatchEvent(new CustomEvent('roster:updated'));
+    } catch (err) {
+      if (err.name !== 'AbortError') console.error(err);
     }
   }
 
-  function applyFilters() {
-    const searchTerm = (searchInput ? searchInput.value : '').trim().toLowerCase();
-    const selectedStatus = (statusFilter ? statusFilter.value : '').trim();
-    const selectedCourse = (courseFilter ? courseFilter.value : '').trim().toLowerCase();
-    const selectedYear = (yearFilter ? yearFilter.value : '').trim();
+  // Used by scan_attendance.js after an attendee is added
+  window.reloadRoster = () => load(currentPage);
 
-    let visibleCount = 0;
+  search.addEventListener('input', () => {
+    clearTimeout(timer);
+    const v = search.value.trim();
+    if (v.length === 1) return;              // wait for at least 2 characters (empty still resets)
+    timer = setTimeout(() => load(), 400); 
+  });
+  [statusSel, courseSel, yearSel].forEach(el => el?.addEventListener('change', () => load()));
 
-    rows.forEach(item => {
-      const matchesSearch = !searchTerm || item.text.includes(searchTerm);
-      let matchesStatus = true;
-      if (selectedStatus === 'PRESENT') {
-        matchesStatus = (item.status === 'PRESENT' || item.status === 'INCOMPLETE_PRESENT');
-      } else if (selectedStatus === 'LATE') {
-        matchesStatus = (item.status === 'LATE' || item.status === 'INCOMPLETE_LATE');
-      } else if (selectedStatus === 'ABSENT') {
-        matchesStatus = (item.status === 'ABSENT' || item.status === 'INCOMPLETE_ABSENT');
-      } else if (selectedStatus === 'INCOMPLETE') {
-        matchesStatus = (item.status === 'INCOMPLETE');
-      } else if (selectedStatus) {
-        matchesStatus = (item.status === selectedStatus);
-      }
-      const matchesCourse = !selectedCourse || item.course === selectedCourse;
-      const matchesYear = !selectedYear || item.year === selectedYear;
+  clearBtn.addEventListener('click', e => {
+    e.preventDefault();
+    search.value = '';
+    [statusSel, courseSel, yearSel].forEach(el => { if (el) el.value = ''; });
+    load();
+  });
 
-      if (matchesSearch && matchesStatus && matchesCourse && matchesYear) {
-        item.element.style.display = '';
-        visibleCount++;
-      } else {
-        item.element.style.display = 'none';
-      }
-    });
-
-    if (emptyRow) {
-      emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
-    }
-
-    const hasActiveFilters = Boolean(
-      searchTerm.length > 0 || 
-      selectedStatus.length > 0 || 
-      selectedCourse.length > 0 || 
-      selectedYear.length > 0
-    );
-    updateClearVisibility(hasActiveFilters);
-  }
-
-  // Called by scan_attendance.js after it patches or adds a row in place.
-  // Updates the cached copy (or registers new dynamic rows) and re-applies active filters.
-  window.refreshAttendanceRow = function (rowElement) {
-    if (!rowElement) return;
-    let item = rows.find(r => r.element === rowElement);
-    if (!item) {
-      item = {
-        element: rowElement,
-        status: (rowElement.dataset.status || '').trim(),
-        course: (rowElement.dataset.course || '').trim().toLowerCase(),
-        year: (rowElement.dataset.year || '').trim(),
-        text: rowElement.innerText.toLowerCase()
-      };
-      rows.push(item);
-    } else {
-      item.status = (rowElement.dataset.status || '').trim();
-      item.course = (rowElement.dataset.course || '').trim().toLowerCase();
-      item.year = (rowElement.dataset.year || '').trim();
-      item.text = rowElement.innerText.toLowerCase();
-    }
-    applyFilters();
-  };
-
-  if (searchInput) searchInput.addEventListener('input', applyFilters);
-  if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-  if (courseFilter) courseFilter.addEventListener('change', applyFilters);
-  if (yearFilter) yearFilter.addEventListener('change', applyFilters);
-
-  if (clearBtn) {
-    clearBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (searchInput) searchInput.value = '';
-      if (statusFilter) statusFilter.value = '';
-      if (courseFilter) courseFilter.value = '';
-      if (yearFilter) yearFilter.value = '';
-      applyFilters();
-    });
-  }
-
-  // -------------------------------------------------------------
-  // CONDITIONAL IDENTIFIER VALIDATION FOR ADD ATTENDEE MODAL
-  // -------------------------------------------------------------
-  const studentIdInput = document.getElementById('add_student_id');
-  const emailInput = document.getElementById('add_email');
-  const lblStudentId = document.getElementById('lbl_student_id');
-  const lblEmail = document.getElementById('lbl_email');
-  const addForm = document.getElementById('addAttendeeForm');
-
-  function syncIdentifierRequirements() {
-    if (!studentIdInput || !emailInput) return;
-
-    const hasStudentId = studentIdInput.value.trim().length > 0;
-    const hasEmail = emailInput.value.trim().length > 0;
-
-    if (hasStudentId && !hasEmail) {
-      lblStudentId.textContent = "Student ID *";
-      lblEmail.textContent = "Email (Optional)";
-    } else if (!hasStudentId && hasEmail) {
-      lblStudentId.textContent = "Student ID (Optional)";
-      lblEmail.textContent = "Email *";
-    } else {
-      lblStudentId.textContent = "Student ID";
-      lblEmail.textContent = "Email";
-    }
-  }
-
-  if (studentIdInput && emailInput) {
-    studentIdInput.addEventListener('input', syncIdentifierRequirements);
-    emailInput.addEventListener('input', syncIdentifierRequirements);
-  }
-
-  if (addForm) {
-    addForm.addEventListener('submit', (e) => {
-      const hasStudentId = studentIdInput ? studentIdInput.value.trim().length > 0 : false;
-      const hasEmail = emailInput ? emailInput.value.trim().length > 0 : false;
-
-      if (!hasStudentId && !hasEmail) {
-        e.preventDefault();
-        alert('Please provide at least a Student ID or an Email address.');
-        if (studentIdInput) studentIdInput.focus();
-      }
-    });
-  }
-});
-
-// Delete Modal Handlers
-function openDeleteRecordModal(deleteUrl, attendeeName) {
-  const modal = document.getElementById('deleteRecordModal');
-  const form = document.getElementById('deleteRecordForm');
-  const nameSpan = document.getElementById('deleteAttendeeName');
-
-  if (form && nameSpan && modal) {
-    form.action = deleteUrl;
-    nameSpan.textContent = attendeeName;
-    modal.style.display = 'flex';
-  }
-}
-
-function closeDeleteRecordModal() {
-  const modal = document.getElementById('deleteRecordModal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
-}
-
-// Add Modal Handlers
-if (!window.openAddRecordModal) {
-  window.openAddRecordModal = function() {
-    const modal = document.getElementById('addRecordModal');
-    if (modal) {
-      modal.style.display = 'flex';
-    }
-  };
-}
-
-if (!window.closeAddRecordModal) {
-  window.closeAddRecordModal = function() {
-    const modal = document.getElementById('addRecordModal');
-    if (modal) {
-      modal.style.display = 'none';
-    }
-  };
-}
-
-// Click outside detection for all detail modals
-window.addEventListener('click', (e) => {
-  const deleteModal = document.getElementById('deleteRecordModal');
-  const addModal = document.getElementById('addRecordModal');
-  if (e.target === deleteModal) {
-    closeDeleteRecordModal();
-  }
-  if (e.target === addModal) {
-    closeAddRecordModal();
-  }
+  pager.addEventListener('click', e => {
+    const a = e.target.closest('.js-page-link');
+    if (!a) return;
+    e.preventDefault();
+    load(new URL(a.href).searchParams.get('page'));
+  });
 });
