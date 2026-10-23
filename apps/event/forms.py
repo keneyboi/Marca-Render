@@ -16,8 +16,10 @@ class EditEventForm(forms.ModelForm):
             'end_time_2'
         ]
 
-    def __init__(self, *args, **kwargs):
+def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        self.fields['end_time_1'].required = False
         self.fields['start_time_2'].required = False
         self.fields['end_time_2'].required = False
 
@@ -64,6 +66,13 @@ class EventForm(forms.ModelForm):
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Location'}),
             'session_type': forms.RadioSelect(),
         }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Explicitly make end_time_1 optional so Session Type 1 can pass validation
+        self.fields['end_time_1'].required = False
+        self.fields['start_time_2'].required = False
+        self.fields['end_time_2'].required = False
 
     def clean_roster_file(self):
         file = self.cleaned_data.get('roster_file')

@@ -93,6 +93,7 @@ function syncAndValidateDates() {
   const startInput2 = document.getElementById('id_start_time_2');
   const endInput2 = document.getElementById('id_end_time_2');
   const selectedRadio = document.querySelector('input[name="session_type"]:checked');
+  const time1bContainer = document.getElementById('time_1_b');
 
   let isValid = true;
 
@@ -104,8 +105,17 @@ function syncAndValidateDates() {
     setFieldFeedback(sharedDate, true);
   }
 
-  // 2. Validate Session 1 Times
-  if (startInput1 && endInput1) {
+  // 2. Validate Session 1 Start Time
+  if (startInput1 && !startInput1.value) {
+    setFieldFeedback(startInput1, false, 'Start time (1) is required.');
+    isValid = false;
+  } else if (startInput1) {
+    setFieldFeedback(startInput1, true);
+  }
+
+  // Validate Session 1 End Time ONLY IF visible
+  const isTime1bVisible = time1bContainer && time1bContainer.style.display !== 'none';
+  if (isTime1bVisible && startInput1 && endInput1) {
     const startVal1 = startInput1.value;
     const endVal1 = endInput1.value;
 
@@ -116,10 +126,12 @@ function syncAndValidateDates() {
       } else {
         setFieldFeedback(endInput1, true);
       }
-    } else if (!startVal1 && endVal1) {
-      setFieldFeedback(startInput1, false, 'Start time (1) is required.');
+    } else if (!endVal1) {
+      setFieldFeedback(endInput1, false, 'End time (1) is required.');
       isValid = false;
     }
+  } else if (endInput1) {
+    setFieldFeedback(endInput1, true); // Clear feedback if hidden
   }
 
   // 3. Validate Session 2 Times & Overlap Check (if Session 2 is active)
@@ -130,7 +142,6 @@ function syncAndValidateDates() {
     const endVal2 = endInput2.value;
 
     if (startVal2 && endVal2) {
-      // Check if End 2 is after Start 2
       if (endVal2 <= startVal2) {
         setFieldFeedback(endInput2, false, 'End time (2) must be later than start time (2).');
         isValid = false;
@@ -138,12 +149,11 @@ function syncAndValidateDates() {
         setFieldFeedback(endInput2, true);
       }
 
-      // Check for overlap with Session 1 (Session 2 cannot start before Session 1 ends)
-      const endVal1 = endInput1 ? endInput1.value : '';
+      const endVal1 = endInput1 && isTime1bVisible ? endInput1.value : (startInput1 ? startInput1.value : '');
       if (endVal1 && startVal2 < endVal1) {
         setFieldFeedback(startInput2, false, 'Session 2 cannot overlap with Session 1 (must start at or after Session 1 ends).');
         isValid = false;
-      } else if (endVal1) {
+      } else {
         setFieldFeedback(startInput2, true);
       }
     } else if (!startVal2 && endVal2) {
@@ -227,13 +237,19 @@ function toggleEventStep(step) {
     const startInput1 = document.getElementById('id_start_time_1');
     const endInput1 = document.getElementById('id_end_time_1');
     const selectedRadio = document.querySelector('input[name="session_type"]:checked');
+    const time1bContainer = document.getElementById('time_1_b');
 
     const isDateValid = validateField(sharedDate, 'Event date');
     const isStart1Valid = validateField(startInput1, 'Start time (1)');
-    const isEnd1Valid = validateField(endInput1, 'End time (1)');
+    
+    // Only validate end_time_1 if it is currently visible
+    const isTime1bVisible = time1bContainer && time1bContainer.style.display !== 'none';
+    let isEnd1Valid = true;
+    if (isTime1bVisible) {
+      isEnd1Valid = validateField(endInput1, 'End time (1)');
+    }
 
     let isSession2Valid = true;
-
     if (selectedRadio && selectedRadio.value !== '1' && selectedRadio.value !== '2') {
       const startInput2 = document.getElementById('id_start_time_2');
       const endInput2 = document.getElementById('id_end_time_2');
@@ -280,6 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const startInput2 = document.getElementById('id_start_time_2');
   const endInput2 = document.getElementById('id_end_time_2');
   const sharedDate = document.getElementById('shared_event_date');
+  const time1bContainer = document.getElementById('time_1_b');
+  const time2Container = document.getElementById('time_2');
 
   // Real-time validation listeners for date & times
   if (sharedDate) {
@@ -343,17 +361,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Session Type Radio Toggles
   const radioButtons = document.querySelectorAll('input[name="session_type"]');
-  const time2Container = document.getElementById('time_2');
 
   function updateTimeFieldsVisibility() {
     const selectedRadio = document.querySelector('input[name="session_type"]:checked');
     if (!selectedRadio) return;
 
-    if (selectedRadio.value === '1' || selectedRadio.value === '2') {
+    // Debugging: check your browser console (F12) to see what value your radio has
+    console.log("Selected radio value:", selectedRadio.value);
+
+    // Check if it's the first radio button OR if the value matches common representations of Session 1
+    const isFirstSessionType = (selectedRadio === radioButtons[0]) || 
+                               (selectedRadio.value === '1') || 
+                               (selectedRadio.value.toLowerCase().includes('single') && !selectedRadio.value.toLowerCase().includes('out'));
+
+    if (isFirstSessionType || selectedRadio.value === '1') {
+      // Hide Session 1 Time Out & Session 2 completely
+      if (time1bContainer) time1bContainer.style.display = 'none';
+      if (time2Container) time2Container.style.display = 'none';
+      if (endInput1) endInput1.value = '';
+      if (startInput2) startInput2.value = '';
+      if (endInput2) endInput2.value = '';
+    } else if (selectedRadio.value === '2') {
+      // Show Session 1 Time Out, hide Session 2
+      if (time1bContainer) time1bContainer.style.display = 'flex';
       if (time2Container) time2Container.style.display = 'none';
       if (startInput2) startInput2.value = '';
       if (endInput2) endInput2.value = '';
     } else {
+      // Show both
+      if (time1bContainer) time1bContainer.style.display = 'flex';
       if (time2Container) time2Container.style.display = 'flex';
     }
     syncAndValidateDates();

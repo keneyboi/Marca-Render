@@ -86,8 +86,9 @@ class Event(models.Model):
         choices=Status.choices,
         default=Status.SCHEDULED
     )
-    start_time_1 = models.DateTimeField()
-    end_time_1 = models.DateTimeField()
+    
+    start_time_1 = models.DateTimeField(blank=True, null=True)
+    end_time_1 = models.DateTimeField(blank=True, null=True)
     start_time_2 = models.DateTimeField(blank=True, null=True)
     end_time_2 = models.DateTimeField(blank=True, null=True)
     
