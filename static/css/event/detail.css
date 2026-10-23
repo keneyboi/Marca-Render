@@ -162,28 +162,14 @@
 
 .badge-absent {
   background-color: #fce8e6;
-  color: #c5221f;
+  color: #db0401;
 }
 
-.badge-incomplete {
-  background-color: #fbe9e7;
-  color: #c5431f;
+.badge-incomplete .badge-incomplete_present .badge-incomplete_late .badge-incomplete_absent {
+  background-color: #fdd4eb;
+  color: #85035e;
 }
 
-.badge-incomplete_present {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.badge-incomplete_late {
-  background-color: #fff8e1;
-  color: #b78103;
-}
-
-.badge-incomplete_absent {
-  background-color: #f5ebeb;
-  color: #9e3a38;
-}
 
 .badge-excused {
   background-color: #fef7e0;

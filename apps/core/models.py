@@ -168,9 +168,9 @@ class AttendanceRecord(models.Model):
     @property
     def display_status_label(self):
         mapping = {
-            self.Status.INCOMPLETE_PRESENT: 'Present',
-            self.Status.INCOMPLETE_LATE: 'Late',
-            self.Status.INCOMPLETE_ABSENT: 'Absent',
+            self.Status.INCOMPLETE_PRESENT: 'Incomplete',
+            self.Status.INCOMPLETE_LATE: 'Incomplete',
+            self.Status.INCOMPLETE_ABSENT: 'Incomplete',
             self.Status.INCOMPLETE: 'Incomplete',
             self.Status.PRESENT: 'Present',
             self.Status.LATE: 'Late',
@@ -181,9 +181,9 @@ class AttendanceRecord(models.Model):
     @property
     def display_status_class(self):
         mapping = {
-            self.Status.INCOMPLETE_PRESENT: 'present',
-            self.Status.INCOMPLETE_LATE: 'late',
-            self.Status.INCOMPLETE_ABSENT: 'absent',
+            self.Status.INCOMPLETE_PRESENT: 'incomplete',
+            self.Status.INCOMPLETE_LATE: 'incomplete',
+            self.Status.INCOMPLETE_ABSENT: 'incomplete',
             self.Status.INCOMPLETE: 'incomplete',
             self.Status.PRESENT: 'present',
             self.Status.LATE: 'late',
