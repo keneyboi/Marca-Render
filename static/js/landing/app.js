@@ -5,19 +5,43 @@ let isProcessingScan = false;
 let currentFacingMode = "environment";
 let isTogglingCamera = false;
 
+/**
+ * JSON.stringify, but with every non-ASCII character escaped as \uXXXX,
+ * so the QR payload is pure ASCII (safe for any QR library/scanner).
+ */
+function toAsciiJson(obj) {
+    return JSON.stringify(obj).replace(/[\u0080-\uFFFF]/g, (ch) => {
+        return "\\u" + ch.charCodeAt(0).toString(16).padStart(4, "0");
+    });
+}
+
+/**
+ * Parses scanned text. If it looks like UTF-8 that was misread as Latin-1
+ * (e.g. "Ã±" instead of "ñ", from older QR codes), repair it first.
+ */
+function parseScannedJson(rawText) {
+    try {
+        return JSON.parse(rawText);
+    } catch (e) {
+        // fall through to repair attempt
+    }
+    const repaired = decodeURIComponent(escape(rawText));
+    return JSON.parse(repaired);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // Initialize html5QrCode engine
     if (document.getElementById("reader")) {
         html5QrCode = new Html5Qrcode("reader");
     }
-    
+
     // Attach listener for form submittal
     const generateBtn = document.getElementById("generate-btn");
     if (generateBtn) {
         generateBtn.addEventListener("click", createMarcaIDQR);
     }
 
-    // --- ADDED: Attach listener for download button ---
+    // Attach listener for download button
     const downloadBtn = document.getElementById("download-btn");
     if (downloadBtn) {
         downloadBtn.addEventListener("click", downloadQRCode);
@@ -57,7 +81,8 @@ function createMarcaIDQR() {
         ts: Date.now()
     };
 
-    const jsonString = JSON.stringify(userData);
+    // ASCII-safe JSON so ñ, é, ü, etc. survive any QR library/scanner
+    const jsonString = toAsciiJson(userData);
 
     // Render or update QR Code using qrcode.min.js
     const qrWrapper = document.getElementById("qr-code");
@@ -84,7 +109,7 @@ function createMarcaIDQR() {
         displayName.textContent = `${lastName}, ${firstName}`;
     }
 
-    // --- ADDED: Enable the download button on generation ---
+    // Enable the download button on generation
     const downloadBtn = document.getElementById("download-btn");
     if (downloadBtn) {
         downloadBtn.disabled = false;
@@ -211,7 +236,10 @@ async function resetScanner() {
 
 function handleScannedData(rawJsonText) {
     try {
-        const data = JSON.parse(rawJsonText);
+        // Parse (with automatic repair of Latin-1-misread UTF-8 from older QR codes)
+        const data = parseScannedJson(rawJsonText);
+        // Clean ASCII-safe version used to re-render the QR
+        const safeJson = toAsciiJson(data);
 
         // Populate form fields directly from scanned JSON
         const firstNameInput = document.getElementById("input-first-name");
@@ -238,7 +266,7 @@ function handleScannedData(rawJsonText) {
             if (!qrCodeInstance) {
                 qrWrapper.innerHTML = '';
                 qrCodeInstance = new QRCode(qrWrapper, {
-                    text: rawJsonText,
+                    text: safeJson,
                     width: 210,
                     height: 210,
                     colorDark: "#4a0d0d",
@@ -247,11 +275,11 @@ function handleScannedData(rawJsonText) {
                 });
             } else {
                 qrCodeInstance.clear();
-                qrCodeInstance.makeCode(rawJsonText);
+                qrCodeInstance.makeCode(safeJson);
             }
         }
 
-        // --- ADDED: Enable the download button on scan ---
+        // Enable the download button on scan
         const downloadBtn = document.getElementById("download-btn");
         if (downloadBtn) {
             downloadBtn.disabled = false;
