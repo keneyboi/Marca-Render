@@ -569,3 +569,34 @@ def lookup_student(request):
         })
 
     return JsonResponse({'found': False})
+
+def recompute_status(record, event):
+    """
+    Derive the status purely from the recorded times (mirrors apply_scan).
+    Keep the two in sync if you ever change the rules.
+    """
+    Status = AttendanceRecord.Status
+    session = str(event.session_type).strip()
+
+    chain = [(record.timed_in_1, event.start_time_1)]
+    if session in ('2', '3'):
+        chain.append((record.timed_out_1, event.end_time_1))
+    if session == '3':
+        chain += [(record.timed_in_2, event.start_time_2),
+                  (record.timed_out_2, event.end_time_2)]
+
+    stamps = [(when, limit) for when, limit in chain if when]
+    if not stamps:
+        return Status.ABSENT
+
+    is_late = any(limit and when > limit for when, limit in stamps)
+
+    if len(stamps) == len(chain):                      # every required scan exists
+        return Status.LATE if is_late else Status.PRESENT
+
+    # Partial attendance: only a clean run from the start counts as "in progress";
+    # a gap (e.g. afternoon only) is plain INCOMPLETE.
+    contiguous = all(chain[i][0] for i in range(len(stamps)))
+    if not contiguous:
+        return Status.INCOMPLETE
+    return Status.INCOMPLETE_LATE if is_late else Status.INCOMPLETE_PRESENT

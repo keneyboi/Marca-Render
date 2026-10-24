@@ -1,9 +1,14 @@
 <tr 
   class="attendance-row" 
   data-record-id="{{ record.id }}"
+  data-name="{{ record.first_name }} {{ record.last_name }}"
   data-status="{{ record.status }}" 
   data-course="{{ record.course|default:'' }}" 
   data-year="{{ record.year_level|default:'' }}"
+  data-in1="{{ record.timed_in_1|date:'H:i' }}"
+  data-out1="{{ record.timed_out_1|date:'H:i' }}"
+  data-in2="{{ record.timed_in_2|date:'H:i' }}"
+  data-out2="{{ record.timed_out_2|date:'H:i' }}"
 >
   <td class="bulk-col"><input type="checkbox" class="bulk-check" value="{{ record.id }}" aria-label="Select {{ record.first_name }} {{ record.last_name }}"></td>
   <td><strong>{{ record.last_name }}, {{ record.first_name }}</strong></td>

@@ -24,6 +24,7 @@ from apps.core.utils import notify_user
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.vary import vary_on_headers
+from datetime import datetime
 
 def _clean_cell_value(val):
     if val is None:
@@ -753,3 +754,89 @@ def edit_event(request, event_id):
         messages.error(request, f'Failed to update event: {e}')
 
     return redirect('home')
+
+
+
+
+
+"check lang sah"
+
+def _combine_time(value, existing, fallback):
+    """
+    'HH:MM' + a date -> aware datetime. The date comes from the existing
+    recorded scan if there is one, else from the event time it belongs to.
+    """
+    value = (value or '').strip()
+    if not value:
+        return None
+    for fmt in ('%H:%M', '%H:%M:%S'):
+        try:
+            t = datetime.strptime(value, fmt).time()
+            break
+        except ValueError:
+            continue
+    else:
+        raise ValueError('Invalid time.')
+    base = existing or fallback
+    day = timezone.localtime(base).date()
+    return timezone.make_aware(datetime.combine(day, t))
+
+
+@login_required(login_url='landing')
+@require_POST
+def edit_attendance_times(request, event_id, record_id):
+    owner_user = get_data_owner(request)
+    if owner_user is None:
+        raise PermissionDenied("You do not have permission to edit these records.")
+
+    event = get_object_or_404(Event, id=event_id, user=owner_user)
+
+    from apps.attendance.views import allowed_options, recompute_status, _row_payload, _status_counts
+
+    def err(msg):
+        return JsonResponse({'ok': False, 'message': msg}, status=400)
+
+    ordered = [('1', 'timed_in_1'), ('2', 'timed_out_1'), ('3', 'timed_in_2'), ('4', 'timed_out_2')]
+    allowed = allowed_options(event)
+    fields = [f for opt, f in ordered if opt in allowed]
+
+    # Which event time supplies the date when the scan doesn't exist yet
+    fallbacks = {
+        'timed_in_1': event.start_time_1,
+        'timed_out_1': event.end_time_1 or event.start_time_1,
+        'timed_in_2': event.start_time_2 or event.start_time_1,
+        'timed_out_2': event.end_time_2 or event.start_time_1,
+    }
+
+    with transaction.atomic():
+        record = get_object_or_404(
+            AttendanceRecord.objects.select_for_update(), id=record_id, event=event
+        )
+
+        try:
+            new_values = {
+                f: _combine_time(request.POST.get(f), getattr(record, f), fallbacks[f])
+                for f in fields
+            }
+        except ValueError:
+            return err('One of the times is not valid.')
+
+        given = [new_values[f] for f in fields if new_values[f]]
+        if any(a > b for a, b in zip(given, given[1:])):
+            return err('Times must be in order: each time must not be earlier than the one before it.')
+
+        for f in fields:
+            setattr(record, f, new_values[f])
+
+        if request.POST.get('recalc') in ('on', 'true', '1'):
+            record.status = recompute_status(record, event)
+
+        record.edited_by = request.user
+        record.save()
+
+    return JsonResponse({
+        'ok': True,
+        'message': f'Times updated for {record.first_name} {record.last_name}.',
+        'row': _row_payload(record),
+        'counts': _status_counts(event),
+    })

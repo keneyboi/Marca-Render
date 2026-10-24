@@ -472,6 +472,82 @@
   </div>
 </div>
 
+<!-- Edit Times Modal -->
+<style>
+  .attendance-row { cursor: pointer; }
+  .attendance-row:hover { background: rgba(0,0,0,0.025); }
+  .et-field { margin-bottom: 1rem; }
+  .et-field label { display: block; font-size: 0.75rem; font-weight: 600; color: #4a0d0d; letter-spacing: 0.05em; opacity: 0.8; margin-bottom: 0.35rem; text-transform: uppercase; }
+  .et-input-row { display: flex; gap: 0.5rem; align-items: center; }
+  .et-input-row input { flex: 1; box-sizing: border-box; font-size: 0.9rem; color: #331010; background: #f7f4ed; border: 1px solid #d1c8b8; border-radius: 10px; padding: 0.6rem 0.8rem; outline: none; }
+  .et-clear { background: none; border: none; color: #8c7e75; font-size: 12px; cursor: pointer; text-decoration: underline; }
+</style>
+
+<div id="editTimesModal"
+     data-default-datetime="{{ event.start_time_1|date:'Y-m-d\TH:i' }}"
+     style="display: none; position: fixed; inset: 0; background: rgba(51, 16, 16, 0.4); backdrop-filter: blur(6px); z-index: 9999; align-items: center; justify-content: center;">
+  <div style="background: #fdfbf7; border: 1px solid rgba(209, 200, 184, 0.5); border-radius: 24px; width: 90%; max-width: 460px; padding: 2rem; box-shadow: 0 20px 50px rgba(51,16,16,0.25); box-sizing: border-box; max-height: 85vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(209,200,184,0.6);">
+      <div>
+        <h3 style="margin: 0; font-family: 'Tiro Telugu', Georgia, serif; font-size: 1.4rem; font-weight: 400; color: #4a0d0d;">Edit Times</h3>
+        <div id="editTimesName" style="font-size: 13px; color: #665b55; margin-top: 2px;"></div>
+      </div>
+      <button type="button" id="editTimesClose" aria-label="Close" style="background: none; border: none; font-size: 1.8rem; line-height: 1; color: #4a0d0d; cursor: pointer; opacity: 0.6; padding: 0;">&times;</button>
+    </div>
+
+    <form id="editTimesForm" method="POST" data-url-template="{% url 'edit_attendance_times' event.id 987654321 %}">
+      {% csrf_token %}
+
+      <div class="et-field">
+        <label for="et_in1">{% if show_session_3 %}Morning Time In{% else %}Time In{% endif %}</label>
+        <div class="et-input-row">
+          <input type="time" name="timed_in_1" id="et_in1" data-src="in1">
+          <button type="button" class="et-clear" data-target="et_in1">Clear</button>
+        </div>
+      </div>
+
+      {% if show_session_2 or show_session_3 %}
+      <div class="et-field">
+        <label for="et_out1">{% if show_session_3 %}Morning Time Out{% else %}Time Out{% endif %}</label>
+        <div class="et-input-row">
+          <input type="time" name="timed_out_1" id="et_out1" data-src="out1">
+          <button type="button" class="et-clear" data-target="et_out1">Clear</button>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if show_session_3 %}
+      <div class="et-field">
+        <label for="et_in2">Afternoon Time In</label>
+        <div class="et-input-row">
+          <input type="time" name="timed_in_2" id="et_in2" data-src="in2">
+          <button type="button" class="et-clear" data-target="et_in2">Clear</button>
+        </div>
+      </div>
+      <div class="et-field">
+        <label for="et_out2">Afternoon Time Out</label>
+        <div class="et-input-row">
+          <input type="time" name="timed_out_2" id="et_out2" data-src="out2">
+          <button type="button" class="et-clear" data-target="et_out2">Clear</button>
+        </div>
+      </div>
+      {% endif %}
+
+      <label style="display: flex; gap: 0.5rem; align-items: flex-start; font-size: 13px; color: #4a0d0d; margin: 0.5rem 0 0;">
+        <input type="checkbox" name="recalc" id="et_recalc" checked style="margin-top: 3px;">
+        <span>Recalculate status from these times<br>
+          <span style="font-size: 12px; color: #8c7e75;">Untick to keep the current status as is.</span>
+        </span>
+      </label>
+
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+        <button type="button" id="editTimesCancel" class="btn-secondary" style="width: 100%;">Cancel</button>
+        <button type="submit" id="editTimesSave" class="btn-primary" style="width: 100%;">Save Times</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Form Validation Script for Add Attendee Modal -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -495,4 +571,5 @@
 <script src="{% static 'js/event/batch_scan.js' %}"></script>
 <script src="{% static 'js/event/attendance_filter.js' %}"></script>
 <script src="{% static 'js/event/bulk_status.js' %}"></script>
+<script src="{% static 'js/event/edit_time.js' %}"></script>
 {% endblock %}
