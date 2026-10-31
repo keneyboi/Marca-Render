@@ -9,6 +9,7 @@ safety net.
 import time
 
 from django.core.cache import cache
+from django.db.models import Count
 
 TTL = 300  # seconds
 
@@ -56,8 +57,19 @@ def get_events(owner, folder_id=None):
     key = _key(owner.pk, f'events:{folder_id or "root"}')
     events = cache.get(key)
     if events is None:
-        qs = owner.organized_events.all()
+        qs = owner.organized_events.annotate(attendee_count=Count('attendance_records', distinct=True))
         qs = qs.filter(folder_id=folder_id) if folder_id else qs.filter(folder__isnull=True)
+        events = list(qs.order_by('-start_time_1'))
+        cache.set(key, events, TTL)
+    return events
+
+
+def get_all_events(owner):
+    """All events for owner regardless of folder, newest first."""
+    key = _key(owner.pk, 'events:all')
+    events = cache.get(key)
+    if events is None:
+        qs = owner.organized_events.annotate(attendee_count=Count('attendance_records', distinct=True))
         events = list(qs.order_by('-start_time_1'))
         cache.set(key, events, TTL)
     return events

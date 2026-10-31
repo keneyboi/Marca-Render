@@ -11,77 +11,115 @@
 <div class="event-detail-container">
   
   <!-- Header & Back Navigation -->
-  {% if event.folder %}
-  <a href="{% url 'folder_detail' event.folder.id %}" class="btn-navigation folder-card-link">
-    Back to Folder
-  </a>
-{% else %}
-  <a href="{% url 'home' %}" class="btn-navigation" style="line-height: 0.85;">
-    Back to Dashboard
-  </a>
-{% endif %}
+  <div class="detail-nav-bar">
+    <a href="{% url 'home' %}" class="btn-back-pill">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      <span>Back to Dashboard</span>
+    </a>
+  </div>
 
   <header class="detail-header">
     <div class="detail-header-left">
       <h1 class="event-headline">{{ event.name }}</h1>
       <div class="event-meta-strip">
-        <span><strong>Venue:</strong> {{ event.location }}</span>
-        <span><strong>Date:</strong> {{ event.start_time_1|date:"M d"}}</span>
-        <span><strong>Time (1):</strong> {{ event.start_time_1|date:"H:i" }}{% if event.end_time_1 %} &ndash; {{ event.end_time_1|date:"H:i" }}{% endif %}</span>
-        {% if event.session_type == '3' %} 
-        <span><strong>Time (2):</strong> {{ event.start_time_2|date:"H:i" }} &ndash; {{ event.end_time_2|date:"H:i" }}</span>
+        <div class="event-meta-row">
+          <svg class="event-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="datetime-event">{{ event.start_time_1|date:"M d" }} &nbsp;|&nbsp; {{ event.start_time_1|date:"g:i a" }}{% if event.end_time_1 %} - {{ event.end_time_1|date:"g:i a" }}{% endif %}</span>
+        </div>
+
+        {% if event.session_type == '3' and event.start_time_2 %}
+        <div class="event-meta-row">
+          <svg class="event-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="datetime-event">Session 2 &nbsp;|&nbsp; {{ event.start_time_2|date:"g:i a" }}{% if event.end_time_2 %} - {{ event.end_time_2|date:"g:i a" }}{% endif %}</span>
+        </div>
         {% endif %}
+
+        <div class="event-meta-row">
+          <svg class="event-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>{{ event.location|default:"Venue TBA" }}</span>
+        </div>
       </div>
     </div>
     
-    <!-- FIXED: Combined class attributes -->
-    <div class="detail-header-right add-attendee-button" style="display: flex; gap: 0.5rem; align-items: center;">
+    <div class="detail-header-right">
       <a 
         href="{% url 'export_event_xlsx' event.id %}" 
         id="exportEventXlsxBtn" 
-        class="btn-secondary" 
+        class="btn-circle-action btn-circle-peach" 
         title="Export attendance as XLSX"
-        style="display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;"
+        aria-label="Export attendance as XLSX"
       >
         <svg 
-          width="18" 
-          height="18" 
+          width="20" 
+          height="20" 
           viewBox="0 0 24 24" 
           fill="none" 
           stroke="currentColor" 
-          stroke-width="2" 
+          stroke-width="2.2" 
           stroke-linecap="round" 
           stroke-linejoin="round"
-          style="display: block; flex-shrink: 0;"
         >
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7 10 12 15 17 10"></polyline>
           <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
-        <span style="line-height: 0.9;">Export XLSX</span>
       </a>
 
-      <button type="button" class="btn-secondary" onclick="openAddRecordModal()">
+      <button 
+        type="button" 
+        class="btn-circle-action btn-circle-maroon" 
+        onclick="openAddRecordModal()"
+        title="Add Attendee"
+        aria-label="Add Attendee"
+      >
         <svg 
-          width="18" 
-          height="18" 
+          width="22" 
+          height="22" 
           viewBox="0 0 24 24" 
           fill="none" 
           stroke="currentColor" 
-          stroke-width="2" 
+          stroke-width="2.5" 
           stroke-linecap="round" 
           stroke-linejoin="round"
-          style="display: block; flex-shrink: 0;"
         >
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        <span style="line-height: 0.9;">Add Attendee</span>
       </button>
 
-      <!-- FIXED: Merged duplicate class attributes -->
-      <button type="button" class="btn-primary" onclick="openScanner()" >
-          <span>Scan Attendance</span>
+      <button 
+        type="button" 
+        class="btn-circle-action btn-circle-maroon" 
+        onclick="openScanner()"
+        title="Scan Attendance"
+        aria-label="Scan Attendance"
+      >
+        <svg 
+          width="22" 
+          height="22" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2.2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+        >
+          <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+          <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+          <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+        </svg>
       </button> 
     </div>
   </header>
@@ -259,46 +297,53 @@
   </div>
 
   <!-- Search & Filter Toolbar -->
+  <div class="attendance-toolbar">
+    <input 
+      type="text" 
+      id="attendanceSearchInput" 
+      value="{{ q }}"
+      placeholder="Search name, ID, or email..." 
+      autocomplete="off"
+      class="attendance-search-input"
+    >
 
-  <div class="attendance-toolbar" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
-  <input type="text" id="attendanceSearchInput" value="{{ q }}"
-    placeholder="Search name, ID, or email..." autocomplete="off"
-    style="padding: 7px 12px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; min-width: 240px;">
+    <div class="attendance-filters-row">
+      <select id="attendanceStatusFilter" class="attendance-filter-select">
+        <option value="">All Statuses</option>
+        <option value="PRESENT" {% if sel_status == 'PRESENT' %}selected{% endif %}>Present</option>
+        <option value="LATE" {% if sel_status == 'LATE' %}selected{% endif %}>Late</option>
+        <option value="INCOMPLETE" {% if sel_status == 'INCOMPLETE' %}selected{% endif %}>Incomplete</option>
+        <option value="ABSENT" {% if sel_status == 'ABSENT' %}selected{% endif %}>Absent</option>
+      </select>
 
-  <select id="attendanceStatusFilter"
-    style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff;">
-    <option value="">All Statuses</option>
-    <option value="PRESENT" {% if sel_status == 'PRESENT' %}selected{% endif %}>Present</option>
-    <option value="LATE" {% if sel_status == 'LATE' %}selected{% endif %}>Late</option>
-    <option value="INCOMPLETE" {% if sel_status == 'INCOMPLETE' %}selected{% endif %}>Incomplete</option>
-    <option value="ABSENT" {% if sel_status == 'ABSENT' %}selected{% endif %}>Absent</option>
-  </select>
+      {% if unique_courses %}
+        <select id="attendanceCourseFilter" class="attendance-filter-select">
+          <option value="">All Courses</option>
+          {% for course in unique_courses %}
+            <option value="{{ course }}" {% if sel_course == course %}selected{% endif %}>{{ course }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
 
-  {% if unique_courses %}
-    <select id="attendanceCourseFilter"
-      style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; color: #2b2320; cursor: pointer;">
-      <option value="">All Courses</option>
-      {% for course in unique_courses %}
-        <option value="{{ course }}" {% if sel_course == course %}selected{% endif %}>{{ course }}</option>
-      {% endfor %}
-    </select>
-  {% endif %}
+      {% if unique_year_levels %}
+        <select id="attendanceYearFilter" class="attendance-filter-select">
+          <option value="">All Years</option>
+          {% for year in unique_year_levels %}
+            <option value="{{ year }}" {% if sel_year == year %}selected{% endif %}>Year {{ year }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
 
-  {% if unique_year_levels %}
-    <select id="attendanceYearFilter"
-      style="padding: 7px 10px; border: 1px solid #dcd4cc; border-radius: 6px; font-size: 13px; outline: none; background: #fff; color: #2b2320; cursor: pointer;">
-      <option value="">All Years</option>
-      {% for year in unique_year_levels %}
-        <option value="{{ year }}" {% if sel_year == year %}selected{% endif %}>Year {{ year }}</option>
-      {% endfor %}
-    </select>
-  {% endif %}
-
-  <a href="#" id="clearAttendanceFiltersBtn"
-    style="{% if not is_filtered %}display: none; {% endif %}font-size: 12.5px; color: #8c7e75; text-decoration: none; padding-left: 4px;">
-    Clear
-  </a>
-</div>
+      <a 
+        href="#" 
+        id="clearAttendanceFiltersBtn"
+        class="clear-filters-link"
+        {% if not is_filtered %}style="display: none;"{% endif %}
+      >
+        Clear
+      </a>
+    </div>
+  </div>
 
   <!-- Bulk actions (appears when rows are ticked) -->
   <div id="bulk-bar" class="bulk-bar" hidden
@@ -372,12 +417,12 @@
 <!-- Delete Confirmation Modal -->
 <div 
   id="deleteRecordModal" 
-  style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;"
+  style="display: none; position: fixed; inset: 0; background: rgba(51, 16, 16, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 10000; align-items: center; justify-content: center;"
 >
-  <div style="background: #ffffff; border-radius: 10px; width: 90%; max-width: 400px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.12); font-family: 'SF Pro', sans-serif;">
-    <h3 style="margin-top: 0; color: #1f1f1f; font-size: 17px; font-weight: 600;">Remove Attendee</h3>
-    <p style="color: #5f6368; font-size: 13.5px; line-height: 1.5; margin: 0.75rem 0 1.5rem;">
-      Are you sure you want to remove <strong id="deleteAttendeeName" style="color: #1f1f1f;"></strong> from this event's attendance records?
+  <div style="background-color: #fdfbf7; border: 1px solid rgba(209, 200, 184, 0.5); border-radius: 22px; width: 90%; max-width: 420px; padding: 2rem; box-shadow: 0 20px 50px rgba(51, 16, 16, 0.25); font-family: 'SF Pro', sans-serif;">
+    <h3 style="margin-top: 0; font-family: 'Tiro Telugu', Georgia, serif; color: #580c0c; font-size: 1.5rem; font-weight: 400;">Remove Attendee</h3>
+    <p style="color: #665b55; font-size: 0.95rem; line-height: 1.5; margin: 0.75rem 0 1.5rem;">
+      Are you sure you want to remove <strong id="deleteAttendeeName" style="color: #331010;"></strong> from this event's attendance records?
     </p>
 
     <form id="deleteRecordForm" method="POST" action="" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
@@ -385,13 +430,13 @@
       <button 
         type="button" 
         onclick="closeDeleteRecordModal()" 
-        style="padding: 7px 14px; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 6px; cursor: pointer; font-size: 13px;"
+        class="btn-action-secondary"
       >
         Cancel
       </button>
       <button 
         type="submit" 
-        style="padding: 7px 14px; background: #c5221f; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"
+        style="padding: 0.55rem 1.25rem; background: #c5221f; color: #ffffff; border: none; border-radius: 999px; cursor: pointer; font-size: 0.88rem; font-weight: 600; font-family: 'SF Pro', sans-serif;"
       >
         Confirm Remove
       </button>

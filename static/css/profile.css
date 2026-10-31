@@ -1,34 +1,600 @@
-/* Dashboard Layout & Cards */
-.dashboard-container { max-width: 800px; margin: 0 auto; }
-.dashboard-title { font-weight: 700; text-align: center; margin: 2rem 0;}
-.profile-sections { display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0;}
-.profile-header { display: flex; flex-direction: column; align-items: center; justify-content: center;}
-.profile-icon { width: 160px; height: 160px; margin: 0 auto; background-color: #f7f4ed; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);}
-.profile-name { margin: 12px 0 0; text-align: center; font-family: 'SF Pro'; font-weight: 700; font-size: 1.5rem;}
-.profile-email { text-align: center; font-family: 'SF Pro'; font-weight: 700; font-size: 0.8rem; opacity: 50%;}
-.profile-card { background: #ffffff; border: 1px solid var(--border-color, #e5dfd8); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+/* ==========================================================================
+   SETTINGS / PROFILE STYLES (profile.css)
+   Clean, unified Marca design language mirroring home.css, officer.css,
+   and notification.css.
+   SF Pro typography, pill capsules, circular avatars, and elevated cards.
+   ========================================================================== */
 
-/* Header & Section Titles */
-.dashboard-header-card { margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color, #e5dfd8); padding-bottom: 1rem; }
-.profile-subtitle { color: #665b55; }
-.card-section-title { margin-top: 0; font-size: 1.1rem; color: #2b2320; margin-bottom: 1rem; }
+/* --- 1. Global Page Wrapper --- */
+.settings-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #2b2320;
+}
 
-/* Messages & Alerts */
-.messages-container { margin-bottom: 1.5rem; }
-.message-alert { background-color: #fdf8f8; border: 1px solid #fde8e8; color: #620808; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 8px; }
+/* --- 2. Dashboard Header --- */
+.dashboard-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
 
-/* Form Fields & Typography */
-.form-group { margin-bottom: 1rem; }
-.form-group-mb { margin-bottom: 1.5rem; }
-.modal-label { display: block; font-size: 0.8rem; font-weight: 600; color: #665b55; margin-bottom: 4px; }
-.disabled-input { background-color: #f7f4ed; color: #8c7e75; cursor: not-allowed; }
-.form-help { color: #8c7e75; font-size: 0.75rem; margin-top: 4px; display: block; }
-.form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
-.form-group-flex { flex: 1; }
-.form-error { color: #dc3545; font-size: 0.8rem; margin-top: 4px; }
+.welcome-heading-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.welcome-subtitle {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #580c0c;
+  letter-spacing: 0.02em;
+}
+
+.welcome-title {
+
+  font-size: 3rem;
+  font-weight: 400;
+  color: #580c0c;
+  margin: 0;
+  padding: 0;
+  line-height: 1.1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Circular Notification Bell Button */
+.btn-notification-mobile {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #580c0c;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-notification-mobile:hover {
+  background-color: #f7efe7;
+  transform: scale(1.05);
+}
+
+.notification-badge-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 9px;
+  height: 9px;
+  background-color: #b92b27;
+  border-radius: 50%;
+  border: 1.5px solid #f6bd89;
+}
+
+/* --- 3. Hero Profile Card --- */
+.profile-hero-card {
+  background-color: #fdfbf7;
+  border: 1px solid #f2ece2;
+  border-radius: 24px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 10px 28px rgba(88, 12, 12, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Large Circular Avatar Badge */
+.profile-avatar-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  border: 2.5px solid rgba(88, 12, 12, 0.18);
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(88, 12, 12, 0.08);
+}
+
+.profile-hero-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-hero-name {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #2b2320;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.profile-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.15rem;
+}
+
+.profile-username-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background-color: #f2eee6;
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.profile-role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background-color: #580c0c;
+  color: #ffffff;
+
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.profile-hero-email {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #7d7269;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.profile-hero-email svg {
+  width: 15px;
+  height: 15px;
+  color: #8c7e75;
+  flex-shrink: 0;
+}
+
+/* --- 4. Section Navigation Pills --- */
+.settings-nav-section {
+  margin-bottom: 0.5rem;
+}
+
+.settings-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding: 2px 2px 6px 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.settings-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 38px;
+  padding: 0.45rem 1.15rem;
+  border-radius: 999px;
+  border: 1.5px solid #580c0c;
+  background-color: transparent;
+  color: #580c0c;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.settings-tab-pill:hover {
+  background-color: #f7efe7;
+  transform: translateY(-1px);
+}
+
+.settings-tab-pill.active {
+  background-color: #580c0c;
+  border-color: #580c0c;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(88, 12, 12, 0.15);
+}
+
+.settings-tab-pill svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* --- 5. Settings Cards Grid & Tab Switching --- */
+.settings-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-card {
+  background-color: #fdfbf7;
+  border: 1px solid #f2ece2;
+  border-radius: 22px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 8px 24px rgba(88, 12, 12, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Tab Card Display Rules via CSS */
+.settings-tab-card {
+  display: none;
+  animation: settingsTabFade 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes settingsTabFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Show only the active tab card and hide the other two in CSS */
+.settings-cards-grid[data-active-tab="personal-info"] #personal-info {
+  display: flex;
+}
+
+.settings-cards-grid[data-active-tab="security-password"] #security-password {
+  display: flex;
+}
+
+.settings-cards-grid[data-active-tab="session-management"] #session-management {
+  display: flex;
+}
+
+.settings-card:hover {
+  box-shadow: 0 12px 28px rgba(88, 12, 12, 0.08);
+}
+
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.85rem;
+  border-bottom: 1.5px solid #ebd9c8;
+}
+
+.settings-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.settings-card-title {
+  margin: 0;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2b2320;
+}
+
+.settings-card-subtitle {
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.85rem;
+  color: #7d7269;
+}
+
+.settings-card-circle-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-card-circle-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Form Groups & Inputs */
+.form-row {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.15rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.15rem;
+}
+
+.form-group-flex {
+  flex: 1;
+}
+
+.form-label {
+  display: block;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #580c0c;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Pill Input Capsule */
+.settings-card input[type="text"],
+.settings-card input[type="password"],
+.settings-card input[type="email"],
+.form-input-pill {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f2eee6;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.85rem 1.35rem;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.95rem;
+  color: #331010;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+  outline: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-card input[type="text"]:focus,
+.settings-card input[type="password"]:focus,
+.settings-card input[type="email"]:focus,
+.form-input-pill:focus {
+  background-color: #ffffff;
+  border-color: #580c0c;
+  box-shadow: 0 0 0 3px rgba(88, 12, 12, 0.1);
+}
+
+.settings-card input::placeholder,
+.form-input-pill::placeholder {
+  color: #9d9489;
+}
+
+.form-help {
+  color: #8c7e75;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.75rem;
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
+
+.form-error {
+  color: #c5221f;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 0.35rem;
+}
 
 /* Actions & Buttons */
-.form-actions { display: flex; justify-content: flex-end; }
-.form-actions-spaced { margin-top: 1.5rem; }
-.btn-primary { padding: 0.5rem 1.25rem; }
-.btn-secondary { color: #620808; border-color: #fde8e8; background-color: #fdf8f8; padding: 0.5rem 1.25rem; }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 44px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  background-color: #580c0c;
+  color: #ffffff;
+  border: none;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(88, 12, 12, 0.28);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  background-color: #450808;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(88, 12, 12, 0.35);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 44px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  border: 1.5px solid #580c0c;
+  background-color: transparent;
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #f7efe7;
+  transform: translateY(-1px);
+}
+
+/* --- 6. Danger / Logout Card --- */
+.danger-card {
+  border-color: #f5c2be;
+  background-color: #fefcfb;
+}
+
+.danger-card .settings-card-header {
+  border-bottom-color: #fde8e8;
+}
+
+.danger-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.danger-desc {
+  font-size: 0.88rem;
+  color: #8c7e75;
+  margin: 0;
+}
+
+.btn-logout-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 44px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  border: 1px solid #f5c2be;
+  background-color: #fce8e6;
+  color: #c5221f;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-logout-danger:hover {
+  background-color: #c5221f;
+  color: #ffffff;
+  border-color: #c5221f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(197, 34, 31, 0.25);
+}
+
+.btn-logout-danger svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Mobile & Tablet)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .dashboard-header-card {
+    margin-top: 1rem;
+    gap: 0.75rem;
+  }
+
+
+
+  .profile-hero-card {
+    padding: 1.35rem 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    border-radius: 20px;
+  }
+
+  .profile-hero-left {
+    gap: 1rem;
+  }
+
+  .profile-avatar-circle {
+    width: 68px;
+    height: 68px;
+    font-size: 1.6rem;
+  }
+
+  .profile-hero-name {
+    font-size: 1.35rem;
+  }
+
+  .settings-card {
+    padding: 1.35rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-logout-danger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}

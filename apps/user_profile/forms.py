@@ -8,6 +8,6 @@ class UserProfileForm(forms.ModelForm):
         model = User
         fields = ['first_name', 'last_name']
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-input-pill', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-input-pill', 'placeholder': 'Last Name'}),
         }

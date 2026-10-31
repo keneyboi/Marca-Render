@@ -4,233 +4,312 @@
 {% block title %}Manage Officers | Marca{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/officer.css' %}">
 {% endblock %}
 
 {% block dashboard_content %}
 {% csrf_token %}
 
-<!-- System Message Alerts -->
-{% if messages %}
-  <div id="toast-message-container" class="toast-container">
-    {% for message in messages %}
-      <div class="toast-card {% if message.tags == 'success' %}success{% elif message.tags == 'error' or message.tags == 'danger' %}error{% elif message.tags == 'warning' %}warning{% else %}default{% endif %}">
-        <div class="toast-content">
-          {% if message.tags == 'success' %}
-            <span class="toast-icon success">&#10003;</span>
-            <strong class="toast-label">Success:</strong>
-          {% elif message.tags == 'error' or message.tags == 'danger' %}
-            <span class="toast-icon error">&#33;</span>
-            <strong class="toast-label">Error:</strong>
-          {% else %}
-            <span class="toast-icon default">&#10549;</span>
-            <strong class="toast-label">Notice:</strong>
-          {% endif %}
+<div class="officer-page-wrapper">
 
-          <span>{{ message }}</span>
-        </div>
+  <!-- Header Section -->
+  <header class="dashboard-header-card">
+    <div class="welcome-heading-group">
+      <span class="welcome-subtitle">Team Management</span>
+      <h1 class="welcome-title">Officers</h1>
+    </div>
 
-        <button 
-          type="button" 
-          onclick="this.parentElement.remove();" 
-          aria-label="Dismiss alert"
-          class="toast-close-btn"
-        >&times;</button>
-      </div>
-    {% endfor %}
-  </div>
+    <div class="header-actions">
+      <!-- Notification Bell Button -->
+      <a href="{% url 'notifications' %}" class="btn-notification-mobile" aria-label="Notifications" title="Notifications">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+        <span class="notification-badge-dot"></span>
+      </a>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const toastCards = document.querySelectorAll('#toast-message-container .toast-card');
-      
-      toastCards.forEach(function (card) {
-        setTimeout(function () {
-          card.style.opacity = '0';
-          card.style.transform = 'translateY(-12px)';
-          setTimeout(function () {
-            card.remove();
-          }, 400);
-        }, 5000);
-      });
-    });
-  </script>
-{% endif %}
+      <!-- Add Officer Button (Pill on Desktop, FAB on Mobile) -->
+      <button 
+        type="button" 
+        class="btn-create-officer" 
+        onclick="openCreateOfficerModal()"
+        aria-label="Add Officer"
+        title="Add Officer"
+      >
+        <span class="btn-desktop-text">+ Add Officer</span>
+        <span class="btn-mobile-icon">+</span>
+      </button>
+    </div>
+  </header>
 
-<!-- Header Section -->
-<header class="dashboard-header-card">
-  <div class="header-left">
-    <h1 class="welcome-title">Officer Management</h1>
-    <p class="header-subtitle">
-      Manage accounts where user type is assigned as Officer.
-    </p>
-  </div>
-
-  <div class="header-actions">
-    <button type="button" class="btn-primary" onclick="openCreateOfficerModal()">
-      + Add Officer
-    </button>
-  </div>
-</header>
-
-<div class="officer-container">
-
-  <!-- Summary Metric Cards -->
+  <!-- Stat Metric Card -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label">Total Officers</div>
-      <p class="stat-value">{{ officers|length }}</p>
+      <div class="stat-card-left">
+        <span class="stat-label">Total Officers</span>
+        <p class="stat-value" id="officerStatCount">{{ officers|length }}</p>
+      </div>
+      <div class="stat-card-circle-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </div>
     </div>
   </div>
 
   <!-- Filter & Search Toolbar -->
-  <div class="officer-toolbar">
-    <div class="toolbar-group">
+  <div class="officer-toolbar-container">
+    <div class="officer-search-wrapper">
+      <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
       <input 
         type="text" 
         id="officerSearchInput" 
-        class="search-input"
-        placeholder="Search name, username, or email..." 
+        class="officer-search-input"
+        placeholder="Search officers by name, username, or email..." 
         autocomplete="off"
-        onkeyup="filterOfficers()"
+        oninput="filterOfficers()"
       >
+      <button 
+        type="button" 
+        id="clearSearchBtn" 
+        class="clear-search-btn" 
+        onclick="clearOfficerSearch()" 
+        style="display: none;"
+        title="Clear search" 
+        aria-label="Clear search"
+      >&times;</button>
     </div>
   </div>
 
-  <!-- Officers Table -->
-  <div class="table-container">
-    <table class="roster-table">
-      <thead>
-        <tr>
-          <th>Officer Name</th>
-          <th>Username</th>
-          <th>Email Address</th>
-          <th class="align-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="officerTableBody">
-        {% for officer in officers %}
-          {% if officer.type|lower == 'officer' %}
-            <tr class="officer-row">
-              <td>
-                <strong>{{ officer.get_full_name|default:officer.username }}</strong>
-              </td>
-              <td class="text-muted">@{{ officer.username }}</td>
-              <td class="text-muted">{{ officer.email }}</td>
-              <td class="align-right">
-                <div class="action-btn-group">
+  <!-- Officers Table & Cards -->
+  {% if officers %}
+    <div class="table-container">
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th>Officer Name</th>
+            <th>Username</th>
+            <th>Email Address</th>
+            <th class="align-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="officerTableBody">
+          {% for officer in officers %}
+            {% if officer.type|lower == 'officer' %}
+              <tr class="officer-row">
+                <td class="officer-name-cell">
+                  <div class="officer-profile-group">
+                    <div class="officer-avatar-circle">
+                      {{ officer.first_name|slice:":1"|default:officer.username|slice:":1"|upper }}
+                    </div>
+                    <div class="officer-name-info">
+                      <span class="officer-full-name">{{ officer.get_full_name|default:officer.username }}</span>
+                      <span class="officer-mobile-username">@{{ officer.username }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="officer-username-cell">
+                  <span class="officer-username-pill">@{{ officer.username }}</span>
+                </td>
+                <td class="officer-email-cell">
+                  <div class="officer-email-wrapper">
+                    <svg class="officer-email-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>{{ officer.email|default:"No email provided" }}</span>
+                  </div>
+                </td>
+                <td class="align-right officer-actions-cell">
                   <button 
                     type="button" 
-                    class="btn-danger-outline"
+                    class="btn-remove-circle"
+                    title="Remove Officer"
+                    aria-label="Remove Officer"
                     onclick="openDeleteOfficerModal('{% url 'delete_officer' officer.id %}', '{{ officer.username|escapejs }}')"
                   >
-                    Remove
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    <span class="btn-remove-text">Remove</span>
                   </button>
-                </div>
-              </td>
-            </tr>
-          {% endif %}
-        {% empty %}
-          <tr>
-            <td colspan="5" class="table-empty-state">
-              No officer accounts found.
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- No Search Results Found State -->
+    <div id="noOfficerMatchState" class="empty-state-card" style="display: none;">
+      <p class="empty-state-text">
+        No officers found matching your search query.
+      </p>
+      <button type="button" class="btn-action-secondary" onclick="clearOfficerSearch()">
+        Clear Search
+      </button>
+    </div>
+  {% else %}
+    <!-- Empty State (No Officers Yet) -->
+    <div class="empty-state-card">
+      <div class="empty-state-circle-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </div>
+      <h4 class="empty-state-heading">No Officers Assigned</h4>
+      <p class="empty-state-text">
+        You haven't assigned any officers to help manage your events and attendance records yet.
+      </p>
+      <button type="button" class="btn-action-primary" onclick="openCreateOfficerModal()">
+        + Add First Officer
+      </button>
+    </div>
+  {% endif %}
+
 </div>
 
 <!-- Add Officer Modal -->
-<div id="createOfficerModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 class="modal-title">Add New Officer</h3>
-      <button type="button" class="modal-close-btn" onclick="closeCreateOfficerModal()" aria-label="Close">&times;</button>
-    </div>
+<div id="createOfficerModal" class="modal-backdrop-overlay">
+  <div class="modal-card-wrapper">
+    <h3 class="modal-card-title">Add New Officer</h3>
+    <p class="modal-card-desc">
+      Invite an existing user account by email to grant them officer management access to your events.
+    </p>
 
-    <form action="{% url 'create_officer' %}" method="POST">
+    <form action="{% url 'create_officer' %}" method="POST" id="createOfficerForm">
       {% csrf_token %}
 
       <div class="form-group">
-        <label class="form-label">OFFICER'S EMAIL *</label>
-        <input type="email" name="email" required placeholder="e.g. officer@marca.org" class="form-input">
+        <label class="form-label" for="officerEmailInput">OFFICER'S EMAIL *</label>
+        <input 
+          type="email" 
+          name="email" 
+          id="officerEmailInput"
+          required 
+          placeholder="e.g. officer@marca.org" 
+          class="form-input-pill"
+          autocomplete="email"
+        >
       </div>
 
-      <div class="modal-actions">
-        <button type="button" onclick="closeCreateOfficerModal()" class="btn-secondary btn-full">Cancel</button>
-        <button type="submit" class="btn-primary btn-full">Add Officer</button>
+      <div class="modal-form-actions">
+        <button type="button" onclick="closeCreateOfficerModal()" class="modal-btn-cancel">
+          Cancel
+        </button>
+        <button type="submit" class="modal-btn-confirm-primary">
+          Add Officer
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteOfficerModal" class="modal-overlay simple-backdrop">
-  <div class="modal-card modal-card-sm">
-    <h3 class="modal-title">Remove Officer</h3>
-    <p class="modal-body-text">
-      Are you sure you want to remove <strong id="deleteOfficerUsername"></strong>? They will lose access to your events, but their account and any other admins stay unchanged.
+<div id="deleteOfficerModal" class="modal-backdrop-overlay">
+  <div class="modal-card-wrapper">
+    <h3 class="modal-card-title">Remove Officer</h3>
+    <p class="modal-card-desc">
+      Are you sure you want to remove <strong id="deleteOfficerUsername" class="modal-strong-name"></strong>? They will lose access to your events, but their account and any other admins stay unchanged.
     </p>
 
-    <form id="deleteOfficerForm" method="POST" action="" class="modal-actions">
+    <form id="deleteOfficerForm" method="POST" action="" class="modal-form-actions">
       {% csrf_token %}
-      <button type="button" onclick="closeDeleteOfficerModal()" class="btn-secondary btn-sm">
+      <button type="button" onclick="closeDeleteOfficerModal()" class="modal-btn-cancel">
         Cancel
       </button>
-      <button type="submit" class="btn-danger">
+      <button type="submit" class="modal-btn-confirm-danger">
         Confirm Remove
       </button>
     </form>
   </div>
 </div>
 
-<!-- Scripts for Modal Controls & Client Search -->
+<!-- Scripts for Modal Controls & Search Filter -->
 <script>
   function openCreateOfficerModal() {
-    document.getElementById('createOfficerModal').style.display = 'flex';
+    const modal = document.getElementById('createOfficerModal');
+    const input = document.getElementById('officerEmailInput');
+    if (modal) {
+      modal.style.display = 'flex';
+      if (input) setTimeout(() => input.focus(), 60);
+    }
   }
 
   function closeCreateOfficerModal() {
-    document.getElementById('createOfficerModal').style.display = 'none';
-  }
-
-  function openEditOfficerModal(data) {
-    document.getElementById('edit_officer_id').value = data.id;
-    document.getElementById('edit_username').value = data.username;
-    document.getElementById('edit_first_name').value = data.firstName;
-    document.getElementById('edit_last_name').value = data.lastName;
-    document.getElementById('edit_email').value = data.email;
-    document.getElementById('edit_type').value = data.type;
-    
-    document.getElementById('editOfficerForm').action = `/apps/officer/update/${data.id}/`;
-    document.getElementById('editOfficerModal').style.display = 'flex';
-  }
-
-  function closeEditOfficerModal() {
-    document.getElementById('editOfficerModal').style.display = 'none';
+    const modal = document.getElementById('createOfficerModal');
+    if (modal) modal.style.display = 'none';
   }
 
   function openDeleteOfficerModal(deleteUrl, username) {
-    document.getElementById('deleteOfficerUsername').textContent = `@${username}`;
-    document.getElementById('deleteOfficerForm').action = deleteUrl;
-    document.getElementById('deleteOfficerModal').style.display = 'flex';
+    const nameEl = document.getElementById('deleteOfficerUsername');
+    const form = document.getElementById('deleteOfficerForm');
+    const modal = document.getElementById('deleteOfficerModal');
+
+    if (nameEl) nameEl.textContent = `@${username}`;
+    if (form) form.action = deleteUrl;
+    if (modal) modal.style.display = 'flex';
   }
 
   function closeDeleteOfficerModal() {
-    document.getElementById('deleteOfficerModal').style.display = 'none';
+    const modal = document.getElementById('deleteOfficerModal');
+    if (modal) modal.style.display = 'none';
   }
 
+  // Backdrop click listeners to dismiss modals
+  window.addEventListener('click', function(e) {
+    const createModal = document.getElementById('createOfficerModal');
+    const deleteModal = document.getElementById('deleteOfficerModal');
+    if (e.target === createModal) closeCreateOfficerModal();
+    if (e.target === deleteModal) closeDeleteOfficerModal();
+  });
+
+  // Client-side search filtering
   function filterOfficers() {
-    const query = document.getElementById('officerSearchInput').value.toLowerCase();
+    const input = document.getElementById('officerSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const emptyState = document.getElementById('noOfficerMatchState');
     const rows = document.querySelectorAll('#officerTableBody .officer-row');
 
+    const query = (input ? input.value : '').toLowerCase().trim();
+
+    if (clearBtn) {
+      clearBtn.style.display = query.length > 0 ? 'inline-flex' : 'none';
+    }
+
+    let visibleCount = 0;
     rows.forEach(row => {
       const text = row.textContent.toLowerCase();
-      row.style.display = text.includes(query) ? '' : 'none';
+      const matches = !query || text.includes(query);
+      row.style.display = matches ? '' : 'none';
+      if (matches) visibleCount++;
     });
+
+    if (emptyState) {
+      emptyState.style.display = (visibleCount === 0 && rows.length > 0) ? 'block' : 'none';
+    }
+  }
+
+  function clearOfficerSearch() {
+    const input = document.getElementById('officerSearchInput');
+    if (input) {
+      input.value = '';
+      filterOfficers();
+      input.focus();
+    }
   }
 </script>
 {% endblock %}

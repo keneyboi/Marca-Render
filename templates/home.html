@@ -14,38 +14,57 @@
 <!-- Configuration data element for external JavaScript -->
 <div id="dragDropConfig" 
      data-move-url-template="{% url 'move_event' 0 %}" 
+     data-delete-folder-template="{% url 'delete_folder' 0 %}"
      data-is-in-folder="{% if current_folder %}true{% else %}false{% endif %}"
      class="drag-drop-config-hidden"></div>
 
 
 <!-- Dashboard Header -->
 <header class="dashboard-header-card dashboard-header-card-mt">
-    <h1 class="welcome-title welcome-title-reset">
+    <div class="welcome-heading-group">
       {% if not current_folder %}
-        Welcome, {{ request.user.first_name|default:request.user.username }}!
+        <span class="welcome-subtitle">Good Morning,</span>
+        <h1 class="welcome-title welcome-title-reset">
+          {{ request.user.first_name|default:request.user.username }}!
+        </h1>
       {% else %}
-        {{ current_folder.name }} Folder
-      {% endif %}
-    </h1>
-
-    <div class="header-actions">
-      {% if current_folder %}
-        <a href="{% url 'home' %}" class="btn-secondary dashboard-back-link">
-          Back to Dashboard
-        </a>
-      {% else %}
-          <button type="button" class="btn-secondary" id="openFolderBtn">
-          New Folder
-          </button>
-      {% endif %}
-
-      {% if request.user.is_admin %}
-        <button type="button" class="btn-primary" onclick="openEventModal()">
-          Create Event
-        </button>
+        <h1 class="welcome-title welcome-title-reset">
+          {{ current_folder.name }} Folder
+        </h1>
       {% endif %}
     </div>
 
+    <div class="header-actions">
+      <!-- Notification Bell Button -->
+      <a href="{% url 'notifications' %}" class="btn-notification-mobile" aria-label="Notifications" title="Notifications">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+        <span class="notification-badge-dot"></span>
+      </a>
+
+      {% if request.user.is_admin %}
+        <!-- Create Folder Button (In between notification and plus) -->
+        <button 
+          type="button" 
+          class="btn-primary btn-create-folder" 
+          id="openFolderBtn" 
+          onclick="openFolderModalWithEvents()" 
+          aria-label="Create Folder"
+          title="Create Folder"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+
+        <!-- Create Event Button (+) -->
+        <button type="button" class="btn-primary btn-create-event" onclick="openEventModal()" aria-label="Create Event" title="Create Event">
+          <span class="btn-desktop-text">Create Event</span>
+          <span class="btn-mobile-icon">+</span>
+        </button>
+      {% endif %}
+    </div>
 </header>
 
 {% if officer_admins|length > 1 %}
@@ -70,36 +89,29 @@
   </script>
 {% endif %}
 
-<!-- Breadcrumb Navigation & Root Drop Target -->
-{% if current_folder %}
-<nav class="fm-breadcrumb-bar">
-  <div class="breadcrumb-item drop-zone" data-folder-id="">
-    <a href="{% url 'home' %}">&#128194; Root</a>
-    <span class="drop-hint">(Drop card here to ungroup)</span>
-  </div>
-  {% endif %}
-  {% if current_folder %}
-    <span class="breadcrumb-separator">/</span>
-    <span class="breadcrumb-current">&#128193; {{ current_folder.name }}</span>
-  {% endif %}
-</nav>
+<!-- Folders & Category Pills -->
 
-<!-- Folders Grid -->
-{% if not current_folder and folders %}
 <section class="folders-section">
-  <div class="section-header">
-    <h3 class="section-title">Folders</h3>
-  </div>
+
   <div class="folders-grid">
+    <!-- "All Events" Pill -->
+    <div class="folder-pill active" data-folder-id="all" role="button" tabindex="0">
+      <span class="folder-name">All Events</span>
+      <span class="folder-pill-count">{{ events|length }}</span>
+    </div>
+
     {% for folder in folders %}
-      <div class="folder-card drop-zone" data-folder-id="{{ folder.id }}">
-        <a href="{% url 'folder_detail' folder.id %}" class="folder-card-link">
-          <div class="folder-icon">&#128193;</div>
-          <div class="folder-info">
-            <span class="folder-name">{{ folder.name }}</span>
-            <span class="folder-count">{{ folder.item_count }} item{{ folder.item_count|pluralize }}</span>
-          </div>
-        </a>
+      <div class="folder-card drop-zone" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}" role="button" tabindex="0">
+        <span class="folder-name">{{ folder.name }}</span>
+        <span class="folder-count">{{ folder.item_count }}</span>
+        {% if folder.item_count == 0 %}
+          <button type="button" class="btn-delete-empty-folder" title="Delete empty folder" aria-label="Delete empty folder" onclick="event.stopPropagation(); promptDeleteFolder('{{ folder.id }}', '{{ folder.name|escapejs }}');">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        {% endif %}
         <form action="{% url 'delete_folder' folder.id %}" method="POST" class="delete-folder-form">
           {% csrf_token %}
           <button type="submit" title="Delete folder" onclick="return confirm('Delete this folder? Events will move back to Root.');">&times;</button>
@@ -108,7 +120,44 @@
     {% endfor %}
   </div>
 </section>
-{% endif %}
+
+
+<!-- Today Spotlight Card -->
+<div class="today-spotlight-card">
+  <div class="today-date-subtitle">{% now "d M l" %}</div>
+  <h2 class="today-heading">{{ spotlight_heading }}</h2>
+  
+  <div class="today-capsules-list">
+    {% for event in spotlight_events %}
+      <a href="{% url 'event_detail' event.id %}" class="today-capsule-item">
+        <span class="today-capsule-time">
+          {% if is_today %}
+            {{ event.start_time_1|date:"g:i A" }}
+          {% else %}
+            {{ event.start_time_1|date:"M d, g:i A" }}
+          {% endif %}
+        </span>
+        <span class="today-capsule-title">{{ event.name }}</span>
+        {% if event.location %}
+        <div class="today-location">
+          <svg class="mobile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="#4a0d0d" stroke-width="3">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span class="today-capsule-title">{{ event.location }}</span>
+        </div>
+        {% endif %}
+      </a>
+    {% empty %}
+      <div class="today-capsule-item today-capsule-empty">
+        <span class="today-capsule-time">--:--</span>
+        <span class="today-capsule-title">
+          {% if is_today %}No events scheduled today{% else %}No upcoming events scheduled{% endif %}
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+</div>
 
 <!-- Events Section -->
 <section class="events-section">
@@ -123,6 +172,7 @@
 
     {% if events %}
       <div class="events-filter-group">
+        
         <input 
           type="text" 
           id="eventSearchInput" 
@@ -131,23 +181,7 @@
           autocomplete="off"
         >
 
-        <select 
-          id="eventStatusFilter" 
-          class="event-status-select"
-        >
-          <option value="">All Statuses</option>
-          {% for val, label in status_choices %}
-            <option value="{{ val }}">{{ label }}</option>
-          {% endfor %}
-        </select>
 
-        <a 
-          href="#" 
-          id="clearFiltersBtn" 
-          class="clear-filters-link"
-        >
-          Clear
-        </a>
       </div>
     {% endif %}
   </div>
@@ -161,6 +195,7 @@
           data-event-id="{{ event.id }}"
           data-event-name="{{ event.name }}"
           data-status="{{ event.status }}"
+          data-folder-id="{{ event.folder_id|default:'' }}"
           data-detail-url="{% url 'event_detail' event.id %}"
         >
           <div>
@@ -188,15 +223,15 @@
                   </button>
 
                   <div class="card-dropdown-menu">
-                    {% if current_folder %}
-                      <form action="{% url 'remove_from_folder' event.id %}" method="POST" class="remove-folder-form">
+                    {% if current_folder or event.folder_id %}
+                      <form action="{% url 'remove_from_folder' event.id %}" method="POST" class="remove-folder-form" data-event-folder-id="{{ event.folder_id|default:'' }}" style="display: none;">
                         {% csrf_token %}
                         <button 
                           type="submit" 
                           onclick="event.stopPropagation();"
                           class="dropdown-item"
                         >
-                          Ungroup
+                          Remove from Folder
                         </button>
                       </form>
                     {% endif %}
@@ -252,14 +287,37 @@
 
           <!-- Card Footer (Timestamps Only) -->
           <div id="event-detail-more-card" class="event-card-footer">
-
-            <div class="event-footer-col">
-              <span><b>Date:</b> {{ event.start_time_1|date:"M d, Y" }} </span> 
-              <span><b>Time:</b> {{ event.start_time_1|date:"H:i" }} </span> 
+            <div class="mobile-meta-row">
+              <svg class="mobile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span class="datetime-event">{{ event.start_time_1|date:"M d" }} &nbsp;|&nbsp; {{ event.start_time_1|date:"g:i a" }}{% if event.end_time_1 %} - {{ event.end_time_1|date:"g:i a" }}{% endif %}</span>
             </div>
-            <div class="event-footer-col">
-              <span class="detail-label">Location:</span> {{ event.location }}
+            <div class="mobile-meta-row-split">
+              <div class="mobile-meta-row">
+                <svg class="mobile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>{{ event.location|default:"Venue TBA" }}</span>
+              </div>
+              <div class="attendee-count-badge" title="{{ event.attendee_count|default:'0' }} registered attendees" aria-label="{{ event.attendee_count|default:'0' }} registered attendees">
+                <svg class="mobile-meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>{{ event.attendee_count|default:"0" }}</span>
+              </div>
             </div>
+            {% if event.description %}
+            <div class="event-description">
+              <hr>
+              {{ event.description }}
+            </div> 
+            {% endif %}
           </div>
         </div>
       {% endfor %}
@@ -312,6 +370,38 @@
         class="modal-btn-confirm-danger"
       >
         Confirm Delete
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Folder Confirmation Modal -->
+<div 
+  id="deleteFolderModal" 
+  class="modal-backdrop-overlay folder-modal-zindex"
+>
+  <div class="modal-card-wrapper">
+    <h3 class="modal-card-title">Delete Folder</h3>
+    <p class="modal-card-desc">
+      Are you sure you want to delete <strong id="deleteFolderName" class="modal-strong-name"></strong>? Any events in this folder will remain safe and move back to All Events.
+    </p>
+
+    <form id="deleteFolderForm" method="POST" action="" class="modal-form-actions">
+      {% csrf_token %}
+      <input type="hidden" id="deleteFolderIdInput" value="">
+      <button 
+        type="button" 
+        onclick="closeDeleteFolderModal()" 
+        class="modal-btn-cancel"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        id="btnConfirmDeleteFolder"
+        class="modal-btn-confirm-danger"
+      >
+        Delete Folder
       </button>
     </form>
   </div>

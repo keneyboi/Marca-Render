@@ -1,28 +1,572 @@
-/* Dashboard Layout & Header */
-.dashboard-container { max-width: 800px; margin: 0 auto; }
-.dashboard-header-flex { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color, #e5dfd8); margin-bottom: 1rem; }
-.header-subtitle { color: #665b55; }
-.flush-form { margin: 0; }
-.btn-flush { color: #c5221f; border-color: #fde8e8; background-color: #fdf8f8; }
+/* ==========================================================================
+   NOTIFICATION SCREEN STYLES (notification.css)
+   Clean, unified Marca design language mirroring home.css & officer.css.
+   SF Pro typography, pill capsules, circular actions, and pressable cards.
+   ========================================================================== */
 
-/* Notifications Feed & Items */
-.notifications-feed { background: #ffffff; border-radius: 12px; border: 1px solid var(--border-color, #e5dfd8); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-.notifications-feed .notification-item:last-child { border-bottom: none !important; }
-.notification-item { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0ebe3; transition: background-color 0.15s ease; }
-.notification-item.unread { background-color: #fdfaf7; }
-.notification-item:hover { background-color: #f7f4ed !important; }
+/* --- 1. Global SF Pro Font & Container --- */
+.notification-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #2b2320;
+}
 
-/* Notification Content & Meta */
-.notification-content-left { display: flex; gap: 0.85rem; align-items: center; flex: 1; padding-right: 1rem; }
-.notif-icon-avatar { width: 42px; height: 42px; border-radius: 50%; background: #f4ede4; color: #4a0d0d; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
-.notification-details { flex: 1; }
-.notification-title-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2px; }
-.notification-title { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-main, #2b2320); }
-.unread-dot { width: 8px; height: 8px; background-color: #620808; border-radius: 50%; display: inline-block; }
-.notification-message { margin: 0; font-size: 0.88rem; color: #554a44; font-family: 'SF Pro', -apple-system, sans-serif; line-height: 1.35; }
-.notification-time { font-size: 0.75rem; color: #8c7e75; margin-top: 4px; display: inline-block; font-weight: 500; }
-.btn-view { font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 6px; text-decoration: none; white-space: nowrap; }
+/* --- 2. Dashboard Header --- */
+.dashboard-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
 
-/* Empty State */
-.empty-state-card { background-color: #ffffff; border: 1px dashed var(--border-color, #e5dfd8); border-radius: 12px; padding: 3rem 2rem; text-align: center; }
-.empty-state-text { color: #665b55; margin: 0; }
+.welcome-heading-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.welcome-subtitle {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #580c0c;
+  letter-spacing: 0.02em;
+}
+
+.welcome-title {
+
+  font-size: 3rem;
+  font-weight: 400;
+  color: #580c0c;
+  margin: 0;
+  padding: 0;
+  line-height: 1.1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Flush / Clear All Button */
+.btn-clear-notifications {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 42px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  border: 1px solid #f5c2be;
+  background-color: #fce8e6;
+  color: #c5221f;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-clear-notifications:hover {
+  background-color: #c5221f;
+  color: #ffffff;
+  border-color: #c5221f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(197, 34, 31, 0.25);
+}
+
+.btn-clear-notifications svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* --- 3. Overview Pills & Category Filter Row --- */
+.notification-overview-section {
+  margin-bottom: 0.5rem;
+}
+
+.notification-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding: 2px 2px 6px 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.notification-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.notif-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  padding: 1rem 1.5rem;
+  border-radius: 999px;
+  border: 1.5px solid #580c0c;
+  background-color: transparent;
+  color: #580c0c;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.notif-filter-pill:hover {
+  background-color: #f7efe7;
+  transform: translateY(-1px);
+}
+
+.notif-filter-pill.active {
+  background-color: #580c0c;
+  border-color: #580c0c;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(88, 12, 12, 0.15);
+}
+
+.notif-filter-pill .pill-badge {
+  background-color: #580c0c;
+  color: #ffffff;
+  border-radius: 50%;
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.notif-filter-pill.active .pill-badge {
+  background-color: #ffffff;
+  color: #580c0c;
+}
+
+/* --- 4. Stat Metric Card --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card {
+  background-color: #fdfbf7;
+  border: 1px solid #f2ece2;
+  border-radius: 20px;
+  padding: 1.25rem 1.45rem;
+  box-shadow: 0 8px 24px rgba(88, 12, 12, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(88, 12, 12, 0.08);
+  border-color: #eadfcb;
+}
+
+.stat-card-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8c7e75;
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+  color: #580c0c;
+}
+
+.stat-card-circle-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* --- 5. Search Toolbar --- */
+.notification-toolbar-container {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.notification-search-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 1.25rem;
+  width: 18px;
+  height: 18px;
+  color: #8c7e75;
+  pointer-events: none;
+}
+
+.notification-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f2eee6;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.85rem 3rem 0.85rem 3rem;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.95rem;
+  color: #331010;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+  outline: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.notification-search-input:focus {
+  background-color: #ffffff;
+  border-color: #e5dfd8;
+  box-shadow: 0 0 0 3px rgba(88, 12, 12, 0.08);
+}
+
+.notification-search-input::placeholder {
+  color: #9d9489;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 1.25rem;
+  background-color: #e5dfd8;
+  color: #580c0c;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.clear-search-btn:hover {
+  background-color: #580c0c;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* --- 6. Notifications List & Pressable Cards --- */
+.notifications-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Base Notification Item Card */
+.notification-item {
+  position: relative;
+  background-color: #fdfbf7;
+  border: 1px solid #f2ece2;
+  border-radius: 20px;
+  padding: 1.15rem 1.35rem;
+  box-shadow: 0 6px 18px rgba(88, 12, 12, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Pressable Card (Routes to action target_url) */
+.notification-item.pressable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.notification-item.pressable:hover {
+  transform: translateY(-2px);
+  background-color: #ffffff;
+  border-color: #eadfcb;
+  box-shadow: 0 10px 24px rgba(88, 12, 12, 0.08);
+}
+
+.notification-item.pressable:active {
+  transform: scale(0.99);
+}
+
+/* Unread Accent Dot & State */
+.notification-item.unread {
+  background-color: #fffaf5;
+  border-color: #f7e0cf;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #b92b27;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Left Content Area */
+.notification-content-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Circular Icon Avatar */
+.notif-circle-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  border: 1.5px solid rgba(88, 12, 12, 0.15);
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(88, 12, 12, 0.05);
+}
+
+.notif-circle-avatar svg {
+  display: block;
+}
+
+/* Text Details */
+.notification-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.notification-title {
+  margin: 0;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #2b2320;
+}
+
+.notif-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background-color: #f2eee6;
+  color: #580c0c;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+.notification-message {
+  margin: 0;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.88rem;
+  color: #665b55;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.notification-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.2rem;
+}
+
+.notification-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.75rem;
+  color: #8c7e75;
+  font-weight: 500;
+}
+
+.notification-time svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+/* Press Indicator (Right Chevron Circle) */
+.notification-press-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.notif-arrow-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.notification-item.pressable:hover .notif-arrow-circle {
+  background-color: #580c0c;
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.notif-arrow-circle svg {
+  display: block;
+}
+
+/* --- 7. Empty State Cards --- */
+.empty-state-card {
+  background-color: #fdfbf7;
+  border: 1.5px dashed #ded5c8;
+  border-radius: 22px;
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.empty-state-circle-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+}
+
+.empty-state-heading {
+  font-family: 'Tiro Telugu', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #2b2320;
+  margin: 0 0 0.5rem;
+}
+
+.empty-state-text {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.92rem;
+  color: #7d7269;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.btn-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  border: 1.5px solid #580c0c;
+  background-color: transparent;
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-action-secondary:hover {
+  background-color: #f7efe7;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Mobile & Tablet)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .dashboard-header-card {
+    margin-top: 1rem;
+    gap: 0.75rem;
+  }
+
+
+  .notification-item {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .notif-circle-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .notif-arrow-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-clear-notifications {
+    height: 38px;
+    padding: 0 1rem;
+    font-size: 0.82rem;
+  }
+}

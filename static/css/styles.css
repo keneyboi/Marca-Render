@@ -59,17 +59,11 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Apply to headings or your brand logo */
-.logo, h1, h2 {
-    font-family: 'Tiro Telugu', Georgia, serif;
-}
-
-/* Use italic version naturally */
 .italic-text {
-    font-family: 'Tiro Telugu', Georgia, serif;
     font-style: italic;
 }
-/* Sticky Outer Wrapper */
+
+
 .site-header-wrapper {
     position: sticky;
     top: 1rem;
@@ -296,70 +290,232 @@ html {
     background-color: #580c0c;
     color: #ffffff;
     display: flex;
-    flex-direction: column; /* Stacks children vertically */
+    flex-direction: column;
     position: sticky;
     top: 0;
-    height: 100vh; /* Takes up full viewport height */
-    padding: 2.5rem 1.5rem;
+    height: 100vh;
+    padding: 2.25rem 1.5rem;
     box-sizing: border-box;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s ease;
+    z-index: 100;
 }
 
-.sidebar-brand h2 {
-    font-family: 'Tiro Telugu', Georgia, serif;
-    font-weight: 400;
-    font-size: 2rem;
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 40px;
+}
+
+.sidebar-brand .logo {
     color: #ffffff;
-    margin: 0 0 4px 0;
+    text-decoration: none;
+    font-family: 'Tiro Telugu', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+}
+
+/* Sidebar Collapse/Expand Toggle Button (Top of Sidebar) */
+.sidebar-collapse-toggle {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.sidebar-collapse-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.sidebar-collapse-toggle .sidebar-toggle-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.sidebar-collapse-toggle .icon-collapse {
+    display: block;
+}
+
+.sidebar-collapse-toggle .icon-expand {
+    display: none;
 }
 
 .sidebar-nav {
-    margin-top: 30px;
+    margin-top: 2rem;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex-grow: 1; /* Pushes the footer down by filling remaining space */
+    flex-grow: 1;
 }
 
 .sidebar-link {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    color: #ffffff;
+    padding: 12px 14px;
+    color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1rem;
-    transition: background 0.2s ease, opacity 0.2s ease;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    box-sizing: border-box;
 }
 
 .sidebar-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.sidebar-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-link .link-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-footer {
-    margin-top: auto; /* Pushes footer to the bottom boundary */
+    margin-top: auto;
     padding-top: 1.5rem;
     width: 100%;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .logout-btn-sidebar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     padding: 12px;
-    background-color: #d1c8b8;
-    border: 1px solid #ffffff;
-    color: #4e0505;
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 10px;
     cursor: pointer;
     font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .logout-btn-sidebar:hover {
-    background-color: #a69e8f;
+    background-color: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ==========================================================================
+   COLLAPSED SIDEBAR: RED BAR WITH ICONS
+   ========================================================================== */
+.dashboard-sidebar.collapsed {
+    width: 76px;
+    padding: 1.75rem 0.6rem;
+    align-items: center;
+}
+
+.dashboard-sidebar.collapsed .sidebar-brand {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-sidebar.collapsed .sidebar-brand .logo {
+    display: none;
+}
+
+.dashboard-sidebar.collapsed .sidebar-collapse-toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.dashboard-sidebar.collapsed .sidebar-collapse-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.22);
+}
+
+.dashboard-sidebar.collapsed .sidebar-collapse-toggle .icon-collapse {
+    display: none;
+}
+
+.dashboard-sidebar.collapsed .sidebar-collapse-toggle .icon-expand {
+    display: block;
+}
+
+.dashboard-sidebar.collapsed .sidebar-nav {
+    margin-top: 1.25rem;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.dashboard-sidebar.collapsed .sidebar-link {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.dashboard-sidebar.collapsed .sidebar-link .link-text {
+    display: none;
+}
+
+.dashboard-sidebar.collapsed .sidebar-link .sidebar-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.dashboard-sidebar.collapsed .sidebar-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-sidebar.collapsed .sidebar-footer form {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.dashboard-sidebar.collapsed .logout-btn-sidebar {
+    display: none;
+}
+
+.dashboard-sidebar.collapsed .logout-btn-sidebar .link-text {
+    display: none;
+}
+
+.dashboard-sidebar.collapsed .logout-btn-sidebar .sidebar-icon {
+    width: 22px;
+    height: 22px;
 }
 
 /* --- MAIN CONTENT & HEADERS --- */
@@ -691,30 +847,7 @@ html {
         padding: 20px 20px;
         margin: 0 1rem;
         overflow-y: visible;
-    }
-    body .quick-navbar {
-        display: flex;
-    }
-
-    /* FIXED: Added transition properties here so it animates smoothly on mobile */
-    .quick-navbar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 65px;
-        background-color: #ffffff;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
-        border-top: 1px solid #eaeaea;
-        z-index: 1000;
-        padding-bottom: env(safe-area-inset-bottom);
-        
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-        transform: translateY(0);
-        opacity: 1;
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
     }
 }
 
@@ -760,87 +893,119 @@ html {
     display: none;
 }
 
-.quick-navbar.hidden {
-    transform: translateY(100%);
-    opacity: 0;
-    pointer-events: none;
-}
+/* ==========================================================================
+   MOBILE FLOATING NAVIGATION BAR (Modern, Pill, High Touch-Target)
+   ========================================================================== */
+@media (max-width: 880px) {
+    .dashboard-sidebar {
+        display: none;
+    }
 
-.quick-navbar .elements {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: #8e8e93;
-    font-size: 11px;
-    font-weight: 500;
-    flex: 1;
-    height: 100%;
-    transition: color 0.2s ease;
-    cursor: pointer;
-}
+    /* Floating Pill Navbar */
+    .quick-navbar {
+        display: flex;
+        position: fixed;
+        bottom: max(1.15rem, env(safe-area-inset-bottom, 1.15rem));
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(calc(100% - 2.25rem), 430px);
+        height: 72px;
+        background: linear-gradient(180deg, #620d0d 0%, #4a0808 100%);
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 
+            0 16px 38px rgba(88, 12, 12, 0.42),
+            0 6px 14px rgba(0, 0, 0, 0.18),
+            inset 0 1px 1px rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        z-index: 9999;
+        margin: 0;
+        padding: 0rem 1.25rem;
+        box-sizing: border-box;
+        justify-content: space-around;
+        align-items: center;
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+        opacity: 1;
+    }
 
-.quick-navbar .elements .icon {
-    width: 22px;
-    height: 22px;
-    margin-bottom: 3px;
-}
+    .quick-navbar.hidden {
+        transform: translate(-50%, calc(100% + 3rem));
+        opacity: 0;
+        pointer-events: none;
+    }
 
-.quick-navbar .elements.active,
-.quick-navbar .elements:hover {
-    color: #620808;
-}
+    .quick-navbar .elements {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.62);
+        font-family: 'SF Pro', -apple-system, sans-serif;
+        font-size: 0.76rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        flex: 1;
+        height: 100%;
+        padding: 8px 4px;
+        border-radius: 999px;
+        gap: 4px;
+        transition: color 0.18s ease, transform 0.12s ease;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-.quick-navbar .scan-btn .scan-circle {
-    width: 44px;
-    height: 44px;
-    background-color: #620808;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-    margin-top: -12px;
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
-    transition: transform 0.2s ease;
-}
+    .quick-navbar .elements:active {
+        transform: scale(0.92);
+    }
 
-.quick-navbar .scan-btn:hover .scan-circle {
-    transform: scale(1.05);
-}
+    .quick-navbar .elements .icon {
+        width: 25px;
+        height: 25px;
+        stroke-width: 2.1;
+        transition: transform 0.18s ease, stroke-width 0.18s ease;
+    }
 
-.quick-navbar .scan-btn .icon {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 0;
-}
+    .quick-navbar .elements.active,
+    .quick-navbar .elements:hover {
+        color: #ffffff !important;
+    }
 
-.quick-navbar form {
-    display: flex;
-    flex: 1;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    align-items: stretch;
-}
+    .quick-navbar .elements.active {
+        font-weight: 700;
+    }
 
-.quick-navbar button.elements {
-    background: none;
-    color: #8e8e93;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font: inherit;
-    font-size: 11px;
-    cursor: pointer;
-    outline: none;
-    text-align: inherit;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
+    .quick-navbar .elements.active .icon {
+        transform: translateY(-2px);
+        stroke-width: 2.4;
+    }
+
+    /* Floating Center Scan Button (e.g. on event_detail) */
+    .quick-navbar .scan-btn .scan-circle {
+        width: 52px;
+        height: 52px;
+        background: linear-gradient(180deg, #620d0d 0%, #4a0808 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        margin-top: -20px;
+        border: 3px solid #fef4f4;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    }
+
+    .quick-navbar .scan-btn:hover .scan-circle,
+    .quick-navbar .scan-btn:active .scan-circle {
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 12px 26px rgba(246, 189, 137, 0.7);
+    }
+
+    .quick-navbar .scan-btn .icon {
+        width: 24px;
+        height: 24px;
+        color: #ffffff;
+    }
 }

@@ -1,73 +1,769 @@
-/* Dashboard Header Section */
-.dashboard-header-card { display: flex; align-items: center; justify-content: space-between; }
-.header-left { display: flex; flex-direction: column; gap: 0.25rem; }
-.welcome-title { margin: 0; margin-top: 12px; font-size: 1.5rem; font-weight: 700; color: #4a0d0d; }
-.header-subtitle { margin: 0; margin-top: 4px; font-family: 'SF Pro', sans-serif; font-size: 13.5px; color: #665b55; }
-.header-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+/* ==========================================================================
+   OFFICER MANAGEMENT STYLES (officer.css)
+   Clean, cohesive Marca design language mirroring home.css & detail.css.
+   SF Pro typography, pill capsules, circular actions, and elevated cards.
+   ========================================================================== */
 
-/* Toast Container & Notifications */
-.toast-container { position: fixed !important; top: 24px; right: 24px; z-index: 99999; max-width: 450px; width: calc(100% - 48px); pointer-events: none; }
-.toast-card { padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 13.5px; font-weight: 500; line-height: 1.4; display: flex; align-items: center; justify-content: space-between; gap: 12px; pointer-events: auto; border: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(0); opacity: 1; }
-.toast-card.success { background-color: rgba(230, 244, 234, 0.85); color: #137333; }
-.toast-card.error { background-color: rgba(252, 232, 230, 0.85); color: #c5221f; }
-.toast-card.warning { background-color: rgba(254, 247, 224, 0.85); color: #b06000; }
-.toast-card.default { background-color: rgba(247, 244, 237, 0.85); color: #4a0d0d; }
-.toast-content { display: flex; align-items: center; gap: 10px; }
-.toast-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; color: #ffffff; font-size: 11px; font-weight: bold; flex-shrink: 0; }
-.toast-icon.success { background: #137333; }
-.toast-icon.error { background: #c5221f; }
-.toast-icon.default { background: #4a0d0d; }
-.toast-label { text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; opacity: 0.9; }
-.toast-close-btn { background: none; border: none; font-size: 18px; line-height: 1; color: inherit; opacity: 0.5; cursor: pointer; padding: 0; transition: opacity 0.2s ease; }
-.toast-close-btn:hover { opacity: 1; }
+/* --- 1. Global SF Pro Font & Container --- */
+.officer-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #2b2320;
+}
 
-/* Main Layout & Summary Metrics */
-.officer-container { margin-top: 1.5rem; }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-.stat-card { background: #ffffff; padding: 1.25rem; border-radius: 12px; border: 1px solid #d1c8b8; }
-.stat-label { font-size: 12px; font-weight: 600; color: #8c7e75; text-transform: uppercase; }
-.stat-value { font-size: 1.8rem; font-weight: 700; color: #4a0d0d; margin: 0.25rem 0 0; }
+/* --- 2. Dashboard Header --- */
+.dashboard-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
 
-/* Toolbar & Filters */
-.officer-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
-.toolbar-group { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-.search-input { padding: 8px 14px; border: 1px solid #dcd4cc; border-radius: 8px; font-family: 'SF Pro', sans-serif; font-size: 13.5px; outline: none; background: #fff; width: 280px; }
+.welcome-heading-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 
-/* Table Structure & Content */
-.table-container { background: #ffffff; border-radius: 14px; border: 1px solid #d1c8b8; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); }
-.roster-table { width: 100%; border-collapse: collapse; font-family: 'SF Pro', sans-serif; text-align: left; }
-.roster-table thead tr { background-color: #f7f4ed; border-bottom: 1px solid #d1c8b8; font-size: 12px; color: #4a0d0d; text-transform: uppercase; letter-spacing: 0.05em; }
-.roster-table th, .roster-table td { padding: 14px 18px; }
-.roster-table th.align-right, .roster-table td.align-right { text-align: right; }
-.officer-row { border-bottom: 1px solid #f0eae1; font-size: 13.5px; color: #331010; }
-.text-muted { color: #665b55; }
-.table-empty-state { text-align: center; padding: 3rem; color: #8c7e75; font-size: 14px; }
-.action-btn-group { display: flex; gap: 0.5rem; justify-content: flex-end; }
+.welcome-subtitle {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #580c0c;
+  letter-spacing: 0.02em;
+}
 
-/* Buttons & Action Variants */
-.btn-danger-outline { background: transparent; border: 1px solid #f5c2be; color: #c5221f; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s ease; }
-.btn-danger-outline:hover { background: #fce8e6; }
-.btn-danger { padding: 8px 16px; background: #c5221f; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
-.btn-sm { padding: 5px 12px; font-size: 12px; }
-.btn-full { width: 100%; }
+.welcome-title {
+  
+  font-size: 3rem;
+  font-weight: 400;
+  color: #580c0c;
+  margin: 0;
+  padding: 0;
+  line-height: 1.1;
+}
 
-/* Modal Windows & Overlays */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(51, 16, 16, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; }
-.modal-overlay.simple-backdrop { background: rgba(0, 0, 0, 0.5); backdrop-filter: none; }
-.modal-card { background-color: #fdfbf7; border: 1px solid rgba(209, 200, 184, 0.6); border-radius: 20px; width: 90%; max-width: 480px; padding: 2rem; box-shadow: 0 20px 50px rgba(51, 16, 16, 0.25); box-sizing: border-box; }
-.modal-card.modal-card-sm { background: #ffffff; border-radius: 12px; max-width: 420px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); font-family: 'SF Pro', sans-serif; }
-.modal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(209, 200, 184, 0.6); padding-bottom: 0.85rem; margin-bottom: 1.25rem; }
-.modal-title { margin: 0; font-family: 'Tiro Telugu', Georgia, serif; font-size: 1.4rem; color: #4a0d0d; }
-.modal-close-btn { background: none; border: none; font-size: 1.6rem; color: #4a0d0d; cursor: pointer; opacity: 0.6; }
-.modal-close-btn:hover { opacity: 1; }
-.modal-body-text { color: #5f6368; font-size: 14px; line-height: 1.5; margin: 0.75rem 0 1.5rem; }
-.modal-body-text strong { color: #1f1f1f; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
 
-/* Form Elements */
-.form-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
-.form-group { margin-bottom: 1rem; }
-.form-group.last { margin-bottom: 1.25rem; }
-.form-group.flex-1 { flex: 1; }
-.form-label { display: block; font-family: 'SF Pro', sans-serif; font-size: 0.75rem; font-weight: 600; color: #4a0d0d; margin-bottom: 0.35rem; letter-spacing: 0.05em; }
-.form-input { width: 100%; box-sizing: border-box; font-family: 'SF Pro', sans-serif; font-size: 0.9rem; color: #331010; background-color: #f7f4ed; border: 1px solid #d1c8b8; border-radius: 10px; padding: 0.65rem 0.85rem; outline: none; }
+/* Circular Notification Bell Button */
+.btn-notification-mobile {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #f6bd89;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-notification-mobile:hover {
+  background-color: #f7efe7;
+  transform: scale(1.05);
+}
+
+.notification-badge-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 9px;
+  height: 9px;
+  background-color: #b92b27;
+  border-radius: 50%;
+  border: 1.5px solid #f6bd89;
+}
+
+/* Add Officer Button (Pill on Desktop, Circular FAB on Mobile) */
+.btn-create-officer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 44px;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+  background-color: #580c0c;
+  color: #ffffff;
+  border: none;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(88, 12, 12, 0.28);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-create-officer:hover {
+  background-color: #450808;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(88, 12, 12, 0.35);
+}
+
+.btn-create-officer .btn-mobile-icon {
+  display: none;
+}
+
+
+
+/* --- 4. Stat Card --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card {
+  background-color: #580c0c;
+  border: 1px solid #410a0a;
+  border-radius: 20px;
+  padding: 1.25rem 1.45rem;
+  box-shadow: 0 8px 24px rgba(88, 12, 12, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(88, 12, 12, 0.08);
+  border-color: #eadfcb;
+}
+
+.stat-card-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+  color: #fcfcfc;
+}
+
+.stat-card-circle-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* --- 5. Search Toolbar --- */
+.officer-toolbar-container {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.officer-search-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 1.25rem;
+  width: 18px;
+  height: 18px;
+  color: #8c7e75;
+  pointer-events: none;
+}
+
+.officer-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f2eee6;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.85rem 3rem 0.85rem 3rem;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.95rem;
+  color: #331010;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+  outline: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.officer-search-input:focus {
+  background-color: #ffffff;
+  border-color: #e5dfd8;
+  box-shadow: 0 0 0 3px rgba(88, 12, 12, 0.08);
+}
+
+.officer-search-input::placeholder {
+  color: #9d9489;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 1.15rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ded5c8;
+  color: #580c0c;
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.clear-search-btn:hover {
+  background-color: #580c0c;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* --- 6. Table Layout (Desktop & Tablet) --- */
+.table-container {
+  background-color: #fdfbf7;
+  border: 1px solid #f2ece2;
+  border-radius: 22px;
+  box-shadow: 0 10px 24px rgba(88, 12, 12, 0.05);
+  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+}
+
+.roster-table thead tr {
+  background-color: #f7f2ea;
+  border-bottom: 1.5px solid #ebd9c8;
+}
+
+.roster-table th {
+  padding: 14px 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #580c0c;
+  white-space: nowrap;
+}
+
+.roster-table th.align-right,
+.roster-table td.align-right {
+  text-align: right;
+}
+
+.roster-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f4eee6;
+  color: #331010;
+  vertical-align: middle;
+}
+
+.officer-row {
+  transition: background-color 0.15s ease;
+}
+
+.officer-row:hover td {
+  background-color: #faf5ee;
+}
+
+.officer-row:last-child td {
+  border-bottom: none;
+}
+
+/* Profile Group: Avatar Circle + Name */
+.officer-profile-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.officer-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  border: 1.5px solid rgba(88, 12, 12, 0.15);
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(88, 12, 12, 0.06);
+}
+
+.officer-name-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.officer-full-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #2b2320;
+}
+
+.officer-mobile-username {
+  display: none;
+  font-size: 0.8rem;
+  color: #7d7269;
+}
+
+/* Username Pill */
+.officer-username-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background-color: #f2eee6;
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Email Row */
+.officer-email-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #7d7269;
+  font-size: 0.9rem;
+}
+
+.officer-email-icon {
+  width: 15px;
+  height: 15px;
+  color: #8c7e75;
+  flex-shrink: 0;
+}
+
+/* Action Button: Remove Officer */
+.btn-remove-circle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #f5c2be;
+  background-color: transparent;
+  color: #c5221f;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-remove-circle:hover {
+  background-color: #fce8e6;
+  border-color: #c5221f;
+  transform: translateY(-1px);
+}
+
+.btn-remove-circle svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* --- 7. Empty State Cards --- */
+.empty-state-card {
+  background-color: #fdfbf7;
+  border: 1.5px dashed #ded5c8;
+  border-radius: 22px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.empty-state-circle-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background-color: #f2eee6;
+  color: #580c0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+}
+
+.empty-state-heading {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #2b2320;
+  margin: 0 0 0.5rem;
+}
+
+.empty-state-text {
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.92rem;
+  color: #7d7269;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.btn-action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.45rem;
+  border-radius: 999px;
+  border: none;
+  background-color: #580c0c;
+  color: #ffffff;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(88, 12, 12, 0.28);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.btn-action-primary:hover {
+  background-color: #450808;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(88, 12, 12, 0.35);
+}
+
+.btn-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  border: 1.5px solid #580c0c;
+  background-color: transparent;
+  color: #580c0c;
+  font-family: 'SF Pro', -apple-system, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-action-secondary:hover {
+  background-color: #f7efe7;
+  transform: translateY(-1px);
+}
+
+/* --- 8. Modals (Matches home.css modal language) --- */
+.modal-backdrop-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 8, 8, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card-wrapper {
+  background: #ffffff;
+  border-radius: 22px;
+  width: 90%;
+  max-width: 440px;
+  padding: 1.75rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
+}
+
+.modal-card-title {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+  color: #1f1f1f;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.modal-card-desc {
+  color: #5f6368;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0.35rem 0 1.5rem;
+}
+
+.modal-strong-name {
+  color: #1f1f1f;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #580c0c;
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.05em;
+}
+
+.form-input-pill {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 0.92rem;
+  color: #331010;
+  background-color: #f2eee6;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  outline: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input-pill:focus {
+  background-color: #ffffff;
+  border-color: #580c0c;
+  box-shadow: 0 0 0 3px rgba(88, 12, 12, 0.1);
+}
+
+.modal-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.modal-btn-cancel {
+  padding: 9px 20px;
+  background: #f1f3f4;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
+}
+
+.modal-btn-cancel:hover {
+  background: #e8eaed;
+}
+
+.modal-btn-confirm-primary {
+  padding: 9px 22px;
+  background: #580c0c;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(88, 12, 12, 0.28);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.modal-btn-confirm-primary:hover {
+  background: #450808;
+  transform: translateY(-1px);
+}
+
+.modal-btn-confirm-danger {
+  padding: 9px 22px;
+  background: #c5221f;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'SF Pro', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(197, 34, 31, 0.28);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.modal-btn-confirm-danger:hover {
+  background: #a51815;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Mobile & Tablet)
+   Transforms table rows into elevated cards matching home.css event cards.
+   ========================================================================== */
+@media (max-width: 768px) {
+  .dashboard-header-card {
+    margin-top: 1rem;
+    gap: 0.75rem;
+  }
+
+  .welcome-title {
+    font-size: 1.85rem;
+  }
+
+  /* Add Officer FAB (+) */
+  .btn-create-officer {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  .btn-create-officer .btn-desktop-text {
+    display: none;
+  }
+
+  .btn-create-officer .btn-mobile-icon {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 300;
+    line-height: 1;
+    margin-top: -2px;
+  }
+
+  /* Transform table into mobile cards */
+  .table-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .roster-table,
+  .roster-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .roster-table thead {
+    display: none;
+  }
+
+  .officer-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background-color: #fdfbf7;
+    border: 1px solid #f2ece2;
+    border-radius: 20px;
+    box-shadow: 0 8px 22px rgba(88, 12, 12, 0.06);
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .officer-row:hover td {
+    background-color: transparent;
+  }
+
+  .officer-row td {
+    padding: 0;
+    border: none;
+    display: block;
+    width: 100%;
+  }
+
+  /* Top row inside mobile card: Avatar + Name on left, Circular Trash on right */
+  .officer-name-cell {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .officer-profile-group {
+    flex: 1;
+  }
+
+  .officer-mobile-username {
+    display: block;
+  }
+
+  .officer-username-cell {
+    display: none !important;
+  }
+
+  .officer-actions-cell {
+    position: absolute;
+    top: 1.15rem;
+    right: 1.25rem;
+    width: auto !important;
+  }
+
+  .officer-row {
+    position: relative;
+  }
+
+  /* Circular Remove Button on Mobile */
+  .btn-remove-circle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    background-color: #fce8e6;
+  }
+
+  .btn-remove-circle .btn-remove-text {
+    display: none;
+  }
+
+  /* Bottom row: email with icon */
+  .officer-email-cell {
+    border-top: 1px solid #f2ece2 !important;
+    padding-top: 0.65rem !important;
+  }
+
+  .officer-email-wrapper {
+    font-size: 0.85rem;
+  }
+}

@@ -20,6 +20,7 @@ from apps.core.models import Event, AttendanceRecord
 from .forms import EventForm, EditEventForm
 from django.core.exceptions import PermissionDenied
 from apps.core.access import get_data_owner
+from apps.core.cache_utils import bump_home_cache
 from apps.core.utils import notify_user
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
@@ -266,6 +267,7 @@ def create_event(request):
                 for data in records_to_create
             ]
             AttendanceRecord.objects.bulk_create(attendees)
+            bump_home_cache(event.user_id)
 
         notify_user(
             request.user, 
